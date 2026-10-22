@@ -1,0 +1,41 @@
+{
+  "version": "0.1.0rc1",
+  "source_commit": "546bc7d349c1ed24fdb4acd868ad28e409eb0c11",
+  "utc": "2026-10-22T07:23:00.216584+00:00",
+  "files": [
+    {
+      "name": "gf-admission-0.1.0rc1-20261022.tar.gz",
+      "windows_path": "C:/Users/ALIENWARE/Desktop/gf-admission-0.1.0rc1-20261022.tar.gz",
+      "wsl_destination": "/mnt/c/Users/ALIENWARE/Desktop/gf-admission-0.1.0rc1-20261022.tar.gz",
+      "sha256": "3e97e3ebdbd930f9ec0c5892870d07f04e415a1cf96865ff309c67588d3b14e3",
+      "bytes": 1448273,
+      "moved_from": "/home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc1-20261022-r2/gf-admission-0.1.0rc1-20261022.tar.gz",
+      "verified_after_move": true
+    },
+    {
+      "name": "HUAWEI_AGENT_PROMPT_GF_RUNTIME_0.1.0rc1_20261022.md",
+      "windows_path": "C:/Users/ALIENWARE/Desktop/HUAWEI_AGENT_PROMPT_GF_RUNTIME_0.1.0rc1_20261022.md",
+      "wsl_destination": "/mnt/c/Users/ALIENWARE/Desktop/HUAWEI_AGENT_PROMPT_GF_RUNTIME_0.1.0rc1_20261022.md",
+      "sha256": "2d54d318962a1db3b5040c3af33b715fcd44486ba45ac307d2a12844f0bc8df7",
+      "bytes": 4502,
+      "moved_from": "/home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc1-20261022-r2/HUAWEI_AGENT_PROMPT_GF_RUNTIME_0.1.0rc1_20261022.md",
+      "verified_after_move": true
+    },
+    {
+      "name": "GF_ADMISSION_RUNTIME_GUIDE_0.1.0rc1_20261022.md",
+      "windows_path": "C:/Users/ALIENWARE/Desktop/GF_ADMISSION_RUNTIME_GUIDE_0.1.0rc1_20261022.md",
+      "wsl_destination": "/mnt/c/Users/ALIENWARE/Desktop/GF_ADMISSION_RUNTIME_GUIDE_0.1.0rc1_20261022.md",
+      "sha256": "59186a787da553120c354e746a2cd72156b23a60fe1140aad16f92f59e38067d",
+      "bytes": 12705,
+      "moved_from": "/home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc1-20261022-r2/GF_ADMISSION_RUNTIME_GUIDE_0.1.0rc1_20261022.md",
+      "verified_after_move": true
+    }
+  ],
+  "local_project_passed": 79,
+  "motor_passed": 309,
+  "motor_skipped": 8,
+  "final_extracted_passed": 58,
+  "npu_tested": false,
+  "aisbench_tested": false,
+  "session2_review_pending": true
+}
