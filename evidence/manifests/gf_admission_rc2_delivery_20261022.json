@@ -1,0 +1,57 @@
+{
+  "version": "0.1.0rc2",
+  "date": "2026-10-22",
+  "source_commit": "75c5e519195b55ce314fc00bf81b068f382e9cb1",
+  "branch": "backup/20261022-init",
+  "baseline_commit": "3b63b00546e7a6ffb2526dafc341969cebe22359",
+  "files": [
+    {
+      "path": "C:\\Users\\ALIENWARE\\Desktop\\gf-admission-0.1.0rc2-20261022.tar.gz",
+      "sha256": "b23cee6b81d6f4f8b87b1e6cfd6fc28e7e8ed4bab3512c4ab6a4a7cecd1b0121",
+      "bytes": 1575686,
+      "source_removed": true
+    },
+    {
+      "path": "C:\\Users\\ALIENWARE\\Desktop\\HUAWEI_AGENT_PROMPT_GF_RUNTIME_0.1.0rc2_20261022.md",
+      "sha256": "fe6c3b72a988e859331a85e319930f957ba297183841c344fa13d851f806f06a",
+      "bytes": 8767,
+      "source_removed": true
+    },
+    {
+      "path": "C:\\Users\\ALIENWARE\\Desktop\\GF_ADMISSION_RUNTIME_GUIDE_0.1.0rc2_20261022.md",
+      "sha256": "246134aeaa849b633fd4ee6edab0d6f343ecd9b0b137a55b62dab5e6ad3ec53f",
+      "bytes": 14121,
+      "source_removed": true
+    },
+    {
+      "path": "C:\\Users\\ALIENWARE\\Desktop\\GF_ADMISSION_RC2_REPAIR_REPORT_20261022.md",
+      "sha256": "77f7700a1f593eb8875dff8c56326bdb3cb0c8e16e4b1f9d0bb94a11f013b221",
+      "bytes": 5606,
+      "source_removed": true
+    }
+  ],
+  "archive_verified_files": 685,
+  "project_tests": {
+    "passed": 96
+  },
+  "motor_tests": {
+    "passed": 309,
+    "skipped": 8
+  },
+  "final_extracted_tests": {
+    "passed": 75,
+    "log_sha256": "4d591295daffba5917ddabf0341d640f56afadd308270985701ca0cea0a38e94"
+  },
+  "wheel_sha256": "637f1f45a4d4cd200fb691a547998fb3dea010c36d707c942360f74bbfcc258f",
+  "wheel_source_exact": true,
+  "wheel_isolated_import_passed": true,
+  "test_python": "3.13.11",
+  "session2_rc2_review": "pending",
+  "native_huawei_validation": "pending",
+  "aisbench_performance": "not_run",
+  "main_merged": false,
+  "log_hashes": {
+    "extracted-final-tests.log": "4d591295daffba5917ddabf0341d640f56afadd308270985701ca0cea0a38e94",
+    "build-final.log": "0932a0016df36f9464f29a0e2239f6f4950b399058ef6bebe9bd16f0c621da54"
+  }
+}

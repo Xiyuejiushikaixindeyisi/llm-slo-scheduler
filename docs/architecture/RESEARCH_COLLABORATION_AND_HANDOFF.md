@@ -110,3 +110,10 @@ C_* = \underset{C}{\arg\max}\left(
 新交付在 WSL 构建/解包校验后移动到 Windows 桌面；旧 dev1/rc1 归档、wheel、交付 prompt 副本已按用户要求撤回，源码和原评审证据保留。新包先复评、现场短验证、阈值探测和通知演练，再冻结长压测。后台脚本监控并通过实际可用 agent 接口通知故障，正常轮询不用模型；故障/修复/重启诚实留痕，变更版本后重跑受影响配对。
 
 详细规则见 docs/admission/GF_PRESSURE_ADMISSION_REVISION_20261022.md；实施状态见 docs/engineering/GF_ADMISSION_IMPLEMENTATION_STATUS.md。当前仅完成审批与上下文同步，代码/测试/交付完成情况由实施状态后续更新；无现场性能收益声明，不合并 main。
+
+
+## rc2 最终交付完成（2026-10-22）
+
+覆盖前文“仅上下文同步/开始修复”的进度：R1–R4及统一高压让行实现已完成，代码提交75c5e519195b55ce314fc00bf81b068f382e9cb1；项目96通过、Motor309通过/8跳过，最终独立解包75通过、685文件SHA校验。新rc2包、prompt、指南、修复报告已从WSL移动到Windows桌面并核对hash；归档SHA b23cee6b81d6f4f8b87b1e6cfd6fc28e7e8ed4bab3512c4ab6a4a7cecd1b0121。交付凭据见docs/engineering/GF_ADMISSION_0.1.0rc2_DELIVERY_20261022.md。
+
+下一步是Session2复评完整包、华为短验证/已有结果或必要短探测选择静态H/L/实际通知演练、冻结后跑六格AISBench。无需用户重建环境或增加GB流量采集。暂无NPU或性能证据，未合并main；共享未提交文档继续保留。

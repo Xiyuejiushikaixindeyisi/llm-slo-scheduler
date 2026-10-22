@@ -45,3 +45,10 @@ R1真UnifiedPD回归、R2四种清理路径、R3慢metadata并发和总deadline�
 独立解包目录随包75项通过；wheel全部gf_admission源码及runtime contract逐字节一致，pip --target隔离导入与兼容验证通过。第一次解包发现子进程测试脚本误引入本地测试helper（开发PYTHONPATH掩盖），已删除无用导入并在仅包内src的环境重验；失败原日志保留在evidence/local/extracted-initial-failure.log，未把失败隐藏。最终归档校验及桌面移动hash在交付清单。
 
 CPU控制面微基准1000次enqueue+finish对，包含逐渐增长的墓碑：P50 426.244us、P95 993.930us、P99 1502.238us、最大2852.969us；native模拟账最终零。方法/原始JSON随包。仅进程内broker＋FakeLedger，不含IPC/NPU、不代表真实并发吞吐或锁时长上限；没有根据该结果宣称硬2ms预算。
+
+
+## rc2 最终交付完成（2026-10-22）
+
+覆盖前文“仅上下文同步/开始修复”的进度：R1–R4及统一高压让行实现已完成，代码提交75c5e519195b55ce314fc00bf81b068f382e9cb1；项目96通过、Motor309通过/8跳过，最终独立解包75通过、685文件SHA校验。新rc2包、prompt、指南、修复报告已从WSL移动到Windows桌面并核对hash；归档SHA b23cee6b81d6f4f8b87b1e6cfd6fc28e7e8ed4bab3512c4ab6a4a7cecd1b0121。交付凭据见docs/engineering/GF_ADMISSION_0.1.0rc2_DELIVERY_20261022.md。
+
+下一步是Session2复评完整包、华为短验证/已有结果或必要短探测选择静态H/L/实际通知演练、冻结后跑六格AISBench。无需用户重建环境或增加GB流量采集。暂无NPU或性能证据，未合并main；共享未提交文档继续保留。
