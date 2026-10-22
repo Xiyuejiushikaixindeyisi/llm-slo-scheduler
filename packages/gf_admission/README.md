@@ -17,7 +17,9 @@ From the repository root:
 The builder creates a standalone source tree and wheel in a new directory,
 includes SHA256 for the source/wheel, and runs a clean import from that wheel.
 It uses the current interpreter's setuptools, with no dependency download.
-Generated files are development artifacts, not a Huawei release.
+Generated files are development artifacts, not a Motor runtime release.
+The separate `build_gf_core_validation_bundle.py` packages them for Huawei
+offline CPU validation with explicit instructions; it still cannot enable admission.
 
 Policy parameters have no production defaults. The example values in tests
 are synthetic test conditions; 20/1 and .8/1.5 are prototype reference rules.

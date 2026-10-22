@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-22",
+  "kind": "offline_cpu_core_validation",
+  "desktop_confirmed_by": "Environment.GetFolderPath(Desktop)",
+  "files": [
+    {
+      "name": "gf-admission-core-0.1.0.dev1-20261022.tar.gz",
+      "source_wsl": "/home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-core-validation-20261022-r2/gf-admission-core-0.1.0.dev1-20261022.tar.gz",
+      "destination_windows": "C:/Users/ALIENWARE/Desktop/gf-admission-core-0.1.0.dev1-20261022.tar.gz",
+      "sha256": "849da295b8541a4b6b8fc9d1f54f650cdcda2ebe37c910df8af7ddbaf0bbda01",
+      "bytes": 30318,
+      "moved": true,
+      "hash_verified": true
+    },
+    {
+      "name": "HUAWEI_AGENT_PROMPT_GF_CORE_20261022.md",
+      "source_wsl": "/home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-core-validation-20261022-r2/HUAWEI_AGENT_PROMPT_GF_CORE_20261022.md",
+      "destination_windows": "C:/Users/ALIENWARE/Desktop/HUAWEI_AGENT_PROMPT_GF_CORE_20261022.md",
+      "sha256": "a93e11a476273011ad6c331e9af03f9f45d96c93648f282cf5e83895cbc05354",
+      "bytes": 4433,
+      "moved": true,
+      "hash_verified": true
+    },
+    {
+      "name": "GF_ADMISSION_CORE_DELIVERY_20261022.md",
+      "source_wsl": "/home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-core-validation-20261022-r2/GF_ADMISSION_CORE_DELIVERY_20261022.md",
+      "destination_windows": "C:/Users/ALIENWARE/Desktop/GF_ADMISSION_CORE_DELIVERY_20261022.md",
+      "sha256": "fff8978e61796769ac8f77342152e6f8b1c64cf6f3d780273585efb5358d3b7a",
+      "bytes": 2670,
+      "moved": true,
+      "hash_verified": true
+    }
+  ],
+  "extracted_tests": "22 passed",
+  "source_commit": "7055b220c6ac640ef32837e4bbe0ff50b22bbf19",
+  "runtime_activation": false
+}

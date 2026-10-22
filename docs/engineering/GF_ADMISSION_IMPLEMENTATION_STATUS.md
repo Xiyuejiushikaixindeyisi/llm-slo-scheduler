@@ -98,9 +98,12 @@ P99 用排序后的下取整秩；tracemalloc 单独跑，报告 Python 分配�
 最新本机产物为 `artifacts/gf-admission/core-build-final/`；早期 core-build/wheels 是中间产物，勿交付。
 独立 wheel 不包含 fgjsq/motor_adapter/slo_patch 或 vLLM entrypoint。
 
-此为开发自检产物，**不作正式华为代码包、不移动桌面、不提供伪可运行的 enforce prompt**。
-正式交付仍欠：显式 hooks、兼容 manifest、自检、安装/回退、runtime schema/模板、完整现场 prompt、
-解包验证与桌面 hash 核验。现场报告吸收与 main 合并均尚未开始。
+上述为首阶段开发自检产物。用户随后要求提供代码包＋prompt：现新增
+`scripts/package/build_gf_core_validation_bundle.py`，用于**华为离线 CPU 核心验证**，
+附 `HUAWEI_AGENT_PROMPT_GF_CORE_20261022.md`，解包复验后移动 Windows 桌面。
+这不是可运行的 shadow/enforce 交付。线上版本仍欠：显式 hooks、兼容 manifest、
+接入自检、安装/回退、runtime schema/模板及真实链路实验 prompt。
+现场报告吸收与 main 合并均尚未开始。交付位置/hash 另见 gf_admission_core_delivery_20261022.json。
 
 ## 给 Session 2 的设计建议与下一实施步骤
 
