@@ -1,0 +1,5 @@
+{
+  "vllm.v1.engine.core": "cf9cbde601afb80925254aae814033abeab3817f9c4fe7bf01ca92edc9d10c2d",
+  "vllm.v1.core.sched.async_scheduler": "0022e12f356fd46406f6e6d3c82755daf7287ca2d86e2000c27b05bb8d9621cc",
+  "vllm_ascend.core.recompute_scheduler": "38111806d9434e4267482a63a453f6f4328a5d0bf9ae931fa17ad38208d79202"
+}

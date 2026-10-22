@@ -1,0 +1,50 @@
+{
+  "import_date": "2026-10-19",
+  "items": [
+    {
+      "source": "/home/zhangxiyue/vllm-omni/LLM_TAIL_LATENCY_RESEARCH_GUIDE.md",
+      "destination": "docs/LLM_TAIL_LATENCY_RESEARCH_GUIDE.md",
+      "kind": "maintained_document",
+      "source_sha256": "833605a29a4067146338189aedd68a73cadf9a6fc49e984a477930d107dc3911",
+      "imported_sha256": "833605a29a4067146338189aedd68a73cadf9a6fc49e984a477930d107dc3911",
+      "current_sha256": "ecc808649e3998d20938db6a01154e0ab89e0abc9ff2f51ade7eb4d5844b7112",
+      "transform": "local_links_and_workspace_locations_updated"
+    },
+    {
+      "source": "/home/zhangxiyue/vllm-omni/CHUNK_SIZE_KV_CACHE_MATHEMATICAL_MODEL.md",
+      "destination": "docs/modeling/CHUNK_SIZE_KV_CACHE_MATHEMATICAL_MODEL.md",
+      "kind": "maintained_document",
+      "source_sha256": "ef427186b5b166d14bba5ff2c3edd5c949c1addf648ca107c6ec0a9511dd2d63",
+      "imported_sha256": "ef427186b5b166d14bba5ff2c3edd5c949c1addf648ca107c6ec0a9511dd2d63",
+      "current_sha256": "4e65a8155bbb2663d7eaca283ce0862ccf2f2cc77ad8aa7ac7084576b23a8b30",
+      "transform": "local_links_and_workspace_locations_updated"
+    },
+    {
+      "source": "/home/zhangxiyue/vllm-omni/SUPER_P95_RESEARCH_AND_LLM_COMPARISON.md",
+      "destination": "docs/references/SUPER_P95_RESEARCH_AND_LLM_COMPARISON.md",
+      "kind": "maintained_document",
+      "source_sha256": "85744cf414bbfd4046a2ee15757c594d3cfdec8d82f0e8ece05e6e32b3c4a587",
+      "imported_sha256": "85744cf414bbfd4046a2ee15757c594d3cfdec8d82f0e8ece05e6e32b3c4a587",
+      "current_sha256": "dba2a4f9b659ea06d002512f323b63100921e2a03582bf55b325df5bac8c4d2a",
+      "transform": "local_links_and_workspace_locations_updated"
+    },
+    {
+      "source": "/mnt/c/Users/ALIENWARE/.codex/attachments/d9f3a332-0086-4ce4-893f-5b453fe2612d/已粘贴的文本.txt",
+      "destination": "evidence/huawei/2026-10-19-import/SUMMARY_REPORT.txt",
+      "kind": "original_evidence",
+      "source_sha256": "81b5090aec18cb2897651b55853fda7909f4d395afa29368ef0a6ed6565056a4",
+      "imported_sha256": "81b5090aec18cb2897651b55853fda7909f4d395afa29368ef0a6ed6565056a4",
+      "current_sha256": "81b5090aec18cb2897651b55853fda7909f4d395afa29368ef0a6ed6565056a4",
+      "transform": "none"
+    },
+    {
+      "source": "/mnt/c/Users/ALIENWARE/.codex/attachments/50c15145-253b-4c5e-827e-4a1356563239/已粘贴的文本.txt",
+      "destination": "evidence/huawei/2026-10-19-import/DOC1_F_vs_chenyao.txt",
+      "kind": "original_evidence",
+      "source_sha256": "a63c04efae15f2f4cbed49037ceb82fff335ef053d64fe5bb4a858e70135d4f2",
+      "imported_sha256": "a63c04efae15f2f4cbed49037ceb82fff335ef053d64fe5bb4a858e70135d4f2",
+      "current_sha256": "a63c04efae15f2f4cbed49037ceb82fff335ef053d64fe5bb4a858e70135d4f2",
+      "transform": "none"
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "audit_date": "2026-10-22",
+  "status": "review_only_no_runtime_code_changes",
+  "handover": {
+    "path": "docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md",
+    "sha256": "0995514a020978159fa49803e956380da435f2279cf9431f0920cbc5dbcc7aae",
+    "bytes": 145299,
+    "data_cutoff": "2026-10-21T13:09:00Z"
+  },
+  "repositories": {
+    "upstream/motor": {
+      "head": "f203263d9742dd6fa76eaef658e0ff3a0f380301",
+      "status": ""
+    },
+    "upstream/vllm-v0.23.0": {
+      "head": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+      "status": ""
+    },
+    "upstream/vllm-ascend-v0.23.0": {
+      "head": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+      "status": ""
+    }
+  },
+  "source_vs_original_release": [
+    {
+      "path": "src/fgjsq/__init__.py",
+      "sha256": "4db447395f66ea2cbabc85c0b925c70c7feefa0b75f706386480baf4921f197a",
+      "same_as_release": true
+    },
+    {
+      "path": "src/fgjsq/policy.py",
+      "sha256": "68c2695dec1136b593a9b827bc05c5f43e333b8e79154eb424044f29bbfa4f07",
+      "same_as_release": true
+    },
+    {
+      "path": "src/fgjsq/snapshot.py",
+      "sha256": "459b020bdf59c7e850a0338f44b6b23faadcc0413a24c7492e8bde8b7f00233a",
+      "same_as_release": true
+    },
+    {
+      "path": "src/motor_adapter/__init__.py",
+      "sha256": "c155c64486f27a3c4e3bf547b8ce10850edf8427bfcf6ee6894fe8ff9f5b4745",
+      "same_as_release": true
+    },
+    {
+      "path": "src/motor_adapter/bindings.py",
+      "sha256": "053652d6f8e1b9e69df553cb5077c881a029cec8e38a3699f5d3d4c7bb494a0b",
+      "same_as_release": true
+    },
+    {
+      "path": "src/motor_adapter/body_observer.py",
+      "sha256": "586ff1fb72492190a74d55fea332f9447bc2e278ae316a99739c54c8b806f386",
+      "same_as_release": true
+    },
+    {
+      "path": "src/motor_adapter/config.py",
+      "sha256": "6f715fb64ec0f05ec8d289d4671e1922afd1e40bf1c6698df0e807aa74d4e17c",
+      "same_as_release": true
+    },
+    {
+      "path": "src/motor_adapter/motor_backend.py",
+      "sha256": "78fab06f2e9466b9857823f0855b10a5003b78607b62e2768f3f5947588b49a6",
+      "same_as_release": true
+    },
+    {
+      "path": "src/motor_adapter/service.py",
+      "sha256": "10cca5403ae916d6044d781a60a30c8a095575888e624b84a0f74d4b5d6a2027",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/__init__.py",
+      "sha256": "9acc027352b776aa0bd06090a5d75e4275972edff38f1c4ab343e4b36cc3c3ef",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/activate.py",
+      "sha256": "bdf2cd6453d0c1ed5f15246a764518f590244ea23d246cc5aa12a0cbb8b908b5",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/compatibility.py",
+      "sha256": "3de3fdc8f3cbd837dbd68deea7830439b35f43882ac3cd52e5d3ec2b45c329dc",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/engine_files.json",
+      "sha256": "523b6c1e256fd77b0352f8f8f1219252ad246d2d98701d200a77a1584697af36",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/patch_core.py",
+      "sha256": "ff2052d2fbaf2c4c011a759e3011355dc289d9573700a94fbc8a8f05c505fac3",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/patch_runtime.py",
+      "sha256": "f1148ba16b2b79c4ca338a9052743ff4a5bdf66998f22ff543ae63021c39af85",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/slo/__init__.py",
+      "sha256": "d3e17837e17aaddf1227a2e104e3d3550470e333dde13b105111a14f5ca2721a",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/slo/batch_event_reporter.py",
+      "sha256": "4b15a44d939cbe6397d31cddb0c96ebc954711d9ca8c3a84ad4d03576c442381",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/slo/batch_reporter.py",
+      "sha256": "7ec2a7efd5c10e0b1b65bac6dcae0fbb5bdfd736d8bf0e792224d9d63da70181",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/slo/predictor.py",
+      "sha256": "f08e3e40782deb3f544aee3f6b4279761d00d5657e75825676c112c6e53695de",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/slo/predictor_impl.py",
+      "sha256": "ca4f9d20077243cec679cd487db57e4db4dae89dfd8d1dbd71a34e6baa788aca",
+      "same_as_release": true
+    },
+    {
+      "path": "src/slo_patch/slo/scheduler_with_predictor.py",
+      "sha256": "36c97c22e941d20fe7750a5c4d5acd717f9219c9ee784cf58d9323e781f4803a",
+      "same_as_release": true
+    }
+  ],
+  "motor_patch_files": {
+    "motor/coordinator/models/request.py": {
+      "base_sha256": "4cbf796eaf919622603425acf2212ed5a64b816fcfd4cee3cc1c155fd77d5f52",
+      "build_sha256": "041ffef5b364419dfb442a0dccab77f0cb1dc7e58605c440fa96f957a9514d38",
+      "manifest_matches": true
+    },
+    "motor/coordinator/domain/scheduling.py": {
+      "base_sha256": "3948a068275e2b78e7a3fe89709f4b4c7c3cd6f35c8fe543e5dd94323b26a7ed",
+      "build_sha256": "d18e07bfb27fd5a023aec6747eb038d3bcbf0792d5f4b1be4b543f8c1d05a77c",
+      "manifest_matches": true
+    },
+    "motor/coordinator/scheduler/runtime/scheduler_client.py": {
+      "base_sha256": "56c9ad3c9b1bf919d5fde14c210e9c7cb658f04d3f942473525ae9970d226c13",
+      "build_sha256": "73b65adfa9c528e462ebf0c9d96ec2a79ff8513db6db114ed865e6617dfbfceb",
+      "manifest_matches": true
+    },
+    "motor/coordinator/scheduler/runtime/scheduler_server.py": {
+      "base_sha256": "ed50d0f2f045036286edfa449b6fec5fff59d83a6cb6046d9261878b852b4585",
+      "build_sha256": "5e48389a6045393c36d8b3dd5fc9af99d7ad3e670c8e3eee1099f5e1aabc8232",
+      "manifest_matches": true
+    },
+    "motor/coordinator/api_server/management_server.py": {
+      "base_sha256": "c94a4473a24516e0b90d28da4f2985976d1a6f5314b4ef40b98356b22f681075",
+      "build_sha256": "3e8ea8fea66482fa1a77625f904f5ecbca818fb4786767707f1f8e601f1c79b4",
+      "manifest_matches": true
+    },
+    "motor/coordinator/router/strategies/unified_pd.py": {
+      "base_sha256": "16ceb4e5a592fa12de43c47436da1b09c8e9dd28c93296c319938c2b07b5a1e8",
+      "build_sha256": "7e5860e55f2f11896269426ccdd7f06190f75072503c41d2992f33aa81dd232b",
+      "manifest_matches": true
+    },
+    "motor/coordinator/router/strategies/base.py": {
+      "base_sha256": "5a849c6f66e465675fa490f8f5ba4811789a67fbf49f6e3af9a880926487a027",
+      "build_sha256": "5efc332eadf8ea69e0ff33e7457a0cc785325ee447637c87c0ce1bf2edd75c8e",
+      "manifest_matches": true
+    }
+  },
+  "engine_files": {
+    "vllm.v1.engine.core": {
+      "path": "upstream/vllm-v0.23.0/vllm/v1/engine/core.py",
+      "actual_sha256": "cf9cbde601afb80925254aae814033abeab3817f9c4fe7bf01ca92edc9d10c2d",
+      "local_allowlist": "cf9cbde601afb80925254aae814033abeab3817f9c4fe7bf01ca92edc9d10c2d",
+      "reported_allowlist": "cf9cbde601afb80925254aae814033abeab3817f9c4fe7bf01ca92edc9d10c2d"
+    },
+    "vllm.v1.core.sched.async_scheduler": {
+      "path": "upstream/vllm-v0.23.0/vllm/v1/core/sched/async_scheduler.py",
+      "actual_sha256": "0022e12f356fd46406f6e6d3c82755daf7287ca2d86e2000c27b05bb8d9621cc",
+      "local_allowlist": "0022e12f356fd46406f6e6d3c82755daf7287ca2d86e2000c27b05bb8d9621cc",
+      "reported_allowlist": "0022e12f356fd46406f6a6d3c82755daf7287ca2d86e2000c27b05bb8d9621cc"
+    },
+    "vllm_ascend.core.recompute_scheduler": {
+      "path": "upstream/vllm-ascend-v0.23.0/vllm_ascend/core/recompute_scheduler.py",
+      "actual_sha256": "38111806d9434e4267482a63a453f6f4328a5d0bf9ae931fa17ad38208d79202",
+      "local_allowlist": "38111806d9434e4267482a63a453f6f4328a5d0bf9ae931fa17ad38208d79202",
+      "reported_allowlist": "38111806d9434e4267482a63a453f6f4328a5d0bf9ae931fa17ad38208d79202"
+    }
+  },
+  "embedded_full_block_checks": [
+    {
+      "path": "src/fgjsq/policy.py",
+      "equal_text": true
+    },
+    {
+      "path": "src/motor_adapter/body_observer.py",
+      "equal_text": true
+    }
+  ],
+  "validation": {
+    "method": "read_only_content_hash_ast_and_git_inventory",
+    "tests_rerun": false,
+    "onsite_direct_access": false
+  },
+  "embedded_activate_syntax_error": {
+    "line_in_block": 24,
+    "message": "invalid syntax",
+    "source": "from slo_patch.compatibility import verify_engine()"
+  },
+  "node_manager_fix1": {
+    "local_base_sha256": "9d1121d46ac707d2168f5bb1606797029595c3dbb2b565d8fea0996299adac35",
+    "local_build_equals_base": true,
+    "reported_after_sha256_prefix": "c098842c",
+    "full_onsite_file_not_provided": true
+  },
+  "missing_artifacts": [
+    "onsite full eight-file Motor SHA256 manifest",
+    "complete node_manager.py fix1 diff including offset/UCM context",
+    "full warm predictor model SHA256 and model bytes",
+    "complete ten-scenario acceptance report"
+  ],
+  "original_release_reference": "artifacts/releases/fgjsq-motor-p-0.2.0-20261019",
+  "wheel_checks": [
+    {
+      "path": "artifacts/releases/fgjsq-motor-p-0.2.0-20261019/dist/slo_patch-0.2.0-py3-none-any.whl",
+      "mismatches": []
+    }
+  ]
+}

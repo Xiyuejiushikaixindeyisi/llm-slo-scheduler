@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-22",
+  "scope": "CPU baseline alignment; not NPU or performance validation",
+  "tests": {
+    "node_manager": 74,
+    "motor_config_backend": 96,
+    "project_and_tools": 29,
+    "total_passed": 199,
+    "expected_old_code_regression": {
+      "failed": 4,
+      "passed": 2
+    }
+  },
+  "tooling": {
+    "clean_rebuild": "passed",
+    "repeated_prepare": "passed",
+    "rebuilt_source_fingerprints": "33 matched",
+    "staged_bundle_manifest_files": 73,
+    "staging_archived_or_delivered": false,
+    "python_files_parsed": 40,
+    "reference_json": "parsed",
+    "upstream_clean": true
+  }
+}

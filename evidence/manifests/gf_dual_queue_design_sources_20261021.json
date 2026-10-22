@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-21",
+  "purpose": "Read-only source basis for G5_GF_DUAL_QUEUE_IMPLEMENTATION_DESIGN v0.1; not a runtime compatibility allowlist",
+  "repositories": {
+    "upstream/motor": {
+      "head": "f203263d9742dd6fa76eaef658e0ff3a0f380301",
+      "worktree_status": "clean"
+    },
+    "upstream/vllm-omni-super-p95": {
+      "head": "dd9c0895d98a73c760e9ca930d87e03198713ff7",
+      "worktree_status": "clean"
+    }
+  },
+  "files": [
+    {
+      "path": "upstream/vllm-omni-super-p95/benchmarks/diffusion/super_p95_dispatcher.py",
+      "sha256": "f0e23f6527054b4ec80468d19328d6b7bbf8cd434836985f57d7e889a9ec3102",
+      "lines": 1195
+    },
+    {
+      "path": "upstream/vllm-omni-super-p95/vllm_omni/diffusion/sched/super_p95_step_scheduler.py",
+      "sha256": "116ab5f6ccd93620a1c389af345a384b7c8eb921427177d6d1fe0dc0f783d532",
+      "lines": 441
+    },
+    {
+      "path": "src/fgjsq/policy.py",
+      "sha256": "68c2695dec1136b593a9b827bc05c5f43e333b8e79154eb424044f29bbfa4f07",
+      "lines": 97
+    },
+    {
+      "path": "src/motor_adapter/service.py",
+      "sha256": "10cca5403ae916d6044d781a60a30c8a095575888e624b84a0f74d4b5d6a2027",
+      "lines": 186
+    },
+    {
+      "path": "src/motor_adapter/bindings.py",
+      "sha256": "053652d6f8e1b9e69df553cb5077c881a029cec8e38a3699f5d3d4c7bb494a0b",
+      "lines": 248
+    },
+    {
+      "path": "src/motor_adapter/motor_backend.py",
+      "sha256": "78fab06f2e9466b9857823f0855b10a5003b78607b62e2768f3f5947588b49a6",
+      "lines": 78
+    },
+    {
+      "path": "src/motor_adapter/config.py",
+      "sha256": "6f715fb64ec0f05ec8d289d4671e1922afd1e40bf1c6698df0e807aa74d4e17c",
+      "lines": 58
+    },
+    {
+      "path": "src/motor_adapter/body_observer.py",
+      "sha256": "586ff1fb72492190a74d55fea332f9447bc2e278ae316a99739c54c8b806f386",
+      "lines": 41
+    },
+    {
+      "path": "upstream/motor/motor/coordinator/router/strategies/unified_pd.py",
+      "sha256": "16ceb4e5a592fa12de43c47436da1b09c8e9dd28c93296c319938c2b07b5a1e8",
+      "lines": 2696
+    },
+    {
+      "path": "upstream/motor/motor/coordinator/scheduler/runtime/scheduler_server.py",
+      "sha256": "ed50d0f2f045036286edfa449b6fec5fff59d83a6cb6046d9261878b852b4585",
+      "lines": 986
+    },
+    {
+      "path": "upstream/motor/motor/coordinator/scheduler/runtime/scheduler_client.py",
+      "sha256": "56c9ad3c9b1bf919d5fde14c210e9c7cb658f04d3f942473525ae9970d226c13",
+      "lines": 1856
+    },
+    {
+      "path": "upstream/motor/motor/coordinator/scheduler/policy/kv_cache_affinity.py",
+      "sha256": "78af2043db8d8cd552e66a8c97bfda0f1f18ca5a9b0ccb8bd3b31d00e03983ea",
+      "lines": 845
+    },
+    {
+      "path": "upstream/motor/motor/coordinator/api_client/conductor_api_client.py",
+      "sha256": "4cbdeeb2f794d7c761b9b3475f97c956fafdc353ee58db8f7b458888bfc85a61",
+      "lines": 640
+    },
+    {
+      "path": "upstream/motor/motor/kv_conductor/README.md",
+      "sha256": "d6f95cfc933dcc7344cd4fae5932fa13ace2fc6b6c6b1e9c7079de81af27fc65",
+      "lines": 297
+    },
+    {
+      "path": "patches/motor/f203263d-p-fgjsq.patch",
+      "sha256": "a63afb877026aa1d68fededc1202f885632e27a10ecf2b5cf98beb243fab9312",
+      "lines": 269
+    },
+    {
+      "path": "docs/engineering/G5_BASELINE_HANDOVER.md",
+      "sha256": "13b2a89fe82c7e81cb7e2feaf2a0642265b5d48bd84c84c8ce740005f2926e7d",
+      "lines": 775
+    }
+  ],
+  "official_docs": [
+    "https://docs.python.org/3.12/library/collections.html#collections.OrderedDict",
+    "https://docs.python.org/3.12/library/asyncio-sync.html",
+    "https://docs.python.org/3.12/library/asyncio-task.html",
+    "https://www.python-httpx.org/async/"
+  ],
+  "implementation_status": "design_only; no new scheduler implementation or tests run"
+}

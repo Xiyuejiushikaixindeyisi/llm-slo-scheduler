@@ -1,0 +1,337 @@
+Checking test dependencies...
+Installing pytest-xdist...
+Requirement already satisfied: pytest-xdist in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (3.8.0)
+Requirement already satisfied: execnet>=2.1 in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (from pytest-xdist) (2.1.2)
+Requirement already satisfied: pytest>=7.0.0 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest-xdist) (8.4.2)
+Requirement already satisfied: iniconfig>=1 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.3.0)
+Requirement already satisfied: packaging>=20 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (25.0)
+Requirement already satisfied: pluggy<2,>=1.5 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (1.5.0)
+Requirement already satisfied: pygments>=2.7.2 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.19.2)
+Checking project core dependencies...
+Checking HTTP client dependencies...
+Dependency check completed
+Checking and generating protobuf files...
+Generating code from ./motor/common/etcd/proto/rpc.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/rpc.proto
+  Fixed import paths in rpc_pb2_grpc.py
+  Fixed import paths in rpc_pb2.py
+Generating code from ./motor/common/etcd/proto/auth.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/auth.proto
+  Fixed import paths in auth_pb2_grpc.py
+  Fixed import paths in auth_pb2.py
+Generating code from ./motor/common/etcd/proto/kv.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/kv.proto
+  Fixed import paths in kv_pb2_grpc.py
+  Fixed import paths in kv_pb2.py
+All protobuf files generated successfully.
+Executing command: pytest  tests/node_manager/test_config.py --color=no
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-8.4.2, pluggy-1.5.0 -- /home/zhangxiyue/llm-slo-scheduler/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5
+configfile: pytest.ini
+plugins: xdist-3.8.0, asyncio-1.4.0, anyio-4.13.0, cov-7.1.0, jaxtyping-0.3.6
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 74 items
+
+tests/node_manager/test_config.py::test_init_success 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 2, service_ports: ['10000', '10002'].
+PASSED                                                                   [  1%]
+tests/node_manager/test_config.py::test_config_validation_errors[invalid_config0-Missing required config field-both] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+PASSED                                                                   [  2%]
+tests/node_manager/test_config.py::test_config_validation_errors[invalid_config1-Invalid role value-invalid] PASSED [  4%]
+tests/node_manager/test_config.py::test_logging_config_defaults 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+PASSED                                                                   [  5%]
+tests/node_manager/test_config.py::test_native_sglang_bootstrap_port_from_engine_config PASSED [  6%]
+tests/node_manager/test_config.py::test_native_bootstrap_port_rejects_invalid_range PASSED [  8%]
+tests/node_manager/test_config.py::test_logging_config_validation_errors[invalid_config0-log_level must be one of] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - log_level must be one of: DEBUG, INFO, WARNING, ERROR
+PASSED                                                                   [  9%]
+tests/node_manager/test_config.py::test_logging_config_validation_errors[invalid_config1-log_level must be one of] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - log_level must be one of: DEBUG, INFO, WARNING, ERROR
+PASSED                                                                   [ 10%]
+tests/node_manager/test_config.py::test_logging_config_validation_errors[invalid_config2-log_file must be a string or null] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+PASSED                                                                   [ 12%]
+tests/node_manager/test_config.py::test_logging_config_validation_errors[invalid_config3-log_format must be a string] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+PASSED                                                                   [ 13%]
+tests/node_manager/test_config.py::test_generate_endpoint_ports 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 2, service_ports: ['10000', '10002'].
+PASSED                                                                   [ 14%]
+tests/node_manager/test_config.py::test_non_singleton_behavior PASSED    [ 16%]
+tests/node_manager/test_config.py::test_reload_success 
+-------------------------------- live log call ---------------------------------
+INFO     config:config_utils.py:531 Configuration file change detected, reloading...
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/user_config.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/user_config.json
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+WARNING  config:node_manager.py:703 No motor_deploy_config found, using default device configuration
+INFO     config:node_manager.py:452 Configuration loading completed
+INFO     config:config_utils.py:536 NodeManager configuration reload successful
+PASSED                                                                   [ 17%]
+tests/node_manager/test_config.py::test_reload_config_file_not_found 
+-------------------------------- live log call ---------------------------------
+WARNING  config:config_utils.py:522 Configuration file path does not exist, cannot reload
+PASSED                                                                   [ 18%]
+tests/node_manager/test_config.py::test_reload_invalid_json 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:539 Failed to reload NodeManager configuration: [Errno 2] No such file or directory: '/tmp/test_node_manager_config.json'
+PASSED                                                                   [ 20%]
+tests/node_manager/test_config.py::test_validate_config_success PASSED   [ 21%]
+tests/node_manager/test_config.py::test_validate_config_errors[node_manager_port-0-node_manager_port must be in range 1-65535] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - node_manager_port must be in range 1-65535
+PASSED                                                                   [ 22%]
+tests/node_manager/test_config.py::test_validate_config_errors[node_manager_port-65536-node_manager_port must be in range 1-65535] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - node_manager_port must be in range 1-65535
+PASSED                                                                   [ 24%]
+tests/node_manager/test_config.py::test_validate_config_errors[base_port--1-base_port must be in range 0-65535] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - base_port must be in range 0-65535
+PASSED                                                                   [ 25%]
+tests/node_manager/test_config.py::test_validate_config_errors[endpoint_num--1-endpoint_num cannot be negative] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - endpoint_num cannot be negative
+PASSED                                                                   [ 27%]
+tests/node_manager/test_config.py::test_validate_config_errors[heartbeat_interval_seconds-0-heartbeat_interval_seconds must be greater than 0] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - heartbeat_interval_seconds must be greater than 0
+PASSED                                                                   [ 28%]
+tests/node_manager/test_config.py::test_validate_config_errors[log_level-INVALID-log_level must be one of] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - log_level must be one of: DEBUG, INFO, WARNING, ERROR
+PASSED                                                                   [ 29%]
+tests/node_manager/test_config.py::test_validate_config_errors[log_max_line_length-0-log_max_line_length must be greater than 0] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - log_max_line_length must be greater than 0
+PASSED                                                                   [ 31%]
+tests/node_manager/test_config.py::test_to_dict PASSED                   [ 32%]
+tests/node_manager/test_config.py::test_save_to_json_success 
+-------------------------------- live log call ---------------------------------
+INFO     config:config_utils.py:559 Configuration saved to: tmp_node_manager_save.json
+PASSED                                                                   [ 33%]
+tests/node_manager/test_config.py::test_save_to_json_no_path 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:577 Save paths not specified
+PASSED                                                                   [ 35%]
+tests/node_manager/test_config.py::test_get_config_summary PASSED        [ 36%]
+tests/node_manager/test_config.py::test_from_json_success 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+PASSED                                                                   [ 37%]
+tests/node_manager/test_config.py::test_generate_endpoint_ports_with_cp_prefill 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 2, service_ports: ['10000', '10002'].
+PASSED                                                                   [ 39%]
+tests/node_manager/test_config.py::test_from_json_loads_union_config_for_hybrid 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=tmp_node_manager_union.json
+INFO     config:node_manager.py:429 Successfully loaded config file: tmp_node_manager_union.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+INFO     config:node_manager.py:813 Using 4 devices from config for role both
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 2, service_ports: ['10000', '10002'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 40%]
+tests/node_manager/test_config.py::test_native_vllm_runtime_accepts_snapshot_configuration PASSED [ 41%]
+tests/node_manager/test_config.py::test_native_non_vllm_runtime_rejects_snapshot_configuration 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - Native Snapshot currently supports only the vllm engine type
+PASSED                                                                   [ 43%]
+tests/node_manager/test_config.py::test_from_json_loads_vllm_startup_acceleration_on_a2 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/pytest-of-zhangxiyue/pytest-5/test_from_json_loads_vllm_star0/user_config.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/pytest-of-zhangxiyue/pytest-5/test_from_json_loads_vllm_star0/user_config.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 1 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 44%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_defaults_allow_enabling_without_cache_root PASSED [ 45%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[enable_startup_plan-true-vllm-enable_startup_plan must be a boolean] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - enable_startup_plan must be a boolean
+PASSED                                                                   [ 47%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[enable_graph_reuse-true-vllm-enable_graph_reuse must be a boolean] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - enable_graph_reuse must be a boolean
+PASSED                                                                   [ 48%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[cache_root-relative/cache-vllm-cache_root must be an absolute path] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - cache_root must be an absolute path when specified
+PASSED                                                                   [ 50%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[enable_startup_plan-True-sglang-supports only the vllm engine type] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - vLLM startup acceleration supports only the vllm engine type
+PASSED                                                                   [ 51%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[cache_root-123-vllm-cache_root must be a string] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - cache_root must be a string
+PASSED                                                                   [ 52%]
+tests/node_manager/test_config.py::test_single_container_union_port_offsets_for_hybrid[0-0-0-9000] PASSED [ 54%]
+tests/node_manager/test_config.py::test_single_container_union_port_offsets_for_hybrid[1-1-2-9001] PASSED [ 55%]
+tests/node_manager/test_config.py::test_vllm_handoff_connector_infers_handoff_capability PASSED [ 56%]
+tests/node_manager/test_config.py::test_vllm_hybrid_connector_infers_handoff_capability PASSED [ 58%]
+tests/node_manager/test_config.py::test_vllm_nixl_connector_infers_handoff_capability PASSED [ 59%]
+tests/node_manager/test_config.py::test_vllm_multi_connector_infers_transport_connector_capability PASSED [ 60%]
+tests/node_manager/test_config.py::test_vllm_multi_connector_ignores_non_transport_connector_profiles PASSED [ 62%]
+tests/node_manager/test_config.py::test_vllm_multi_connector_requires_transport_and_store_connectors 
+-------------------------------- live log call ---------------------------------
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+PASSED                                                                   [ 63%]
+tests/node_manager/test_config.py::test_user_dispatch_capabilities_cannot_override_connector_semantics 
+-------------------------------- live log call ---------------------------------
+WARNING  config:node_manager.py:483 User-configured dispatch_capabilities is no longer supported and was ignored. Configure kv_transfer_config or dispatch_profile instead.
+PASSED                                                                   [ 64%]
+tests/node_manager/test_config.py::test_user_dispatch_capabilities_cannot_enable_unknown_connector 
+-------------------------------- live log call ---------------------------------
+WARNING  config:node_manager.py:483 User-configured dispatch_capabilities is no longer supported and was ignored. Configure kv_transfer_config or dispatch_profile instead.
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+PASSED                                                                   [ 66%]
+tests/node_manager/test_config.py::test_vllm_layerwise_connector_advertises_concurrent_capability PASSED [ 67%]
+tests/node_manager/test_config.py::test_sglang_infers_concurrent_capability PASSED [ 68%]
+tests/node_manager/test_config.py::test_cross_node_pcp_adjusts_local_world_size 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmp4k4lydg_.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmp4k4lydg_.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:546 Cross-node parallel detected (nnodes=2, pcp=2, pp=1): per-node local_world_size adjusted from 32 to 16
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 16 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 70%]
+tests/node_manager/test_config.py::test_cross_node_pcp_no_adjustment_when_nnodes_is_one 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmphd97g2lu.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmphd97g2lu.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 8 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 71%]
+tests/node_manager/test_config.py::test_cross_node_pcp_generate_endpoint_ports 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+PASSED                                                                   [ 72%]
+tests/node_manager/test_config.py::test_single_container_ucm_store_skips_lookup_rpc_port PASSED [ 74%]
+tests/node_manager/test_config.py::test_single_container_ascend_store_still_sets_lookup_rpc_port PASSED [ 75%]
+tests/node_manager/test_config.py::test_single_container_malformed_multi_connectors_rejected PASSED [ 77%]
+tests/node_manager/test_config.py::test_cross_node_pp_adjusts_local_world_size 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmpb0g_12j5.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmpb0g_12j5.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:546 Cross-node parallel detected (nnodes=2, pcp=1, pp=2): per-node local_world_size adjusted from 32 to 16
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 16 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 78%]
+tests/node_manager/test_config.py::test_cross_node_pp_and_pcp_both_adjusted 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmp6_jsg_kh.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmp6_jsg_kh.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:546 Cross-node parallel detected (nnodes=2, pcp=2, pp=2): per-node local_world_size adjusted from 32 to 16
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 32 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 79%]
+tests/node_manager/test_config.py::test_cross_node_pp_not_divisible_raises 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmpygp9le90.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmpygp9le90.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+PASSED                                                                   [ 81%]
+tests/node_manager/test_config.py::test_config_engine_restart_freeze_defaults PASSED [ 82%]
+tests/node_manager/test_config.py::test_config_engine_restart_validation[engine_restart_wait_timeout_sec-30-engine_restart_wait_timeout_sec must be in range 60-3600] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - engine_restart_wait_timeout_sec must be in range 60-3600
+PASSED                                                                   [ 83%]
+tests/node_manager/test_config.py::test_config_engine_restart_validation[engine_restart_freeze_sec-60-engine_restart_freeze_sec must be in range 120-7200] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - engine_restart_freeze_sec must be in range 120-7200
+PASSED                                                                   [ 85%]
+tests/node_manager/test_config.py::test_kv_config_mooncake_standalone_fields PASSED [ 86%]
+tests/node_manager/test_config.py::test_kv_config_mooncake_defaults PASSED [ 87%]
+tests/node_manager/test_config.py::test_kv_config_mooncake_invalid_store_mode_falls_back 
+-------------------------------- live log call ---------------------------------
+WARNING  config:node_manager.py:771 kv_cache_store_config.store_mode='bogus' is invalid, falling back to 'embedded'
+PASSED                                                                   [ 89%]
+tests/node_manager/test_config.py::test_kv_config_memcache_ignores_mooncake_fields PASSED [ 90%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields0-20-prefill-0] PASSED [ 91%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields0-20-decode-1] PASSED [ 93%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields1-7-prefill-0] PASSED [ 94%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields1-7-decode-1] PASSED [ 95%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields2-0-prefill-0] PASSED [ 97%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields2-0-decode-1] PASSED [ 98%]
+tests/node_manager/test_config.py::test_g5_invalid_explicit_lookup_port_is_not_silently_defaulted PASSED [100%]
+
+============================== 74 passed in 0.09s ==============================
+
+==========================================
+Test Result Summary
+==========================================
+Test Status:
+  ✓ Passed: 74
+
+Overall Status:
+  ✓ All tests passed
+==========================================
+
+
+✓ All tests passed

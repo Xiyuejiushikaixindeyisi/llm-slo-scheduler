@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-10-22",
+  "baseline": "g5-g4base-motor-20261021-r1",
+  "effective_image": "vllm-ascend:g5-g4base-motor-20261021-r1",
+  "process_tag": "v0.23.0-motor310-g4base-r2",
+  "base_image": "quay.io/ascend/vllm-ascend:v0.23.0",
+  "base_image_short_id": "660ce23a8357",
+  "node_image_short_ids": {
+    "49": "9ff2237f0ebe",
+    "151": "c590300504b9",
+    "175": "fb149ce8f7d2"
+  },
+  "source_report": {
+    "path": "docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md",
+    "sha256": "0995514a020978159fa49803e956380da435f2279cf9431f0920cbc5dbcc7aae",
+    "bytes": 145299,
+    "data_cutoff": "2026-10-21T13:09:00Z"
+  },
+  "status": {
+    "onsite_reported": "frozen; E2 passed; ten-scenario acceptance pending at cutoff",
+    "locally_observed": "source/hash comparison only; no NPU execution"
+  },
+  "packages_reported": {
+    "python": "3.12.13",
+    "motor": "3.1.0",
+    "vllm-ascend": "0.23.0",
+    "torch": "2.10.0+cpu",
+    "torch-npu": "2.10.0.post4",
+    "mooncake": "0.3.11.post1",
+    "CANN": "9.0.1",
+    "lightgbm": "4.7.0",
+    "scikit-learn": "1.9.1"
+  },
+  "model": {
+    "name": "Qwen3.6-27B-w8a8",
+    "predictor_pretrained_sha256": null,
+    "predictor_pretrained_sha256_prefix_reported": "142f3364"
+  },
+  "onsite_full_motor_commit": null,
+  "local_motor_pin": "f203263d9742dd6fa76eaef658e0ff3a0f380301",
+  "local_motor_checkout": "artifacts/build/motor-g5",
+  "node_manager_fix_identity": "semantic reconstruction; not certified byte-identical to onsite fix"
+}

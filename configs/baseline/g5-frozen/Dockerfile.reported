@@ -1,0 +1,48 @@
+# 方案 E 候选镜像 r2：g4 完整引擎底座 + 当前已跑通的 Motor/FGJSQ/predictor 集成
+# 底座 = quay.io/ascend/vllm-ascend:v0.23.0 (660ce23a8357)：vllm 0.23.0+empty@0fc695fc、
+#        vllm_ascend 0.23.0@5cb98caa、torch_npu 2.10.0.post4 —— 全部保留不动。
+# 增量 = g5 运行容器导出（三节点 md5 一致验证）：
+#        motor 3.1.0（含 8 文件现场修复 fix1-8）、slo_patch 0.2.0（含 engine_files.json
+#        g4 锚适配版 + fgjsq 七文件适配 + predictor/reporter）、fgjsq、lightgbm 4.7.0。
+# r2 修订（2026-10-21 E0 第三轮教训）：r1 只带 docker diff 增量，漏掉两类依赖——
+#   (a) rc1 镜像层预装而 g4 底座没有的（docker diff 不可见）：OpenSSL/pyopenssl 26.4.0
+#       （motor.common.http.cert_util 必需；g4 自带 cryptography 50.0.0 满足 >=49,<51，
+#       零升级）、kubernetes+durationpy+oauthlib+requests_oauthlib+websocket(client)
+#       （motor 2 文件引用 kubernetes）、watchdog（1 文件引用）；
+#   (b) diff 增量中误判可省的：motor_adapter（FGJSQ 源码补丁的 P 侧集成入口，必需）、
+#       sklearn 1.9.1+libs+joblib+threadpoolctl（predictor 侧依赖）。
+#   依赖集为证据法选定：grep motor/slo_patch/motor_adapter/fgjsq 源码 import 引用计数>0
+#   或 import 链直接命中；0 引用且非传递依赖者不带。仍不触碰底座任何已有路径。
+FROM quay.io/ascend/vllm-ascend:v0.23.0
+ARG SP=/usr/local/python3.12.13/lib/python3.12/site-packages
+COPY g5_export/motor/ ${SP}/motor/
+COPY g5_export/motor-3.1.0.dist-info/ ${SP}/motor-3.1.0.dist-info/
+COPY g5_export/slo_patch/ ${SP}/slo_patch/
+COPY g5_export/slo_patch-0.2.0.dist-info/ ${SP}/slo_patch-0.2.0.dist-info/
+COPY g5_export/fgjsq/ ${SP}/fgjsq/
+COPY g5_export/lightgbm/ ${SP}/lightgbm/
+COPY g5_export/lightgbm-4.7.0.dist-info/ ${SP}/lightgbm-4.7.0.dist-info/
+COPY g5_export/narwhals/ ${SP}/narwhals/
+COPY g5_export/narwhals-2.26.0.dist-info/ ${SP}/narwhals-2.26.0.dist-info/
+COPY g5_export/motor_adapter/ ${SP}/motor_adapter/
+COPY g5_export/OpenSSL/ ${SP}/OpenSSL/
+COPY g5_export/pyopenssl-26.4.0.dist-info/ ${SP}/pyopenssl-26.4.0.dist-info/
+COPY g5_export/sklearn/ ${SP}/sklearn/
+COPY g5_export/scikit_learn.libs/ ${SP}/scikit_learn.libs/
+COPY g5_export/scikit_learn-1.9.1.dist-info/ ${SP}/scikit_learn-1.9.1.dist-info/
+COPY g5_export/joblib/ ${SP}/joblib/
+COPY g5_export/joblib-1.6.0.dist-info/ ${SP}/joblib-1.6.0.dist-info/
+COPY g5_export/threadpoolctl.py ${SP}/threadpoolctl.py
+COPY g5_export/threadpoolctl-3.7.0.dist-info/ ${SP}/threadpoolctl-3.7.0.dist-info/
+COPY g5_export/kubernetes/ ${SP}/kubernetes/
+COPY g5_export/kubernetes-35.0.0.dist-info/ ${SP}/kubernetes-35.0.0.dist-info/
+COPY g5_export/durationpy/ ${SP}/durationpy/
+COPY g5_export/durationpy-0.11.dist-info/ ${SP}/durationpy-0.11.dist-info/
+COPY g5_export/oauthlib/ ${SP}/oauthlib/
+COPY g5_export/oauthlib-3.3.1.dist-info/ ${SP}/oauthlib-3.3.1.dist-info/
+COPY g5_export/requests_oauthlib/ ${SP}/requests_oauthlib/
+COPY g5_export/requests_oauthlib-2.0.0.dist-info/ ${SP}/requests_oauthlib-2.0.0.dist-info/
+COPY g5_export/websocket/ ${SP}/websocket/
+COPY g5_export/websocket_client-1.9.2.dist-info/ ${SP}/websocket_client-1.9.2.dist-info/
+COPY g5_export/watchdog/ ${SP}/watchdog/
+COPY g5_export/watchdog-6.0.0.dist-info/ ${SP}/watchdog-6.0.0.dist-info/

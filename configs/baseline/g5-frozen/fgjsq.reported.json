@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "event_url": "http://7.193.130.49:18081/fgjsq/v1/events",
+  "max_num_seqs": 24,
+  "retention": 0.05,
+  "reserve_window_s": 30,
+  "tombstone_s": 3600,
+  "max_records": 100000,
+  "rpc_attempts": 3
+}

@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-10-19",
+  "evidence": {
+    "source": "evidence/huawei/2026-10-19-g4-forensics/FGJSQ_P_ONLY_REPRO_FORENSICS.txt",
+    "sha256": "68aef44611f95124aac3084cb406657566adcbd8abe366ef24857281c0c189cc",
+    "basis": "user_supplied_report; local agent did not access intranet"
+  },
+  "runtime": {
+    "experiment_group": "g4",
+    "tag": "20261015_134536",
+    "status": "historical_teardown"
+  },
+  "image": {
+    "name": "quay.io/ascend/vllm-ascend:v0.23.0",
+    "image_id": "sha256:660ce23a83574fdcd28ba126b07615829c06770c06fbdf6533f03cc4d90acdb1",
+    "repo_digests": [],
+    "architecture": "arm64",
+    "created": "2026-08-17T00:22:10Z",
+    "archive_name": "v0.23.0.tar.gz",
+    "archive_kind": "docker_save_export",
+    "archive_bytes": 6555895542,
+    "archive_md5": "58d9edaffad3566a24bd1ee96931fbc9",
+    "archive_sha256": null
+  },
+  "source_commits": {
+    "vllm": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+    "vllm_ascend": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+    "motor_actual": null,
+    "motor_design": "f203263d9742dd6fa76eaef658e0ff3a0f380301"
+  },
+  "slo_patch": {
+    "version": "0.1.0",
+    "installation": "editable --no-deps --no-build-isolation",
+    "source_git_commit": null,
+    "original_tree": "/mnt/esfs/zhangxiyue/slo_patch",
+    "reference_tree": "EXP_10.14/code_patch/engine_side/slo_patch_src/",
+    "runtime_hooks_reported": [
+      "Hook1 P scheduler swap",
+      "Hook2 P EngineCore instrumentation",
+      "Hook3 P and D chat_utils compatibility wrapper"
+    ],
+    "raw_source_received": true
+  },
+  "proxy": {
+    "file": "load_balance_proxy_finegrained_p3d_pdhybrid.py",
+    "workers": 1,
+    "prefill_policy": "FineGrainedTokenJSQ",
+    "decode_policy": "heap active_tokens",
+    "prefill_release_event": "first D chunk at proxy",
+    "raw_source_received": true
+  },
+  "predictor": {
+    "pretrained_model_sha256": "142f3364e8d7d8de58da62477b3fe852a797aa4cc8c79c582dda985853b54c9c",
+    "reported_model_format": "pickle dict with scaler and gbr; older Pipeline also accepted",
+    "expected_model_path": "models/predictor/g4-20261015/model.pkl",
+    "reported_unit": "ms",
+    "reported_target": "one scheduled batch step; asynchronous timing alignment needs source audit"
+  },
+  "reported_extra_wheels": {
+    "lightgbm": "4.7.0",
+    "scikit_learn": "1.9.1",
+    "joblib": "1.6.0",
+    "narwhals": "2.26.0",
+    "threadpoolctl": "3.7.0"
+  },
+  "runtime_versions_pending": [
+    "Python exact version (cp312 wheel ABI reported)",
+    "CANN",
+    "TorchNPU",
+    "Mooncake",
+    "numpy",
+    "pandas",
+    "scipy"
+  ],
+  "local_runtime_installed": false,
+  "local_source_audit": {
+    "date": "2026-10-19",
+    "status": "approved_implemented_locally_onsite_validation_pending",
+    "manifest": "evidence/manifests/g4_source_intake_20261019.json",
+    "review": "docs/engineering/FGJSQ_MOTOR_ADAPTATION_REVIEW.md",
+    "model_received": false,
+    "runtime_tested": false,
+    "runtime_hook_definitions_found": 5
+  }
+}

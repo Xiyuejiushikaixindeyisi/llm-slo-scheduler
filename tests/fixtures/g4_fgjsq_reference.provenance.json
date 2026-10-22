@@ -1,0 +1,19 @@
+{
+  "source": "evidence/source_drops/proxy/g4-20261015/load_balance_proxy_finegrained_p3d_pdhybrid.py",
+  "source_sha256": "a19838bb3f96a94e874e47c289cb0cfe2a04454db6b524e67473425053f26576",
+  "fixture": "tests/fixtures/g4_fgjsq_reference.py",
+  "fixture_sha256": "7fed69f896ee87d42608a5a2e72e85bb2ad000c920dc77c3e49ff7d73fa03bd3",
+  "classes": [
+    {
+      "name": "FgRequestInfo",
+      "start_line": 278,
+      "end_line": 288
+    },
+    {
+      "name": "FineGrainedTokenJSQ",
+      "start_line": 296,
+      "end_line": 549
+    }
+  ],
+  "scope": "Only unchanged algorithm classes; excludes the full private proxy and onsite configuration"
+}

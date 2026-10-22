@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-19",
+  "python": "3.13.11",
+  "platform": "WSL x86_64 CPU",
+  "reports": {
+    "fgjsq-tests": {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 20,
+      "skip_reasons": []
+    },
+    "motor-regression": {
+      "tests": 177,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 8,
+      "passed": 169,
+      "skip_reasons": [
+        "Endpoint status resolution in model_validate needs investigation",
+        "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found",
+        "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found",
+        "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found",
+        "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found",
+        "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found",
+        "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found",
+        "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found"
+      ]
+    }
+  },
+  "not_validated": [
+    "target rc1 image compatibility",
+    "aarch64 native SHM CAS",
+    "NPU model execution",
+    "original predictor model numerical outputs",
+    "3P3D end-to-end",
+    "AISBench performance"
+  ]
+}

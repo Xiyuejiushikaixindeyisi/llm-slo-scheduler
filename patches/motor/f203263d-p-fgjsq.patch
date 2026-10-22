@@ -1,0 +1,269 @@
+diff --git a/motor/coordinator/api_server/management_server.py b/motor/coordinator/api_server/management_server.py
+index b86ef456..d299bcbc 100644
+--- a/motor/coordinator/api_server/management_server.py
++++ b/motor/coordinator/api_server/management_server.py
+@@ -49,6 +49,9 @@ from motor.coordinator.domain.probe import (
+     RoleShmDaemonLivenessProvider,
+ )
+ 
++from motor_adapter import bindings as fgjsq_hooks
++from motor_adapter.config import enabled as fgjsq_enabled
++
+ logger = get_logger(__name__)
+ _rl = RateLimitedLogger(logger)
+ _READINESS_REMAINS_READY_KEY = "coordinator.readiness.remains_ready"
+@@ -382,6 +385,7 @@ class ManagementServer(BaseCoordinatorServer):
+             )
+ 
+     def _register_routes(self) -> None:
++        fgjsq_hooks.register_routes(self)
+         @self.management_app.get("/startup")
+         async def startup_probe():
+             logger.debug("Received startup probe request")
+diff --git a/motor/coordinator/domain/scheduling.py b/motor/coordinator/domain/scheduling.py
+index 23261a26..c9fad838 100644
+--- a/motor/coordinator/domain/scheduling.py
++++ b/motor/coordinator/domain/scheduling.py
+@@ -142,6 +142,8 @@ class UpdateWorkloadParams:
+     workload_action: WorkloadAction
+     workload_change: Workload
+     operation_id: str | None = None
++    fgjsq_reservation_id: str | None = None
++    fgjsq_coordinator_epoch: str | None = None
+ 
+ 
+ class SchedulingFacade(Protocol):
+@@ -156,6 +158,7 @@ class SchedulingFacade(Protocol):
+         role: PDRole,
+         req_info: RequestInfo,
+         *,
++        attempt_seq: int | None = None,
+         target_instance_id: int | None = None,
+         required_engine_type: str | None = None,
+         required_dispatch_capability: str | None = None,
+diff --git a/motor/coordinator/models/request.py b/motor/coordinator/models/request.py
+index bcda52f1..03e45b3c 100644
+--- a/motor/coordinator/models/request.py
++++ b/motor/coordinator/models/request.py
+@@ -99,6 +99,7 @@ class RequestInfo(BaseModel):
+     state: ReqState = Field(default=ReqState.ARRIVE, description="Request current status")
+     status: dict[ReqState, float] = Field(default={}, description="Request status time")
+     trace_obj: TraceObj = Field(default_factory=TraceObj, description="Tracing object")
++    _fgjsq_state: dict = PrivateAttr(default_factory=dict)
+     _p_cancel_scope: anyio.CancelScope | None = PrivateAttr(default=None)
+     _d_cancel_scope: anyio.CancelScope | None = PrivateAttr(default=None)
+     _e_cancel_scope: anyio.CancelScope | None = PrivateAttr(default=None)
+diff --git a/motor/coordinator/router/strategies/base.py b/motor/coordinator/router/strategies/base.py
+index b2e4faf0..b073f2e6 100644
+--- a/motor/coordinator/router/strategies/base.py
++++ b/motor/coordinator/router/strategies/base.py
+@@ -59,6 +59,9 @@ from motor.coordinator.router.upstream_error import UpstreamHTTPError
+ from motor.coordinator.tracer.tracing import TracerManager
+ from motor.coordinator.domain.scheduling import InstanceReadiness
+ 
++from motor_adapter import bindings as fgjsq_hooks
++from motor_adapter.config import enabled as fgjsq_enabled
++
+ logger = get_logger(__name__)
+ 
+ _SCHEDULING_LOG_SAMPLE_RATE = 100  # ~1% sampling at high QPS
+@@ -245,12 +248,16 @@ class BaseRouter(ABC):
+         Lifecycle management for request in the RequestManager.
+         Ensures request info is added and cleaned up.
+         """
++        fgjsq_hooks.validate_router(self)
+         await self._request_manager.add_req_info(self.req_info)
+         try:
+             yield
+         finally:
+             with CancelScope(shield=True):
+-                await self._reclaim_residual_workloads()
++                try:
++                    await self._reclaim_residual_workloads()
++                finally:
++                    await fgjsq_hooks.finish_request(self)
+                 await self._request_manager.del_req_info(self.req_info.req_id)
+             self._log_request_details()
+ 
+@@ -553,6 +560,7 @@ class BaseRouter(ABC):
+         *,
+         on_response_ready: Callable[[], None] | None = None,
+     ) -> AsyncGenerator[str, None]:
++        req_data, fg_observer = fgjsq_hooks.prepare_forward(self, req_data)
+         trace_obj = self.req_info.trace_obj
+         headers = {'Content-Type': 'application/json', 'X-Request-Id': self._forward_request_id(req_data)}
+         trace_obj.set_trace_attribute("server.path", api, self.is_meta)
+@@ -603,6 +611,8 @@ class BaseRouter(ABC):
+             count_token = 0
+             pending = b""
+             async for chunk in response.aiter_bytes():
++                if fg_observer is not None:
++                    fg_observer.observe(chunk)
+                 if not self.first_chunk_sent and chunk:
+                     self.first_chunk_sent = True
+                     trace_obj.set_time_first_token()
+@@ -647,6 +657,7 @@ class BaseRouter(ABC):
+         Returns:
+             The response from the endpoint
+         """
++        req_data, fg_observer = fgjsq_hooks.prepare_forward(self, req_data)
+         trace_obj = self.req_info.trace_obj
+         headers = {'Content-Type': 'application/json', 'X-Request-Id': self._forward_request_id(req_data)}
+         trace_obj.set_trace_attribute("server.path", api, self.is_meta)
+@@ -695,7 +706,16 @@ class BaseRouter(ABC):
+             # Callers parse the returned response after this context exits, so cache
+             # the complete successful body before the connection is closed.
+             if streamed:
++                if fg_observer is not None:
++                    if response.is_stream_consumed:
++                        # Buffered transports do not iterate response.stream during aread().
++                        fg_observer.observe(response.content)
++                    else:
++                        from motor_adapter.body_observer import ObservedStream
++                        response.stream = ObservedStream(response.stream, fg_observer)
+                 await response.aread()
++            elif fg_observer is not None:
++                fg_observer.observe(response.content)
+ 
+         trace_obj.add_trace_event(f"Post ok: {response.status_code}", is_meta=self.is_meta)
+         elapsed_forward_ms = (time.perf_counter() - t0_forward) * 1000
+diff --git a/motor/coordinator/router/strategies/unified_pd.py b/motor/coordinator/router/strategies/unified_pd.py
+index 1a16539b..86086820 100644
+--- a/motor/coordinator/router/strategies/unified_pd.py
++++ b/motor/coordinator/router/strategies/unified_pd.py
+@@ -96,6 +96,9 @@ from motor.coordinator.router.upstream_error import (
+     is_retryable_upstream_error,
+ )
+ 
++from motor_adapter import bindings as fgjsq_hooks
++from motor_adapter.config import enabled as fgjsq_enabled
++
+ _SGLANG_PROTOCOL_ADAPTER = ADAPTERS["sglang"]
+ _TRIGGER_CAPABILITY = DispatchPlan.CONCURRENT_ENGINE_SYNC.value
+ _HANDOFF_CAPABILITY = DispatchPlan.PREFILL_HANDOFF_DECODE.value
+@@ -501,6 +504,7 @@ class UnifiedPDRouter(BaseRouter):
+                             self._stream_commit_controller.begin_attempt(attempt.attempt_seq)
+                         attempt.register_canceller()
+                         coordination_mode = self._select_coordination_mode(attempt)
++                        fgjsq_hooks.validate_mode(coordination_mode)
+                         if attempt_index > 0:
+                             self.logger.warning(
+                                 "Rescheduling %d/%d: P=[%s], D=[%s]",
+@@ -575,6 +579,7 @@ class UnifiedPDRouter(BaseRouter):
+                         attempt = await self._create_attempt(session)
+                         attempt.register_canceller()
+                         coordination_mode = self._select_coordination_mode(attempt)
++                        fgjsq_hooks.validate_mode(coordination_mode)
+                         if attempt_index > 0:
+                             self.rescheduler.retry_count = attempt_index
+                             self.logger.warning(
+@@ -1968,7 +1973,7 @@ class UnifiedPDRouter(BaseRouter):
+             engine_request = adapter.build_prefill_request(req, context)
+         else:
+             engine_request = adapter.build_decode_request(req, context, prefill_metadata)
+-        return engine_request.body, engine_request.api
++        return fgjsq_hooks.attach_request(self, attempt, role, engine_request.body), engine_request.api
+ 
+     @staticmethod
+     def _native_leg_context(attempt: AttemptContext, role: PDRole, api: str) -> LegContext:
+@@ -2113,6 +2118,8 @@ class UnifiedPDRouter(BaseRouter):
+         if constraint is not None:
+             target_instance_id = constraint.target_for_role(role)
+         scheduler_kwargs = {"target_instance_id": target_instance_id}
++        if fgjsq_enabled() and role == PDRole.ROLE_P:
++            scheduler_kwargs["attempt_seq"] = attempt_seq
+         if required_engine_type is not None:
+             scheduler_kwargs["required_engine_type"] = required_engine_type
+         result = await self._scheduler.select_and_allocate(role, self.req_info, **scheduler_kwargs)
+@@ -2156,6 +2163,7 @@ class UnifiedPDRouter(BaseRouter):
+         return ScheduledResource(instance=ins, endpoint=endpoint)
+ 
+     async def _release_attempt(self, attempt: AttemptContext, *, wait: bool = True) -> None:
++        await fgjsq_hooks.finish_attempt(self, attempt)
+         if attempt.prefill_resource:
+             await self._release_attempt_resource(
+                 attempt.prefill_resource,
+@@ -2337,6 +2345,10 @@ class UnifiedPDRouter(BaseRouter):
+             req_id=self.req_info.req_id,
+             workload_action=action,
+             workload_change=workload_change,
++            fgjsq_reservation_id=(fgjsq_hooks.metadata(self.req_info, attempt_seq) or {}).get('reservation_id')
++            if role == PDRole.ROLE_P and fgjsq_enabled() else None,
++            fgjsq_coordinator_epoch=(fgjsq_hooks.metadata(self.req_info, attempt_seq) or {}).get('coordinator_epoch')
++            if role == PDRole.ROLE_P and fgjsq_enabled() else None,
+             # Deterministic id for log/trace correlation across retries only -- the CAS release
+             # path does not dedup on it (see _mark_released in _release_attempt_resource_task).
+             operation_id=(
+diff --git a/motor/coordinator/scheduler/runtime/scheduler_client.py b/motor/coordinator/scheduler/runtime/scheduler_client.py
+index 85f8f97d..cf28cea0 100644
+--- a/motor/coordinator/scheduler/runtime/scheduler_client.py
++++ b/motor/coordinator/scheduler/runtime/scheduler_client.py
+@@ -69,6 +69,9 @@ from motor.coordinator.domain.scheduling_pin import (
+ )
+ from motor.coordinator.models.request import RequestInfo
+ 
++from motor_adapter import bindings as fgjsq_hooks
++from motor_adapter.config import enabled as fgjsq_enabled
++
+ logger = get_logger(__name__)
+ 
+ # Callback signature: receives active endpoint list [(ip, port), ...], returns None
+@@ -961,11 +964,18 @@ class AsyncSchedulerClient:
+         role: "PDRole",
+         req_info: RequestInfo,
+         *,
++        attempt_seq: int | None = None,
+         target_instance_id: int | None = None,
+         required_engine_type: str | None = None,
+         required_dispatch_capability: str | None = None,
+     ) -> tuple[Instance, Endpoint, Workload] | None:
+-        """Select locally, then CAS-commit on schema-4 SHM (no ALLOCATE_ONLY ZMQ)."""
++        """P FGJSQ uses Mgmt; disabled and D allocation retain native CAS."""
++        if fgjsq_enabled() and role == PDRole.ROLE_P:
++            return await fgjsq_hooks.allocate(
++                self, role, req_info, attempt_seq, target_instance_id=target_instance_id,
++                required_engine_type=required_engine_type,
++                required_dispatch_capability=required_dispatch_capability)
++
+         from motor.coordinator.scheduler.runtime.workload_shm.layout import FLAG_BLOCKED
+         from motor.coordinator.scheduler.runtime.workload_shm.native import (
+             STATUS_BLOCKED,
+@@ -1394,7 +1404,10 @@ class AsyncSchedulerClient:
+         return False
+ 
+     async def update_workload(self, params: UpdateWorkloadParams) -> bool:
+-        """Release path: CAS-sub floor 0 on schema-4 SHM (no UPDATE_WORKLOAD ZMQ)."""
++        """FGJSQ P release is idempotent; D/disabled retain CAS-sub."""
++        if fgjsq_enabled() and params.role == PDRole.ROLE_P:
++            return await fgjsq_hooks.native_release(self, params)
++
+         from motor.coordinator.scheduler.runtime.workload_shm.native import STATUS_OK
+ 
+         role_str = params.role.value if hasattr(params.role, "value") else str(params.role)
+diff --git a/motor/coordinator/scheduler/runtime/scheduler_server.py b/motor/coordinator/scheduler/runtime/scheduler_server.py
+index 28bee6ef..a6d9eba5 100644
+--- a/motor/coordinator/scheduler/runtime/scheduler_server.py
++++ b/motor/coordinator/scheduler/runtime/scheduler_server.py
+@@ -49,6 +49,9 @@ from motor.coordinator.scheduler.runtime.zmq_protocol import (
+     unpack_recv_payload,
+ )
+ 
++from motor_adapter import bindings as fgjsq_hooks
++from motor_adapter.config import enabled as fgjsq_enabled
++
+ logger = get_logger(__name__)
+ 
+ # Time bound (per phase: connect + first response line) for the pre-recovery
+@@ -118,9 +121,12 @@ class _SchedulerRequestDispatcher:
+         # True when InstanceManager has changes not yet reflected in the SHM snapshot; drained by
+         # _retry_dirty_snapshot (also forces a resync on the next apply_refresh).
+         self._snapshot_dirty = False
++        fgjsq_hooks.init_dispatcher(self)
+ 
+     async def dispatch(self, request: SchedulerRequest) -> SchedulerResponse:
+         """Dispatch control-plane request to the appropriate handler."""
++        if request.request_type == fgjsq_hooks.WIRE_TYPE:
++            return await fgjsq_hooks.dispatch(self, request)
+         handlers = {
+             SchedulerRequestType.GET_AVAILABLE_INSTANCES.value: self._handle_get_available_instances,
+             SchedulerRequestType.CONFIRM_SAMPLE.value: self._handle_confirm_sample,

@@ -1,0 +1,42 @@
+diff --git a/.agents/skills/motor-dev/bug-fix-history/INDEX.md b/.agents/skills/motor-dev/bug-fix-history/INDEX.md
+index e6ec92e9..3bf6be64 100644
+--- a/.agents/skills/motor-dev/bug-fix-history/INDEX.md
++++ b/.agents/skills/motor-dev/bug-fix-history/INDEX.md
+@@ -58,3 +58,4 @@
+ | 2026-09-09 | kv_conductor | map 格式 BlockStored 无法解析 | `kv_conductor/map-block-stored.md` | BlockStored, msgspec, map, deserialize_any |
+ | 2026-09-09 | kv_conductor | CPU/Disk 订阅器误按 vLLM 事件解析 | `kv_conductor/event-source-routing.md` | ZmqSubscriber, EventSource, PoolEvent, CPU, Disk |
+ | 2026-09-09 | coordinator | PD 分离请求在 Decode 才因 Prefill 改写字段被拒绝 | [pd-stream-options-late-rejection.md](coordinator/pd-stream-options-late-rejection.md) | coordinator, PD separation, stream_options, min_tokens, Decode HTTP-400, KV cache expiry |
++| 2026-10-19 | coordinator | FGJSQ overlay 已缓存响应首包释放遗漏 | [fgjsq-buffered-response-release.md](coordinator/fgjsq-buffered-response-release.md) | FGJSQ, httpx, prebuffered, first body |
+diff --git a/.agents/skills/motor-dev/references/coordinator.md b/.agents/skills/motor-dev/references/coordinator.md
+index e8c77703..52b46a82 100644
+--- a/.agents/skills/motor-dev/references/coordinator.md
++++ b/.agents/skills/motor-dev/references/coordinator.md
+@@ -201,9 +201,9 @@ decoded by Content-Type (msgpack via `msgspec`, otherwise JSON — legacy
+ JSON-only conductors keep working). Set `query_encoding: "json"` for older
+ kv-conductor binaries.<br>
+ 
+-**Factory registration** (`factory.py`): `SchedulingPolicyFactory` maps policy name → class. New policies register here.
++**Factory registration** (`factory.py`): `SchedulingPolicyFactory` maps policy name → class. Worker-local selection also branches on SchedulerType in scheduler_client.py; a new policy must update that path. The P-only FGJSQ overlay uses an explicit Mgmt RPC branch instead.
+ 
+-The policy is selected by `SchedulerType` (`config/coordinator.py`): `LOAD_BALANCE` / `ROUND_ROBIN` / `KV_CACHE_AFFINITY` (default). For `scheduler_type=kv_cache_affinity`, a sub-mode is chosen by `kv_affinity.mode`:
++The policy is selected by `SchedulerType` (`config/coordinator.py`): `LOAD_BALANCE` (default) / `ROUND_ROBIN` / `KV_CACHE_AFFINITY`. For `scheduler_type=kv_cache_affinity`, a sub-mode is chosen by `kv_affinity.mode`:
+ 
+ - `unified` (default) — single score fusing affinity and live load; pick the minimum
+ - `load_gated` — keep the N least-loaded endpoints, then pick the longest cached prefix
+@@ -428,3 +428,16 @@ bash tests/run_tests.sh tests/coordinator/
+ ```
+ 
+ For metrics-specific development, read `references/metrics.md`.
++
++
++## Optional P-only FGJSQ overlay
++
++FGJSQ_CONFIG selects a shared JSON configuration; unset/disabled retains the native allocation path.
++With the overlay enabled, P-only fgjsq_v1 RPCs reserve/release through Mgmt under the workload commit lock.
++D continues worker-local CAS. The service holds independent native-P and FG-P release flags: HANDOFF
++P completion releases native workload; first nonempty D body bytes release FG load. RequestInfo private
++state survives native workload finalization. Cancel/unknown ACK is reconciled by key, and final request
++cleanup aborts residual FG reservations. Engine events carry explicit reservation identity and frozen
++progress snapshots, never sliced OpenAI IDs. The integration package owns the policy/service modules;
++seven source hook files are verified by file hashes. v1 requires native OpenAI HANDOFF, one P endpoint,
++Render/HA/hybrid fallback disabled. Mgmt restart requires drain/reconciliation.

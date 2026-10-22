@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slo-patch"
+version = "0.2.0"
+description = "P-only FGJSQ and legacy predictor integration for pinned Motor/vLLM"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.entry-points."vllm.general_plugins"]
+slo_patch = "slo_patch.activate:activate"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["fgjsq*", "motor_adapter*", "slo_patch*"]
+
+[tool.setuptools.package-data]
+slo_patch = ["engine_files.json"]

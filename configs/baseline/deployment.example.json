@@ -1,0 +1,74 @@
+{
+  "notes": [
+    "Fill commands from captured image baseline, not this template.",
+    "For NodeManager deployment inject the same role environment in its native config."
+  ],
+  "nodes": {
+    "node0": {
+      "P": {
+        "command": [
+          "REQUIRED_P_EXECUTABLE",
+          "REQUIRED_NODE_0_P_ARGV"
+        ],
+        "cwd": "/ABS/WORKDIR",
+        "env": {}
+      },
+      "D": {
+        "command": [
+          "REQUIRED_D_EXECUTABLE",
+          "REQUIRED_NODE_0_D_ARGV"
+        ],
+        "cwd": "/ABS/WORKDIR",
+        "env": {}
+      }
+    },
+    "node1": {
+      "P": {
+        "command": [
+          "REQUIRED_P_EXECUTABLE",
+          "REQUIRED_NODE_1_P_ARGV"
+        ],
+        "cwd": "/ABS/WORKDIR",
+        "env": {}
+      },
+      "D": {
+        "command": [
+          "REQUIRED_D_EXECUTABLE",
+          "REQUIRED_NODE_1_D_ARGV"
+        ],
+        "cwd": "/ABS/WORKDIR",
+        "env": {}
+      }
+    },
+    "node2": {
+      "P": {
+        "command": [
+          "REQUIRED_P_EXECUTABLE",
+          "REQUIRED_NODE_2_P_ARGV"
+        ],
+        "cwd": "/ABS/WORKDIR",
+        "env": {}
+      },
+      "D": {
+        "command": [
+          "REQUIRED_D_EXECUTABLE",
+          "REQUIRED_NODE_2_D_ARGV"
+        ],
+        "cwd": "/ABS/WORKDIR",
+        "env": {}
+      }
+    },
+    "management": {
+      "coordinator": {
+        "command": [
+          "REQUIRED_MOTOR_EXECUTABLE",
+          "REQUIRED_COORDINATOR_ARGV"
+        ],
+        "cwd": "/ABS/MOTOR",
+        "env": {
+          "FGJSQ_CONFIG": "REQUIRED_ABSOLUTE_FGJSQ_CONFIG"
+        }
+      }
+    }
+  }
+}

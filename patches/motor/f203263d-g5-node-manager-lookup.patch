@@ -1,0 +1,23 @@
+--- a/motor/config/node_manager.py
++++ b/motor/config/node_manager.py
+@@ -272,12 +272,15 @@
+                     )
+                 config.kv_port = int(connectors[0][KV_PORT_KEY]) + kv_port_offset
+                 store = connectors[1]
+-                # UCM store carries no lookup_rpc_port. Skip ONLY UCM (use .get() to avoid a
+-                # KeyError on the kv_connector lookup); every other store still direct-indexes
+-                # lookup_rpc_port, so a genuine AscendStore missing its port fails fast exactly
+-                # as before instead of being silently skipped.
++                # UCM has no lookup port. G5 accepts both legacy top-level ports
++                # and native-engine extra_config ports, retaining the role offset.
+                 if store.get(KV_CONNECTOR_KEY) != UCM_CONNECTOR:
+-                    config.lookup_rpc_port = int(store[LOOPUP_RPC_PORT_KEY]) + lookup_rpc_port_offset
++                    if LOOPUP_RPC_PORT_KEY in store:
++                        lookup_rpc_port = store[LOOPUP_RPC_PORT_KEY]
++                    else:
++                        extra = store.get(KV_CONNECTOR_EXTRA_CONFIG_KEY) or {}
++                        lookup_rpc_port = extra.get(LOOPUP_RPC_PORT_KEY, "0")
++                    config.lookup_rpc_port = int(lookup_rpc_port) + lookup_rpc_port_offset
+             else:
+                 config.kv_port = int(kv_config[KV_PORT_KEY]) + kv_port_offset
+ 

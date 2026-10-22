@@ -1,0 +1,70 @@
+{
+  "status": "all assertions passed",
+  "method": "original AST classes/functions; stdlib only, synthetic clock and requests, no HTTP, no model or NPU",
+  "limitations": [
+    "not an end-to-end Motor or engine test",
+    "no prediction accuracy or performance claim",
+    "mutable-request probe shows sensitivity to timing, not observed production incidence"
+  ],
+  "fgjsq": {
+    "tie_order": [
+      "P0",
+      "P1"
+    ],
+    "score_at_counts_24_25_for_load1000": [
+      1000,
+      1500
+    ],
+    "first_event_corrected_original": 1000,
+    "load_at_elapsed_0_50_1000ms": [
+      800,
+      700,
+      610
+    ],
+    "stale_wrong_instance_late_events_ignored": true,
+    "double_release_idempotent": true
+  },
+  "identity": {
+    "proxy_id": "audit-uuid",
+    "engine_id": "chatcmpl-audit-uuid-12345678",
+    "reporter_id": "chatcmpl-audit-uuid",
+    "matched": false
+  },
+  "mutable_reporter_snapshot": {
+    "before": {
+      "request_id": "chatcmpl-audit-uuid",
+      "num_prompt_tokens": 1000,
+      "num_computed_tokens": 200,
+      "num_scheduled_tokens": 200,
+      "num_remaining_tokens": 600,
+      "predicted_exec_ms": 100.0
+    },
+    "after_later_schedule": {
+      "request_id": "chatcmpl-audit-uuid",
+      "num_prompt_tokens": 1000,
+      "num_computed_tokens": 400,
+      "num_scheduled_tokens": 200,
+      "num_remaining_tokens": 400,
+      "predicted_exec_ms": 100.0
+    }
+  },
+  "features": {
+    "inputs": {
+      "batch_size": 1,
+      "avg_prompt_length": 1000.0,
+      "cache_hit_rate": 0.6
+    },
+    "current_batch_scheduled_tokens": 200,
+    "values": {
+      "N_uncached": 400.0,
+      "B": 1.0,
+      "L_avg": 1000.0,
+      "cache_hit_rate": 0.6,
+      "prefill_intensity": 399.99960000040005,
+      "N_cached": 600.0,
+      "Cross_Attention_Proxy": 240000.0,
+      "Self_Attention_Proxy": 160000.0,
+      "avg_prompt_length": 1000.0
+    }
+  }
+}

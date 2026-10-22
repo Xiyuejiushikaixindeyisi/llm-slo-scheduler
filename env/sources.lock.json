@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "updated": "2026-10-22",
+  "repositories": [
+    {
+      "id": "motor",
+      "path": "upstream/motor",
+      "url": "https://gitcode.com/Ascend/MindIE-Motor.git",
+      "ref": "f203263d9742dd6fa76eaef658e0ff3a0f380301",
+      "commit": "f203263d9742dd6fa76eaef658e0ff3a0f380301",
+      "local_cache": "/home/zhangxiyue/MindIE-Motor-repro",
+      "onsite_status": "design_pin_retained; reported seven-file integration plus fix1; full onsite Motor commit not supplied",
+      "checkout_status": "verified_clean",
+      "actual_commit": "f203263d9742dd6fa76eaef658e0ff3a0f380301",
+      "clone_method": "independent_local_clone",
+      "onsite_evidence": "docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md",
+      "onsite_evidence_section": "0.1 / 5.2",
+      "previous_onsite_record": {
+        "onsite_status": "unknown; forensic proxy stack did not deploy Motor; user-approved design commit retained",
+        "onsite_evidence": "evidence/huawei/2026-10-19-g4-forensics/FGJSQ_P_ONLY_REPRO_FORENSICS.txt",
+        "onsite_evidence_section": "1.3"
+      },
+      "development_checkout": "artifacts/build/motor-g5"
+    },
+    {
+      "id": "vllm",
+      "path": "upstream/vllm-v0.23.0",
+      "url": "https://github.com/vllm-project/vllm.git",
+      "ref": "v0.23.0",
+      "commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+      "local_cache": "/home/zhangxiyue/vllm-v0.23.0-repro",
+      "onsite_status": "commit_matches_final_G5_report; no direct onsite access",
+      "checkout_status": "verified_clean",
+      "actual_commit": "0fc695fc6d1d82e9a5ac6835ac8e4e1c83703665",
+      "clone_method": "independent_local_clone",
+      "onsite_evidence": "docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md",
+      "onsite_evidence_section": "0.1 / 5.2",
+      "previous_onsite_record": {
+        "onsite_status": "full_commit_matches_user_supplied_g4_forensics; not_independently_inspected_on_site",
+        "onsite_evidence": "evidence/huawei/2026-10-19-g4-forensics/FGJSQ_P_ONLY_REPRO_FORENSICS.txt",
+        "onsite_evidence_section": "1.4"
+      }
+    },
+    {
+      "id": "vllm-ascend",
+      "path": "upstream/vllm-ascend-v0.23.0",
+      "url": "https://github.com/vllm-project/vllm-ascend.git",
+      "ref": "v0.23.0",
+      "commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+      "onsite_status": "commit_matches_final_G5_report; no direct onsite access",
+      "checkout_status": "verified_clean",
+      "actual_commit": "5cb98caaadeff42b5b62b996e34bb2aaa29d20fd",
+      "clone_method": "official_remote_shallow_clone",
+      "onsite_evidence": "docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md",
+      "onsite_evidence_section": "0.1 / 5.2",
+      "previous_onsite_record": {
+        "onsite_status": "full_commit_matches_user_supplied_g4_forensics; not_independently_inspected_on_site",
+        "onsite_evidence": "evidence/huawei/2026-10-19-g4-forensics/FGJSQ_P_ONLY_REPRO_FORENSICS.txt",
+        "onsite_evidence_section": "1.4"
+      }
+    },
+    {
+      "id": "vllm-omni",
+      "path": "upstream/vllm-omni-super-p95",
+      "url": "https://github.com/Lijunzhang0829/vllm-omni.git",
+      "ref": "v0.18.0-super-p95-rewrite-dev",
+      "commit": "dd9c0895d98a73c760e9ca930d87e03198713ff7",
+      "local_cache": "/home/zhangxiyue/vllm-omni",
+      "onsite_status": "reference_only",
+      "checkout_status": "verified_clean",
+      "actual_commit": "dd9c0895d98a73c760e9ca930d87e03198713ff7",
+      "clone_method": "independent_local_clone"
+    }
+  ],
+  "notes": [
+    "Full source commits are locked independently from on-site runtime verification.",
+    "No runtime dependencies installed by workspace bootstrap."
+  ]
+}

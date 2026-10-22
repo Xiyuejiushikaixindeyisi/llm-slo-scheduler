@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "baseline": "g5-g4base-motor-20261021-r1",
+  "scope": "local",
+  "passed": true,
+  "python": "3.10.12",
+  "machine": "x86_64",
+  "files": {
+    "src/fgjsq/__init__.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/fgjsq/__init__.py",
+      "sha256": "4db447395f66ea2cbabc85c0b925c70c7feefa0b75f706386480baf4921f197a",
+      "expected": "4db447395f66ea2cbabc85c0b925c70c7feefa0b75f706386480baf4921f197a",
+      "status": "match"
+    },
+    "src/fgjsq/policy.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/fgjsq/policy.py",
+      "sha256": "68c2695dec1136b593a9b827bc05c5f43e333b8e79154eb424044f29bbfa4f07",
+      "expected": "68c2695dec1136b593a9b827bc05c5f43e333b8e79154eb424044f29bbfa4f07",
+      "status": "match"
+    },
+    "src/fgjsq/snapshot.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/fgjsq/snapshot.py",
+      "sha256": "459b020bdf59c7e850a0338f44b6b23faadcc0413a24c7492e8bde8b7f00233a",
+      "expected": "459b020bdf59c7e850a0338f44b6b23faadcc0413a24c7492e8bde8b7f00233a",
+      "status": "match"
+    },
+    "src/motor_adapter/__init__.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/motor_adapter/__init__.py",
+      "sha256": "c155c64486f27a3c4e3bf547b8ce10850edf8427bfcf6ee6894fe8ff9f5b4745",
+      "expected": "c155c64486f27a3c4e3bf547b8ce10850edf8427bfcf6ee6894fe8ff9f5b4745",
+      "status": "match"
+    },
+    "src/motor_adapter/bindings.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/motor_adapter/bindings.py",
+      "sha256": "053652d6f8e1b9e69df553cb5077c881a029cec8e38a3699f5d3d4c7bb494a0b",
+      "expected": "053652d6f8e1b9e69df553cb5077c881a029cec8e38a3699f5d3d4c7bb494a0b",
+      "status": "match"
+    },
+    "src/motor_adapter/body_observer.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/motor_adapter/body_observer.py",
+      "sha256": "586ff1fb72492190a74d55fea332f9447bc2e278ae316a99739c54c8b806f386",
+      "expected": "586ff1fb72492190a74d55fea332f9447bc2e278ae316a99739c54c8b806f386",
+      "status": "match"
+    },
+    "src/motor_adapter/config.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/motor_adapter/config.py",
+      "sha256": "6f715fb64ec0f05ec8d289d4671e1922afd1e40bf1c6698df0e807aa74d4e17c",
+      "expected": "6f715fb64ec0f05ec8d289d4671e1922afd1e40bf1c6698df0e807aa74d4e17c",
+      "status": "match"
+    },
+    "src/motor_adapter/motor_backend.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/motor_adapter/motor_backend.py",
+      "sha256": "78fab06f2e9466b9857823f0855b10a5003b78607b62e2768f3f5947588b49a6",
+      "expected": "78fab06f2e9466b9857823f0855b10a5003b78607b62e2768f3f5947588b49a6",
+      "status": "match"
+    },
+    "src/motor_adapter/service.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/motor_adapter/service.py",
+      "sha256": "10cca5403ae916d6044d781a60a30c8a095575888e624b84a0f74d4b5d6a2027",
+      "expected": "10cca5403ae916d6044d781a60a30c8a095575888e624b84a0f74d4b5d6a2027",
+      "status": "match"
+    },
+    "src/slo_patch/__init__.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/__init__.py",
+      "sha256": "9acc027352b776aa0bd06090a5d75e4275972edff38f1c4ab343e4b36cc3c3ef",
+      "expected": "9acc027352b776aa0bd06090a5d75e4275972edff38f1c4ab343e4b36cc3c3ef",
+      "status": "match"
+    },
+    "src/slo_patch/activate.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/activate.py",
+      "sha256": "bdf2cd6453d0c1ed5f15246a764518f590244ea23d246cc5aa12a0cbb8b908b5",
+      "expected": "bdf2cd6453d0c1ed5f15246a764518f590244ea23d246cc5aa12a0cbb8b908b5",
+      "status": "match"
+    },
+    "src/slo_patch/compatibility.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/compatibility.py",
+      "sha256": "3de3fdc8f3cbd837dbd68deea7830439b35f43882ac3cd52e5d3ec2b45c329dc",
+      "expected": "3de3fdc8f3cbd837dbd68deea7830439b35f43882ac3cd52e5d3ec2b45c329dc",
+      "status": "match"
+    },
+    "src/slo_patch/engine_files.json": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/engine_files.json",
+      "sha256": "523b6c1e256fd77b0352f8f8f1219252ad246d2d98701d200a77a1584697af36",
+      "expected": "523b6c1e256fd77b0352f8f8f1219252ad246d2d98701d200a77a1584697af36",
+      "status": "match"
+    },
+    "src/slo_patch/patch_core.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/patch_core.py",
+      "sha256": "ff2052d2fbaf2c4c011a759e3011355dc289d9573700a94fbc8a8f05c505fac3",
+      "expected": "ff2052d2fbaf2c4c011a759e3011355dc289d9573700a94fbc8a8f05c505fac3",
+      "status": "match"
+    },
+    "src/slo_patch/patch_runtime.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/patch_runtime.py",
+      "sha256": "f1148ba16b2b79c4ca338a9052743ff4a5bdf66998f22ff543ae63021c39af85",
+      "expected": "f1148ba16b2b79c4ca338a9052743ff4a5bdf66998f22ff543ae63021c39af85",
+      "status": "match"
+    },
+    "src/slo_patch/slo/__init__.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/slo/__init__.py",
+      "sha256": "d3e17837e17aaddf1227a2e104e3d3550470e333dde13b105111a14f5ca2721a",
+      "expected": "d3e17837e17aaddf1227a2e104e3d3550470e333dde13b105111a14f5ca2721a",
+      "status": "match"
+    },
+    "src/slo_patch/slo/batch_event_reporter.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/slo/batch_event_reporter.py",
+      "sha256": "4b15a44d939cbe6397d31cddb0c96ebc954711d9ca8c3a84ad4d03576c442381",
+      "expected": "4b15a44d939cbe6397d31cddb0c96ebc954711d9ca8c3a84ad4d03576c442381",
+      "status": "match"
+    },
+    "src/slo_patch/slo/batch_reporter.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/slo/batch_reporter.py",
+      "sha256": "7ec2a7efd5c10e0b1b65bac6dcae0fbb5bdfd736d8bf0e792224d9d63da70181",
+      "expected": "7ec2a7efd5c10e0b1b65bac6dcae0fbb5bdfd736d8bf0e792224d9d63da70181",
+      "status": "match"
+    },
+    "src/slo_patch/slo/predictor.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/slo/predictor.py",
+      "sha256": "f08e3e40782deb3f544aee3f6b4279761d00d5657e75825676c112c6e53695de",
+      "expected": "f08e3e40782deb3f544aee3f6b4279761d00d5657e75825676c112c6e53695de",
+      "status": "match"
+    },
+    "src/slo_patch/slo/predictor_impl.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/slo/predictor_impl.py",
+      "sha256": "ca4f9d20077243cec679cd487db57e4db4dae89dfd8d1dbd71a34e6baa788aca",
+      "expected": "ca4f9d20077243cec679cd487db57e4db4dae89dfd8d1dbd71a34e6baa788aca",
+      "status": "match"
+    },
+    "src/slo_patch/slo/scheduler_with_predictor.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/slo_patch/slo/scheduler_with_predictor.py",
+      "sha256": "36c97c22e941d20fe7750a5c4d5acd717f9219c9ee784cf58d9323e781f4803a",
+      "expected": "36c97c22e941d20fe7750a5c4d5acd717f9219c9ee784cf58d9323e781f4803a",
+      "status": "match"
+    },
+    "upstream/vllm-v0.23.0/vllm/v1/engine/core.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/upstream/vllm-v0.23.0/vllm/v1/engine/core.py",
+      "sha256": "cf9cbde601afb80925254aae814033abeab3817f9c4fe7bf01ca92edc9d10c2d",
+      "expected": "cf9cbde601afb80925254aae814033abeab3817f9c4fe7bf01ca92edc9d10c2d",
+      "status": "match"
+    },
+    "upstream/vllm-v0.23.0/vllm/v1/core/sched/async_scheduler.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/upstream/vllm-v0.23.0/vllm/v1/core/sched/async_scheduler.py",
+      "sha256": "0022e12f356fd46406f6e6d3c82755daf7287ca2d86e2000c27b05bb8d9621cc",
+      "expected": "0022e12f356fd46406f6e6d3c82755daf7287ca2d86e2000c27b05bb8d9621cc",
+      "status": "match"
+    },
+    "upstream/vllm-ascend-v0.23.0/vllm_ascend/core/recompute_scheduler.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/upstream/vllm-ascend-v0.23.0/vllm_ascend/core/recompute_scheduler.py",
+      "sha256": "38111806d9434e4267482a63a453f6f4328a5d0bf9ae931fa17ad38208d79202",
+      "expected": "38111806d9434e4267482a63a453f6f4328a5d0bf9ae931fa17ad38208d79202",
+      "status": "match"
+    },
+    "motor/coordinator/models/request.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/models/request.py",
+      "sha256": "041ffef5b364419dfb442a0dccab77f0cb1dc7e58605c440fa96f957a9514d38",
+      "expected": "041ffef5b364419dfb442a0dccab77f0cb1dc7e58605c440fa96f957a9514d38",
+      "status": "match"
+    },
+    "motor/coordinator/domain/scheduling.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/domain/scheduling.py",
+      "sha256": "d18e07bfb27fd5a023aec6747eb038d3bcbf0792d5f4b1be4b543f8c1d05a77c",
+      "expected": "d18e07bfb27fd5a023aec6747eb038d3bcbf0792d5f4b1be4b543f8c1d05a77c",
+      "status": "match"
+    },
+    "motor/coordinator/scheduler/runtime/scheduler_client.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/scheduler/runtime/scheduler_client.py",
+      "sha256": "73b65adfa9c528e462ebf0c9d96ec2a79ff8513db6db114ed865e6617dfbfceb",
+      "expected": "73b65adfa9c528e462ebf0c9d96ec2a79ff8513db6db114ed865e6617dfbfceb",
+      "status": "match"
+    },
+    "motor/coordinator/scheduler/runtime/scheduler_server.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/scheduler/runtime/scheduler_server.py",
+      "sha256": "5e48389a6045393c36d8b3dd5fc9af99d7ad3e670c8e3eee1099f5e1aabc8232",
+      "expected": "5e48389a6045393c36d8b3dd5fc9af99d7ad3e670c8e3eee1099f5e1aabc8232",
+      "status": "match"
+    },
+    "motor/coordinator/api_server/management_server.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/api_server/management_server.py",
+      "sha256": "3e8ea8fea66482fa1a77625f904f5ecbca818fb4786767707f1f8e601f1c79b4",
+      "expected": "3e8ea8fea66482fa1a77625f904f5ecbca818fb4786767707f1f8e601f1c79b4",
+      "status": "match"
+    },
+    "motor/coordinator/router/strategies/unified_pd.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/router/strategies/unified_pd.py",
+      "sha256": "7e5860e55f2f11896269426ccdd7f06190f75072503c41d2992f33aa81dd232b",
+      "expected": "7e5860e55f2f11896269426ccdd7f06190f75072503c41d2992f33aa81dd232b",
+      "status": "match"
+    },
+    "motor/coordinator/router/strategies/base.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/router/strategies/base.py",
+      "sha256": "5efc332eadf8ea69e0ff33e7457a0cc785325ee447637c87c0ce1bf2edd75c8e",
+      "expected": "5efc332eadf8ea69e0ff33e7457a0cc785325ee447637c87c0ce1bf2edd75c8e",
+      "status": "match"
+    },
+    "motor/config/node_manager.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/config/node_manager.py",
+      "sha256": "46800951b22e5011045f33494cc21e4435940bedd09ac91854a76b96f56a648d",
+      "expected": "46800951b22e5011045f33494cc21e4435940bedd09ac91854a76b96f56a648d",
+      "status": "match"
+    },
+    "docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md",
+      "sha256": "0995514a020978159fa49803e956380da435f2279cf9431f0920cbc5dbcc7aae",
+      "expected": "0995514a020978159fa49803e956380da435f2279cf9431f0920cbc5dbcc7aae",
+      "status": "match"
+    }
+  },
+  "package_versions_observed_only": {
+    "motor": null,
+    "vllm": null,
+    "vllm-ascend": null,
+    "torch": null,
+    "torch-npu": null,
+    "mooncake-transfer-engine": null,
+    "lightgbm": null,
+    "scikit-learn": null,
+    "httpx": null,
+    "pyOpenSSL": "21.0.0",
+    "kubernetes": null,
+    "watchdog": null
+  },
+  "imports": {},
+  "limits": [
+    "No NPU or performance validation; dependency versions are observations, not local requirements.",
+    "NodeManager after hash identifies the local semantic reconstruction, not the unprovided onsite file.",
+    "A different onsite fix must be reviewed; this tool never installs or replaces files."
+  ]
+}

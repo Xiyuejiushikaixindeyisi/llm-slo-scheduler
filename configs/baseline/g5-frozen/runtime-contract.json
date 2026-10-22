@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "baseline": "g5-g4base-motor-20261021-r1",
+  "source_report": {
+    "path": "docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md",
+    "sha256": "0995514a020978159fa49803e956380da435f2279cf9431f0920cbc5dbcc7aae",
+    "bytes": 145299,
+    "data_cutoff": "2026-10-21T13:09:00Z"
+  },
+  "common_engine_environment": {
+    "PYTHONHASHSEED": "0",
+    "HCCL_INTRA_ROCE_ENABLE": "1",
+    "HCCL_RDMA_TIMEOUT": "17",
+    "ASCEND_CONNECT_TIMEOUT": "10000",
+    "ASCEND_TRANSFER_TIMEOUT": "10000",
+    "VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS": "12000",
+    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "HCCL_OP_EXPANSION_MODE": "AIV",
+    "HCCL_BUFFSIZE": "1024",
+    "TASK_QUEUE_ENABLE": "1",
+    "HCCL_IF_IP": "<node_ip>",
+    "GLOO_SOCKET_IFNAME": "enp67s0f5",
+    "TP_SOCKET_IFNAME": "enp67s0f5",
+    "HCCL_SOCKET_IFNAME": "enp67s0f5",
+    "OMP_PROC_BIND": "false",
+    "OMP_NUM_THREADS": "10"
+  },
+  "p_only_environment": {
+    "SLO_PATCH_ROLE": "prefill",
+    "ENABLE_BATCH_REPORTER": "1",
+    "ENABLE_VLLM_TTFT_SLO_MS": "0",
+    "SLO_PREDICTOR_MODEL_PATH": "<onsite_existing_model.pkl>"
+  },
+  "node_ips": [
+    "7.193.130.49",
+    "7.193.130.151",
+    "7.193.130.175"
+  ],
+  "job_name_rule": "one unique JOB_NAME per node and role",
+  "start_order": [
+    "containers",
+    "mooncake_master_on_49",
+    "coordinator_and_controller_on_49",
+    "node_managers_serially",
+    "health_and_event_acceptance"
+  ],
+  "deployment_policy": "reference-only; reuse validated onsite orchestration; no local NPU deployment",
+  "client": {
+    "environment": "agent_1017_aisbench on .216",
+    "concurrency_scope": "whole_3P3D_cluster",
+    "max_input": [
+      66000,
+      126000
+    ],
+    "concurrency": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "pressure_time": 900,
+    "request_rate": 1,
+    "output_tokens": 1024,
+    "prefix": 0.5,
+    "seed": 20261014,
+    "temperature": 0.01,
+    "top_k": 20,
+    "top_p": 0.95
+  },
+  "limitations": [
+    "reported config image_name retains inactive rc1 string; effective image is baseline tag",
+    "long_prefill_token_threshold=0 is inferred, not a runtime dump",
+    "predictor model full SHA256 and onsite fix1 full SHA256 not provided"
+  ]
+}

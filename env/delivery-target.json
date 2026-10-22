@@ -1,0 +1,24 @@
+{
+  "recorded_date": "2026-10-22",
+  "image_archive_reported": null,
+  "image_id": null,
+  "image_contents_verified": false,
+  "deployment": "3 nodes, 8 x 910B2-64G/node, TP4 P + TP4 D/node",
+  "model_reported": "Qwen3.6-27B W8A8; verify actual onsite metadata",
+  "design_sources": "sources.lock.json",
+  "release_version": "0.2.0",
+  "next_gate": "local G5 source alignment completed; admission/chunk research uses this baseline; onsite full-sweep acceptance remains pending",
+  "effective_image": "vllm-ascend:g5-g4base-motor-20261021-r1",
+  "evidence": "onsite-g5-frozen-reported.json",
+  "previous_target": {
+    "recorded_date": "2026-10-19",
+    "image_archive_reported": "vllm-ascend:v0.23.0rc1-mindie-motor-3.1.0-main-0917.tar.gz",
+    "image_id": null,
+    "image_contents_verified": false,
+    "deployment": "3 nodes, 8 x 910B2-64G/node, TP4 P + TP4 D/node",
+    "model_reported": "Qwen3.6-27B W8A8; verify actual onsite metadata",
+    "design_sources": "sources.lock.json",
+    "release_version": "0.2.0",
+    "next_gate": "3P3D FGJSQ + predictor + Motor chain verified onsite before admission research"
+  }
+}

@@ -1,0 +1,95 @@
+--- vllm-0fc695fc:step
++++ raw-g4:patched_step
+@@ -1,16 +1,24 @@
+-def step(self) -> tuple[dict[int, EngineCoreOutputs], bool]:
+-    """Schedule, execute, and make output.
+-
+-        Returns tuple of outputs and a flag indicating whether the model
+-        was executed.
+-        """
++def patched_step(self) -> tuple[dict[int, EngineCoreOutputs], bool]:
++    """vllm 0.23.0 原生 EngineCore.step + SLO 打点（用于非 async-scheduling 实例，如 P）。"""
+     if not self.scheduler.has_requests():
+         return ({}, False)
++    t0 = time.monotonic()
+     scheduler_output = self.scheduler.schedule()
++    t1 = time.monotonic()
++    logger.info('[slo] core-step schedule() took %.2f ms', (t1 - t0) * 1000)
++    if scheduler_output.total_num_scheduled_tokens == 0:
++        _log_empty_batch(self, scheduler_output)
++    _predict_batch_exec_time(self.scheduler, scheduler_output, 'core-step schedule()')
++    _emit_batch_event(self, scheduler_output)
++    t2 = time.monotonic()
+     future = self.model_executor.execute_model(scheduler_output, non_block=True)
++    scheduler_output.exec_submit_time = t2
+     grammar_output = self.scheduler.get_grammar_bitmask(scheduler_output)
+     with self.log_error_detail(scheduler_output), self.log_iteration_details(scheduler_output):
+         model_output = future.result()
++        t3 = time.monotonic()
++        scheduler_output.actual_batch_exec_time = (t3 - scheduler_output.exec_submit_time) * 1000
++        logger.info('[slo] core-step execute_model() took %.2f ms', scheduler_output.actual_batch_exec_time)
+         if model_output is None:
+             model_output = self.model_executor.sample_tokens(grammar_output)
+     self._process_aborts_queue()
+--- vllm-0fc695fc:step_with_batch_queue
++++ raw-g4:patched_step_with_batch_queue
+@@ -1,26 +1,25 @@
+-def step_with_batch_queue(self) -> tuple[dict[int, EngineCoreOutputs] | None, bool]:
+-    """Schedule and execute batches with the batch queue.
+-        Note that if nothing to output in this step, None is returned.
+-
+-        The execution flow is as follows:
+-        1. Try to schedule a new batch if the batch queue is not full.
+-        If a new batch is scheduled, directly return an empty engine core
+-        output. In other words, fulfilling the batch queue has a higher priority
+-        than getting model outputs.
+-        2. If there is no new scheduled batch, meaning that the batch queue
+-        is full or no other requests can be scheduled, we block until the first
+-        batch in the job queue is finished.
+-        3. Update the scheduler from the output.
+-        """
++def patched_step_with_batch_queue(self) -> tuple[dict[int, EngineCoreOutputs] | None, bool]:
++    """vllm 0.23.0 原生 EngineCore.step_with_batch_queue + SLO 打点
++    （用于 --async-scheduling 实例，如 D）。"""
+     batch_queue = self.batch_queue
+     assert batch_queue is not None
+-    assert len(batch_queue) < self.batch_queue_size
+     model_executed = False
+     deferred_scheduler_output = None
+     if self.scheduler.has_requests():
++        t0 = time.monotonic()
+         scheduler_output = self.scheduler.schedule()
++        t1 = time.monotonic()
++        logger.info('[slo] step_with_batch_queue schedule() took %.2f ms', (t1 - t0) * 1000)
++        _predict_batch_exec_time(self.scheduler, scheduler_output, 'step_with_batch_queue schedule()')
+         with self.log_error_detail(scheduler_output):
++            t2 = time.monotonic()
+             exec_future = self.model_executor.execute_model(scheduler_output, non_block=True)
++            t3 = time.monotonic()
++            logger.info('[slo] step_with_batch_queue execute_model() submit took %.2f ms', (t3 - t2) * 1000)
++        scheduler_output.exec_submit_time = t2
++        scheduler_output.was_queue_empty_at_submit = len(batch_queue) == 0
++        if scheduler_output.was_queue_empty_at_submit:
++            _emit_batch_event(self, scheduler_output)
+         if self.is_ec_consumer:
+             model_executed = scheduler_output.total_num_scheduled_tokens > 0
+         if self.is_pooling_model or not model_executed:
+@@ -38,7 +37,18 @@
+         return (None, False)
+     (future, scheduler_output, exec_model_fut) = batch_queue.pop()
+     with self.log_error_detail(scheduler_output), self.log_iteration_details(scheduler_output):
++        if batch_queue:
++            next_scheduler_output = batch_queue[-1][1]
++            _emit_batch_event(self, next_scheduler_output)
+         model_output = future.result()
++        t4 = time.monotonic()
++        if scheduler_output.was_queue_empty_at_submit:
++            exec_start_time = scheduler_output.exec_submit_time
++        else:
++            exec_start_time = getattr(self, 'last_exec_finish_time', scheduler_output.exec_submit_time)
++        scheduler_output.actual_batch_exec_time = (t4 - exec_start_time) * 1000
++        self.last_exec_finish_time = t4
++        logger.info('[slo] step_with_batch_queue execute_model() wait took %.2f ms', scheduler_output.actual_batch_exec_time)
+         if model_output is None:
+             exec_model_fut.result()
+             raise RuntimeError('unexpected error')

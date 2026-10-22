@@ -1,0 +1,274 @@
+Checking test dependencies...
+Installing pytest-xdist...
+Requirement already satisfied: pytest-xdist in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (3.8.0)
+Requirement already satisfied: execnet>=2.1 in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (from pytest-xdist) (2.1.2)
+Requirement already satisfied: pytest>=7.0.0 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest-xdist) (8.4.2)
+Requirement already satisfied: iniconfig>=1 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.3.0)
+Requirement already satisfied: packaging>=20 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (25.0)
+Requirement already satisfied: pluggy<2,>=1.5 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (1.5.0)
+Requirement already satisfied: pygments>=2.7.2 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.19.2)
+Checking project core dependencies...
+Checking HTTP client dependencies...
+Dependency check completed
+Checking and generating protobuf files...
+Generating code from ./motor/common/etcd/proto/rpc.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/rpc.proto
+  Fixed import paths in rpc_pb2_grpc.py
+  Fixed import paths in rpc_pb2.py
+Generating code from ./motor/common/etcd/proto/auth.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/auth.proto
+  Fixed import paths in auth_pb2_grpc.py
+  Fixed import paths in auth_pb2.py
+Generating code from ./motor/common/etcd/proto/kv.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/kv.proto
+  Fixed import paths in kv_pb2_grpc.py
+  Fixed import paths in kv_pb2.py
+All protobuf files generated successfully.
+Executing command: pytest  tests/config tests/node_manager/core/services/native_engine/backends/test_config_contract.py tests/node_manager/core/services/native_engine/backends/vllm/test_config.py --color=no --junitxml=/home/zhangxiyue/llm-slo-scheduler/artifacts/g5-alignment/motor-config-regression.xml
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-8.4.2, pluggy-1.5.0 -- /home/zhangxiyue/llm-slo-scheduler/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5
+configfile: pytest.ini
+plugins: xdist-3.8.0, asyncio-1.4.0, anyio-4.13.0, cov-7.1.0, jaxtyping-0.3.6
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 96 items
+
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_motor_coordinator_missing PASSED [  1%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_motor_coordinator_not_dict PASSED [  2%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_prefill_kv_event_config_missing PASSED [  3%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_prefill_kv_event_config_not_dict PASSED [  4%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_re_register_interval_missing PASSED [  5%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_re_register_interval_is_none PASSED [  6%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_configured_value PASSED [  7%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_accepts_string_value PASSED [  8%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_accepts_zero PASSED [  9%]
+tests/config/test_config_utils.py::TestHasMotorControllerConfig::test_returns_false_when_config_path_missing PASSED [ 10%]
+tests/config/test_config_utils.py::TestHasMotorControllerConfig::test_returns_true_when_motor_controller_config_present PASSED [ 11%]
+tests/config/test_config_utils.py::TestHasMotorControllerConfig::test_returns_false_for_standalone_coordinator_only_config PASSED [ 12%]
+tests/config/test_resolver.py::test_factory_returns_vllm_by_default 
+-------------------------------- live log call ---------------------------------
+WARNING  config:resolver.py:312 engine_type not specified, defaulting to vllm
+PASSED                                                                   [ 13%]
+tests/config/test_resolver.py::test_factory_returns_vllm_for_unknown 
+-------------------------------- live log call ---------------------------------
+WARNING  config:resolver.py:317 unknown engine_type 'unknown', falling back to vllm
+PASSED                                                                   [ 14%]
+tests/config/test_resolver.py::test_factory_returns_sglang PASSED        [ 15%]
+tests/config/test_resolver.py::test_vllm_cp_underscore PASSED            [ 16%]
+tests/config/test_resolver.py::test_vllm_cp_hyphen PASSED                [ 17%]
+tests/config/test_resolver.py::test_vllm_cp_both_forms_are_equivalent PASSED [ 18%]
+tests/config/test_resolver.py::test_sglang_cp_hyphen PASSED              [ 19%]
+tests/config/test_resolver.py::test_sglang_cp_underscore PASSED          [ 20%]
+tests/config/test_resolver.py::test_sglang_cp_not_enabled_without_flag PASSED [ 21%]
+tests/config/test_resolver.py::test_sglang_cp_not_enabled_when_flag_false PASSED [ 22%]
+tests/config/test_resolver.py::test_local_world_size_includes_pcp PASSED [ 23%]
+tests/config/test_resolver.py::test_local_world_size_pcp_defaults_to_1 PASSED [ 25%]
+tests/config/test_resolver.py::test_world_size_includes_pcp PASSED       [ 26%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key0-expected0] PASSED [ 27%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key1-expected1] PASSED [ 28%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key2-expected2] PASSED [ 29%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key3-expected3] PASSED [ 30%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key4-expected4] PASSED [ 31%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key5-expected5] PASSED [ 32%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key6-expected6] PASSED [ 33%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key7-expected7] PASSED [ 34%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key8-expected8] PASSED [ 35%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key9-expected9] PASSED [ 36%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key10-expected10] PASSED [ 37%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key11-expected11] PASSED [ 38%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key0-expected0] PASSED [ 39%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key1-expected1] PASSED [ 40%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key2-expected2] PASSED [ 41%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key3-expected3] PASSED [ 42%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key4-expected4] PASSED [ 43%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key5-expected5] PASSED [ 44%]
+tests/config/test_resolver.py::test_vllm_enable_multi_endpoints_default PASSED [ 45%]
+tests/config/test_resolver.py::test_vllm_enable_multi_endpoints_explicit PASSED [ 46%]
+tests/config/test_resolver.py::test_vllm_enable_multi_endpoints_true PASSED [ 47%]
+tests/config/test_resolver.py::test_sglang_enable_multi_endpoints_default PASSED [ 48%]
+tests/config/test_resolver.py::test_sglang_enable_multi_endpoints_explicit PASSED [ 50%]
+tests/config/test_resolver.py::test_vllm_model_name_both_variants PASSED [ 51%]
+tests/config/test_resolver.py::test_sglang_model_name_both_variants PASSED [ 52%]
+tests/config/test_resolver.py::test_vllm_npu_mem_utils_both_variants PASSED [ 53%]
+tests/config/test_resolver.py::test_sglang_npu_mem_utils_both_variants PASSED [ 54%]
+tests/config/test_resolver.py::test_get_engine_key_returns_first_match PASSED [ 55%]
+tests/config/test_resolver.py::test_get_engine_key_skips_missing PASSED  [ 56%]
+tests/config/test_resolver.py::test_get_engine_key_returns_none_when_all_missing PASSED [ 57%]
+tests/config/test_resolver.py::test_sglang_world_size_uses_local_when_dp_attention_enabled PASSED [ 58%]
+tests/config/test_resolver.py::test_sglang_world_size_keeps_legacy_when_dp_attention_unset PASSED [ 59%]
+tests/config/test_resolver.py::test_vllm_world_size_unaffected_by_enable_multi_endpoints_false PASSED [ 60%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_union_cli_golden_preserves_order_types_and_precedence 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 61%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_pd_cli_golden_injects_handoff_metadata[prefill-kv_producer] 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 62%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_pd_cli_golden_injects_handoff_metadata[decode-kv_consumer] 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 63%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_cross_node_pcp_headless_cli_golden 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=1, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=1, master_addr=10.0.0.1
+PASSED                                                                   [ 64%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_multi_connector_and_d2d_cli_contract 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:234 D2D peer SOURCE: [{'device_id': 0, 'sources': ['[2001:db8::1]:5000', '10.0.0.2:5000']}, {'device_id': 1, 'sources': ['[2001:db8::1]:5001', '10.0.0.2:5001']}]
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 65%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_builder_output_is_stable_across_repeated_initialization 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 66%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_union_cli_golden PASSED [ 67%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_pd_multinode_cli_golden[prefill-prefill] PASSED [ 68%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_pd_multinode_cli_golden[decode-decode] PASSED [ 69%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_multinode_accepts_string_nnodes_and_requires_master_address PASSED [ 70%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_rejects_invalid_nnodes[invalid] PASSED [ 71%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_rejects_invalid_nnodes[0] PASSED [ 72%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_native_cli_omits_none_values PASSED [ 73%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_factory_rejects_unknown_engine_type_before_importing_builder PASSED [ 75%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_invalid_pd_connector_contract[None-kv_transfer_config is None in engine_config] PASSED [ 76%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_invalid_pd_connector_contract[invalid_kv_config1-Failed to process kv_transfer_config] 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: KV connector extra config at least have 2 connectors
+PASSED                                                                   [ 77%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_invalid_pd_connector_contract[invalid_kv_config2-Failed to process kv_transfer_config] 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: UnsupportedStoreConnector is not supported
+PASSED                                                                   [ 78%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_no_pcp_params_when_nnodes_is_one 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 79%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_snapshot_config_enables_auto_checkpoint_for_vllm_cli 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 80%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_no_pcp_params_when_nnodes_gt_1_but_no_master_port 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=2, master_port=None
+PASSED                                                                   [ 81%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_added_for_master_node 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=10.0.0.1
+PASSED                                                                   [ 82%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_added_for_slave_node 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=1, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=1, master_addr=10.0.0.1
+PASSED                                                                   [ 83%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_engine_config_takes_precedence 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=3 (type=int), master_port=6001, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=192.168.1.1
+PASSED                                                                   [ 84%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_added_when_nnodes_is_string 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=str), master_port=7001, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=192.168.1.1
+PASSED                                                                   [ 85%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_master_dp_ip_none_handled_gracefully 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=0, master_dp_ip=None
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=None
+PASSED                                                                   [ 86%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_with_master_port_dash_variant 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=192.168.1.1
+PASSED                                                                   [ 87%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_ucm_store_keeps_kv_both_and_injects_no_port PASSED [ 88%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_ucm_store_inline_config_not_polluted PASSED [ 89%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_ascend_store_still_gets_lookup_rpc_port PASSED [ 90%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_unknown_store_connector_still_raises 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: NotARealStore is not supported
+PASSED                                                                   [ 91%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_standalone_ucm_connector_rejected_in_prefill 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: standalone UCMConnector is only supported in the union role or as connectors[1] of a MultiConnector; wrap it in a MultiConnector for prefill/decode roles
+PASSED                                                                   [ 92%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_ucm_as_transport_position_rejected 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: UCMConnector must be connectors[1] (the store) of a MultiConnector; put the transport connector first
+PASSED                                                                   [ 93%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_cross_node_overrides_placeholder_master_addr_and_node_rank 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7060, node_rank=1, master_dp_ip=192.168.66.62
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=1, master_addr=192.168.66.62
+PASSED                                                                   [ 94%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_cross_node_rank0_clears_stale_headless 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7060, node_rank=0, master_dp_ip=192.168.66.62
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=192.168.66.62
+PASSED                                                                   [ 95%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_mooncake_connector_preserves_pp_layer_partition PASSED [ 96%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_access_log_endpoints_excluded_by_default 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 97%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_access_log_endpoints_user_override_wins 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 98%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_access_log_endpoints_dash_style_user_override_wins 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [100%]
+
+- generated xml file: /home/zhangxiyue/llm-slo-scheduler/artifacts/g5-alignment/motor-config-regression.xml -
+============================== 96 passed in 0.20s ==============================
+
+==========================================
+Test Result Summary
+==========================================
+Test Status:
+  ✓ Passed: 96
+
+Overall Status:
+  ✓ All tests passed
+==========================================
+
+
+✓ All tests passed

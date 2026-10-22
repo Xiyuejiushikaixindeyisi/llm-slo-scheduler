@@ -1,0 +1,111 @@
+{
+  "version": "v2.0",
+  "motor_deploy_config": {
+    "deploy_mode": "single_container",
+    "p_instances_num": 1, "d_instances_num": 1,
+    "single_p_instance_pod_num": 1, "single_d_instance_pod_num": 1,
+    "p_pod_npu_num": 4, "d_pod_npu_num": 4,
+    "image_name": "vllm-ascend:v0.23.0rc1-mindie-motor-3.1.0-main-0917",
+    "job_id": "motor3p3d-zxy",
+    "hardware_type": "910B",
+    "weight_mount_path": "/mnt/esfs"
+  },
+  "motor_engine_prefill_config": {
+    "engine_type": "vllm",
+    "model_config": {
+      "model_path": "/mnt/esfs/Qwen3.6-27B-w8a8", "model_name": "Qwen3.6-27B",
+      "npu_mem_utils": 0.9,
+      "parallel_config": { "dp_size": 1, "tp_size": 4, "pp_size": 1, "dp_rpc_port": 13300 }
+    },
+    "engine_config": {
+      "max_model_len": 131072, "max_num_batched_tokens": 8192, "max_num_seqs": 24,
+      "trust_remote_code": true, "seed": 1024,
+      "tool_call_parser": "qwen3_coder", "enable_auto_tool_choice": true,
+      "reasoning_parser": "qwen3", "quantization": "ascend",
+      "api_server_count": 1, "distributed_executor_backend": "mp",
+      "enable_prompt_tokens_details": true,
+      "enable_prefix_caching": true,
+      "enforce_eager": true,
+      "speculative_config": { "num_speculative_tokens": 3, "method": "mtp", "enforce_eager": true },
+      "additional_config": {
+        "enable_cpu_binding": true, "enable_flashcomm1": true,
+        "scheduler_with_predictor_enable": true,
+        "api_server_host": "motor3p3d-zxy-p", "api_server_port": 10000
+      },
+      "kv_transfer_config": {
+        "kv_connector": "MultiConnector",
+        "kv_connector_extra_config": {
+          "connectors": [
+            { "kv_connector": "MooncakeConnectorV1", "kv_port": "30000",
+              "kv_connector_extra_config": { "use_ascend_direct": true } },
+            { "kv_connector": "AscendStoreConnector",
+              "kv_connector_extra_config": { "backend": "mooncake", "lookup_rpc_port": "0" } }
+          ]
+        }
+      }
+    }
+  },
+  "motor_engine_decode_config": {
+    "engine_type": "vllm",
+    "model_config": {
+      "model_path": "/mnt/esfs/Qwen3.6-27B-w8a8", "model_name": "Qwen3.6-27B",
+      "npu_mem_utils": 0.9,
+      "parallel_config": { "dp_size": 1, "tp_size": 4, "pp_size": 1, "dp_rpc_port": 13300 }
+    },
+    "engine_config": {
+      "max_model_len": 131072, "max_num_batched_tokens": 8192, "max_num_seqs": 24,
+      "trust_remote_code": true, "seed": 1024,
+      "tool_call_parser": "qwen3_coder", "enable_auto_tool_choice": true,
+      "reasoning_parser": "qwen3", "quantization": "ascend",
+      "api_server_count": 1, "distributed_executor_backend": "mp",
+      "enable_prompt_tokens_details": true,
+      "async_scheduling": true,
+      "compilation_config": {
+        "cudagraph_mode": "FULL_DECODE_ONLY",
+        "cudagraph_capture_sizes": [1,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64]
+      },
+      "speculative_config": { "num_speculative_tokens": 3, "method": "mtp", "enforce_eager": true },
+      "additional_config": { "recompute_scheduler_enable": true, "enable_cpu_binding": true },
+      "kv_transfer_config": {
+        "kv_connector": "MultiConnector",
+        "kv_connector_extra_config": {
+          "connectors": [
+            { "kv_connector": "MooncakeConnectorV1", "kv_port": "30000",
+              "kv_connector_extra_config": { "use_ascend_direct": true } },
+            { "kv_connector": "AscendStoreConnector",
+              "kv_connector_extra_config": { "backend": "mooncake", "lookup_rpc_port": "0" } }
+          ]
+        }
+      },
+      "no_enable_prefix_caching": true
+    }
+  },
+  "motor_nodemanger_config": {
+    "api_config": { "pod_ip": "127.0.0.1", "node_manager_port": 1026 },
+    "endpoint_config": { "endpoint_num": 1, "base_port": 13700, "service_ports": [], "bootstrap_port": null },
+    "basic_config": {
+      "model_name": "Qwen3.6-27B", "engine_type": "vllm", "hardware_type": "910B",
+      "device_num": 4,
+      "parallel_config": { "dp_size": 1, "tp_size": 4, "pp_size": 1, "world_size": 4, "local_world_size": 4 },
+      "enable_multi_endpoints": true, "nnodes": 1
+    },
+    "fault_tolerance_config": { "enable_fault_tolerance": false, "enable_engine_relaunch": false },
+    "kv_cache_store_config": { "enable": false, "backend": "memcache", "mode": "combined" }
+  },
+  "motor_coordinator_config": {
+    "api_config": {
+      "coordinator_api_infer_port": 18080,
+      "coordinator_api_mgmt_port": 18081,
+      "coordinator_obs_port": 18082
+    },
+    "scheduler_config": { "scheduler_type": "unified_pd", "enable_pd_separation_fallback_to_hybrid": false },
+    "context_budget_mode": "off",
+    "deploy_config": { "p_instances_num": 1, "d_instances_num": 1 }
+  },
+  "motor_controller_config": {
+    "api_config": { "controller_api_dns": "7.193.130.49", "controller_api_port": 18083, "observability_api_port": 18084 },
+    "instance_config": { "instance_assemble_timeout": 300 },
+    "fault_tolerance_config": { "enable_fault_tolerance": false },
+    "logging_config": { "log_level": "INFO" }
+  }
+}

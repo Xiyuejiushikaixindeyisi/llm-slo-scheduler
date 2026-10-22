@@ -1,0 +1,51 @@
+# Independent pinned upstream repositories
+/upstream/
+# Raw on-site inputs, preserved locally and indexed by manifests
+/evidence/huawei/**
+/evidence/source_drops/**
+!/evidence/huawei/.gitkeep
+!/evidence/source_drops/proxy/.gitkeep
+!/evidence/source_drops/slo_patch/.gitkeep
+# Models, benchmark runs and delivery products
+/models/predictor/**
+!/models/predictor/.gitkeep
+/experiments/runs/**
+!/experiments/runs/**/
+!/experiments/runs/**/*.md
+!/experiments/runs/.gitkeep
+/artifacts/releases/**
+!/artifacts/releases/.gitkeep
+# Python environments and generated files
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+/build/
+/dist/
+.env
+.env.*
+!.env.example
+!.env.sample
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# Isolated Motor implementation checkout and test products
+/artifacts/build/
+/artifacts/*.xml
+# New repeatable test outputs; reviewed G5 evidence stays versioned
+/artifacts/local-validation/

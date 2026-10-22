@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-22",
+  "python_syntax_and_indentation_files": 43,
+  "json_parsed": 28,
+  "shell_syntax_checked": 2,
+  "core_files_unchanged": 21,
+  "project_tests": 37,
+  "motor_tests": 170,
+  "total_passed": 207,
+  "fingerprints_matched": 33,
+  "bootstrap_fixed_commit_and_dirty_guard": "passed",
+  "ignore_rules": "checked required paths and local-only paths",
+  "secret_pattern_scan": "no credential patterns detected; heuristic only",
+  "deleted_files": 0,
+  "formal_npu_experiment": false,
+  "details": "Current CPU environment only; fresh external dependency installation was documented, not reproduced",
+  "git_diff_check": {
+    "legacy_findings": 989,
+    "files": {
+      "artifacts/g5-alignment/motor-config-regression.log": 27,
+      "artifacts/g5-alignment/node-manager-green.log": 42,
+      "artifacts/g5-alignment/node-manager-red.log": 49,
+      "artifacts/motor-regression.log": 120,
+      "docs/engineering/FGJSQ_REPRODUCTION_PLAN.md": 1,
+      "docs/engineering/G5_BASELINE_HANDOVER.md": 3,
+      "docs/modeling/CHUNK_SIZE_KV_CACHE_MATHEMATICAL_MODEL.md": 1,
+      "docs/modeling/COST_FUNCTION_SOURCE_AUDIT.md": 1,
+      "docs/references/SUPER_P95_RESEARCH_AND_LLM_COMPARISON.md": 1,
+      "docs/traffic/CLUSTER_FLOW_PROFILE_REPORT_20260924.original.md": 307,
+      "docs/traffic/FINAL_WAITING_AND_ADMISSION_EVIDENCE_20261021.original.md": 278,
+      "licenses/motor-LICENSE.md": 135,
+      "patches/motor/development-notes.patch": 4,
+      "patches/motor/f203263d-g5-node-manager-lookup.patch": 2,
+      "patches/motor/f203263d-p-fgjsq.patch": 18
+    },
+    "new_maintained_changes_passed": true,
+    "action": "Preserved original logs, report text, patch context and frozen source; no whitespace rewriting"
+  },
+  "staged_size_before_final_notes": {
+    "files": 166,
+    "bytes": 1458562
+  }
+}

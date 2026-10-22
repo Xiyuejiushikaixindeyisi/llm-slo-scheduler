@@ -1,0 +1,610 @@
+Checking test dependencies...
+Installing pytest-xdist...
+Requirement already satisfied: pytest-xdist in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (3.8.0)
+Requirement already satisfied: execnet>=2.1 in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (from pytest-xdist) (2.1.2)
+Requirement already satisfied: pytest>=7.0.0 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest-xdist) (8.4.2)
+Requirement already satisfied: iniconfig>=1 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.3.0)
+Requirement already satisfied: packaging>=20 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (25.0)
+Requirement already satisfied: pluggy<2,>=1.5 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (1.5.0)
+Requirement already satisfied: pygments>=2.7.2 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.19.2)
+Checking project core dependencies...
+Checking HTTP client dependencies...
+Dependency check completed
+Checking and generating protobuf files...
+Generating code from ./motor/common/etcd/proto/rpc.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/rpc.proto
+  Fixed import paths in rpc_pb2_grpc.py
+  Fixed import paths in rpc_pb2.py
+Generating code from ./motor/common/etcd/proto/auth.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/auth.proto
+  Fixed import paths in auth_pb2_grpc.py
+  Fixed import paths in auth_pb2.py
+Generating code from ./motor/common/etcd/proto/kv.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/kv.proto
+  Fixed import paths in kv_pb2_grpc.py
+  Fixed import paths in kv_pb2.py
+All protobuf files generated successfully.
+Executing command: pytest  tests/node_manager/test_config.py -k test_g5_lookup_compatibility_retains_role_offset --color=no
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-8.4.2, pluggy-1.5.0 -- /home/zhangxiyue/llm-slo-scheduler/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5
+configfile: pytest.ini
+plugins: xdist-3.8.0, asyncio-1.4.0, anyio-4.13.0, cov-7.1.0, jaxtyping-0.3.6
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 74 items / 68 deselected / 6 selected
+
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields0-20-prefill-0] FAILED [ 16%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields0-20-decode-1] FAILED [ 33%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields1-7-prefill-0] PASSED [ 50%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields1-7-decode-1] PASSED [ 66%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields2-0-prefill-0] FAILED [ 83%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields2-0-decode-1] FAILED [100%]
+
+=================================== FAILURES ===================================
+____ test_g5_lookup_compatibility_retains_role_offset[fields0-20-prefill-0] ____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b0e10863100>
+role = 'prefill', offset = 0
+fields = {'kv_connector_extra_config': {'lookup_rpc_port': '20'}}, base = 20
+
+    @pytest.mark.parametrize("role,offset", [("prefill", 0), ("decode", 1)])
+    @pytest.mark.parametrize("fields,base", [
+        ({"kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 20),
+        ({"lookup_rpc_port": "7", "kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 7),
+        ({}, 0),
+    ])
+    def test_g5_lookup_compatibility_retains_role_offset(monkeypatch, role, offset, fields, base):
+        """Nested/default ports must work on both roles; a legacy top-level port wins."""
+        monkeypatch.setenv("ROLE", role)
+        monkeypatch.setenv("INDEX", "0")
+        store = {"kv_connector": "AscendStoreConnector", **fields}
+>       config = SingleContainerNodemanagerConfig.from_json(_single_container_user_config(store))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/node_manager/test_config.py:1316: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'motor.config.node_manager.SingleContainerNodemanagerConfig'>
+user_config_data = {'motor_deploy_config': {'d_instances_num': 1, 'deploy_mode': 'single_container', 'p_instances_num': 1}, 'motor_engine...kv_connector': 'MultiConnector', 'kv_connector_extra_config': {'connectors': [{...}, {...}]}}}, 'engine_type': 'vllm'}}
+
+    @classmethod
+    def from_json(cls, user_config_data: dict[str, Any]) -> "SingleContainerNodemanagerConfig":
+        config = cls()
+        deploy_mode = user_config_data.get("motor_deploy_config", {}).get("deploy_mode", "")
+        if deploy_mode != "single_container" or not Env.role or Env.index is None:
+            return config
+    
+        config.single_container_flag = True
+        index = int(Env.index)
+    
+        union_section = user_config_data.get(MOTOR_ENGINE_UNION_CONFIG_KEY)
+        prefill_section = user_config_data.get(MOTOR_ENGINE_PREFILL_CONFIG_KEY)
+        if union_section and not prefill_section:
+            if Env.role != "union":
+                return config
+    
+            union_resolver = ConfigResolver(union_section)
+            union_parallel_config = union_resolver.get_parallel_config()
+            u_dp_size = union_parallel_config.get(DP, 1)
+            u_world_size = union_parallel_config["world_size"]
+    
+            config.node_manager_port_offset = index
+            config.base_port_offset = index * u_dp_size * 2
+            config.device_offset = index * u_world_size
+            config.device_num = u_world_size
+            config.dp_rpc_port = int(union_parallel_config["dp_rpc_port"]) + index
+            return config
+    
+        p_instances_num = user_config_data['motor_deploy_config']['p_instances_num']
+        d_instances_num = user_config_data['motor_deploy_config']['d_instances_num']
+        encode_section = user_config_data.get(MOTOR_ENGINE_ENCODE_CONFIG_KEY, {})
+        prefill_section = user_config_data[MOTOR_ENGINE_PREFILL_CONFIG_KEY]
+        decode_section = user_config_data[MOTOR_ENGINE_DECODE_CONFIG_KEY]
+        encode_resolver = ConfigResolver(encode_section) if encode_section else None
+        prefill_resolver = ConfigResolver(prefill_section)
+        decode_resolver = ConfigResolver(decode_section)
+        encode_parallel_config = encode_resolver.get_parallel_config() if encode_resolver else {}
+        prefill_parallel_config = prefill_resolver.get_parallel_config()
+        decode_parallel_config = decode_resolver.get_parallel_config()
+        e_dp_size = encode_parallel_config.get(DP, 1)
+        p_dp_size = prefill_parallel_config.get(DP, 1)
+        d_dp_size = decode_parallel_config.get(DP, 1)
+        e_world_size = encode_parallel_config.get("world_size", 0)
+        p_world_size = prefill_parallel_config["world_size"]
+        d_world_size = decode_parallel_config["world_size"]
+    
+        d_node_manager_port_offset = p_instances_num * p_dp_size + index
+        d_base_port_offset = (p_instances_num * p_dp_size + index * d_dp_size) * 2
+        d_device_offset = p_instances_num * p_world_size + index * d_world_size
+    
+        e_node_manager_port_offset = d_instances_num * d_dp_size + d_node_manager_port_offset
+        e_base_port_offset = d_base_port_offset + e_dp_size
+        e_device_offset = d_device_offset + e_world_size
+    
+        kv_port_offset = 0
+        lookup_rpc_port_offset = 0
+        dp_rpc_port_offset = 0
+    
+        if Env.role == 'prefill':
+            config.node_manager_port_offset = index
+            config.base_port_offset = index * d_dp_size * 2
+            config.device_offset = index * p_world_size
+            config.device_num = p_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = index
+            dp_rpc_port_offset = index
+        elif Env.role == 'decode':
+            config.node_manager_port_offset = d_node_manager_port_offset
+            config.base_port_offset = d_base_port_offset
+            config.device_offset = d_device_offset
+            config.device_num = d_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = p_instances_num + index
+            dp_rpc_port_offset = p_instances_num + index
+        elif Env.role == 'encode':
+            config.node_manager_port_offset = e_node_manager_port_offset
+            config.base_port_offset = e_base_port_offset
+            config.device_offset = e_device_offset
+            config.device_num = e_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = index
+            dp_rpc_port_offset = index
+    
+        kv_config = user_config_data[MOTOR_ENGINE_PREFILL_CONFIG_KEY][ENGINE_CONFIG_KEY].get(KV_TRANSFER_CONFIG_KEY, {})
+        if kv_config:
+            if kv_config[KV_CONNECTOR_KEY] == MULTICONNECTOR:
+                extra_config = kv_config.get(KV_CONNECTOR_EXTRA_CONFIG_KEY)
+                connectors = extra_config.get(CONNECTORS_KEY) if isinstance(extra_config, dict) else None
+                if not isinstance(connectors, list) or len(connectors) < 2:
+                    raise ValueError(
+                        f"{KV_TRANSFER_CONFIG_KEY}.{KV_CONNECTOR_EXTRA_CONFIG_KEY}.{CONNECTORS_KEY} "
+                        f"must be a list of at least 2 connectors (transport first, store second) "
+                        f"when {KV_CONNECTOR_KEY} is {MULTICONNECTOR}"
+                    )
+                if not all(isinstance(connector, dict) for connector in connectors[:2]):
+                    raise ValueError(
+                        f"{KV_TRANSFER_CONFIG_KEY}.{KV_CONNECTOR_EXTRA_CONFIG_KEY}.{CONNECTORS_KEY} "
+                        "entries must be objects (connector configs)"
+                    )
+                config.kv_port = int(connectors[0][KV_PORT_KEY]) + kv_port_offset
+                store = connectors[1]
+                # UCM store carries no lookup_rpc_port. Skip ONLY UCM (use .get() to avoid a
+                # KeyError on the kv_connector lookup); every other store still direct-indexes
+                # lookup_rpc_port, so a genuine AscendStore missing its port fails fast exactly
+                # as before instead of being silently skipped.
+                if store.get(KV_CONNECTOR_KEY) != UCM_CONNECTOR:
+>                   config.lookup_rpc_port = int(store[LOOPUP_RPC_PORT_KEY]) + lookup_rpc_port_offset
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   KeyError: 'lookup_rpc_port'
+
+motor/config/node_manager.py:280: KeyError
+____ test_g5_lookup_compatibility_retains_role_offset[fields0-20-decode-1] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b0e10862ea0>
+role = 'decode', offset = 1
+fields = {'kv_connector_extra_config': {'lookup_rpc_port': '20'}}, base = 20
+
+    @pytest.mark.parametrize("role,offset", [("prefill", 0), ("decode", 1)])
+    @pytest.mark.parametrize("fields,base", [
+        ({"kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 20),
+        ({"lookup_rpc_port": "7", "kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 7),
+        ({}, 0),
+    ])
+    def test_g5_lookup_compatibility_retains_role_offset(monkeypatch, role, offset, fields, base):
+        """Nested/default ports must work on both roles; a legacy top-level port wins."""
+        monkeypatch.setenv("ROLE", role)
+        monkeypatch.setenv("INDEX", "0")
+        store = {"kv_connector": "AscendStoreConnector", **fields}
+>       config = SingleContainerNodemanagerConfig.from_json(_single_container_user_config(store))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/node_manager/test_config.py:1316: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'motor.config.node_manager.SingleContainerNodemanagerConfig'>
+user_config_data = {'motor_deploy_config': {'d_instances_num': 1, 'deploy_mode': 'single_container', 'p_instances_num': 1}, 'motor_engine...kv_connector': 'MultiConnector', 'kv_connector_extra_config': {'connectors': [{...}, {...}]}}}, 'engine_type': 'vllm'}}
+
+    @classmethod
+    def from_json(cls, user_config_data: dict[str, Any]) -> "SingleContainerNodemanagerConfig":
+        config = cls()
+        deploy_mode = user_config_data.get("motor_deploy_config", {}).get("deploy_mode", "")
+        if deploy_mode != "single_container" or not Env.role or Env.index is None:
+            return config
+    
+        config.single_container_flag = True
+        index = int(Env.index)
+    
+        union_section = user_config_data.get(MOTOR_ENGINE_UNION_CONFIG_KEY)
+        prefill_section = user_config_data.get(MOTOR_ENGINE_PREFILL_CONFIG_KEY)
+        if union_section and not prefill_section:
+            if Env.role != "union":
+                return config
+    
+            union_resolver = ConfigResolver(union_section)
+            union_parallel_config = union_resolver.get_parallel_config()
+            u_dp_size = union_parallel_config.get(DP, 1)
+            u_world_size = union_parallel_config["world_size"]
+    
+            config.node_manager_port_offset = index
+            config.base_port_offset = index * u_dp_size * 2
+            config.device_offset = index * u_world_size
+            config.device_num = u_world_size
+            config.dp_rpc_port = int(union_parallel_config["dp_rpc_port"]) + index
+            return config
+    
+        p_instances_num = user_config_data['motor_deploy_config']['p_instances_num']
+        d_instances_num = user_config_data['motor_deploy_config']['d_instances_num']
+        encode_section = user_config_data.get(MOTOR_ENGINE_ENCODE_CONFIG_KEY, {})
+        prefill_section = user_config_data[MOTOR_ENGINE_PREFILL_CONFIG_KEY]
+        decode_section = user_config_data[MOTOR_ENGINE_DECODE_CONFIG_KEY]
+        encode_resolver = ConfigResolver(encode_section) if encode_section else None
+        prefill_resolver = ConfigResolver(prefill_section)
+        decode_resolver = ConfigResolver(decode_section)
+        encode_parallel_config = encode_resolver.get_parallel_config() if encode_resolver else {}
+        prefill_parallel_config = prefill_resolver.get_parallel_config()
+        decode_parallel_config = decode_resolver.get_parallel_config()
+        e_dp_size = encode_parallel_config.get(DP, 1)
+        p_dp_size = prefill_parallel_config.get(DP, 1)
+        d_dp_size = decode_parallel_config.get(DP, 1)
+        e_world_size = encode_parallel_config.get("world_size", 0)
+        p_world_size = prefill_parallel_config["world_size"]
+        d_world_size = decode_parallel_config["world_size"]
+    
+        d_node_manager_port_offset = p_instances_num * p_dp_size + index
+        d_base_port_offset = (p_instances_num * p_dp_size + index * d_dp_size) * 2
+        d_device_offset = p_instances_num * p_world_size + index * d_world_size
+    
+        e_node_manager_port_offset = d_instances_num * d_dp_size + d_node_manager_port_offset
+        e_base_port_offset = d_base_port_offset + e_dp_size
+        e_device_offset = d_device_offset + e_world_size
+    
+        kv_port_offset = 0
+        lookup_rpc_port_offset = 0
+        dp_rpc_port_offset = 0
+    
+        if Env.role == 'prefill':
+            config.node_manager_port_offset = index
+            config.base_port_offset = index * d_dp_size * 2
+            config.device_offset = index * p_world_size
+            config.device_num = p_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = index
+            dp_rpc_port_offset = index
+        elif Env.role == 'decode':
+            config.node_manager_port_offset = d_node_manager_port_offset
+            config.base_port_offset = d_base_port_offset
+            config.device_offset = d_device_offset
+            config.device_num = d_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = p_instances_num + index
+            dp_rpc_port_offset = p_instances_num + index
+        elif Env.role == 'encode':
+            config.node_manager_port_offset = e_node_manager_port_offset
+            config.base_port_offset = e_base_port_offset
+            config.device_offset = e_device_offset
+            config.device_num = e_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = index
+            dp_rpc_port_offset = index
+    
+        kv_config = user_config_data[MOTOR_ENGINE_PREFILL_CONFIG_KEY][ENGINE_CONFIG_KEY].get(KV_TRANSFER_CONFIG_KEY, {})
+        if kv_config:
+            if kv_config[KV_CONNECTOR_KEY] == MULTICONNECTOR:
+                extra_config = kv_config.get(KV_CONNECTOR_EXTRA_CONFIG_KEY)
+                connectors = extra_config.get(CONNECTORS_KEY) if isinstance(extra_config, dict) else None
+                if not isinstance(connectors, list) or len(connectors) < 2:
+                    raise ValueError(
+                        f"{KV_TRANSFER_CONFIG_KEY}.{KV_CONNECTOR_EXTRA_CONFIG_KEY}.{CONNECTORS_KEY} "
+                        f"must be a list of at least 2 connectors (transport first, store second) "
+                        f"when {KV_CONNECTOR_KEY} is {MULTICONNECTOR}"
+                    )
+                if not all(isinstance(connector, dict) for connector in connectors[:2]):
+                    raise ValueError(
+                        f"{KV_TRANSFER_CONFIG_KEY}.{KV_CONNECTOR_EXTRA_CONFIG_KEY}.{CONNECTORS_KEY} "
+                        "entries must be objects (connector configs)"
+                    )
+                config.kv_port = int(connectors[0][KV_PORT_KEY]) + kv_port_offset
+                store = connectors[1]
+                # UCM store carries no lookup_rpc_port. Skip ONLY UCM (use .get() to avoid a
+                # KeyError on the kv_connector lookup); every other store still direct-indexes
+                # lookup_rpc_port, so a genuine AscendStore missing its port fails fast exactly
+                # as before instead of being silently skipped.
+                if store.get(KV_CONNECTOR_KEY) != UCM_CONNECTOR:
+>                   config.lookup_rpc_port = int(store[LOOPUP_RPC_PORT_KEY]) + lookup_rpc_port_offset
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   KeyError: 'lookup_rpc_port'
+
+motor/config/node_manager.py:280: KeyError
+____ test_g5_lookup_compatibility_retains_role_offset[fields2-0-prefill-0] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b0e10857020>
+role = 'prefill', offset = 0, fields = {}, base = 0
+
+    @pytest.mark.parametrize("role,offset", [("prefill", 0), ("decode", 1)])
+    @pytest.mark.parametrize("fields,base", [
+        ({"kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 20),
+        ({"lookup_rpc_port": "7", "kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 7),
+        ({}, 0),
+    ])
+    def test_g5_lookup_compatibility_retains_role_offset(monkeypatch, role, offset, fields, base):
+        """Nested/default ports must work on both roles; a legacy top-level port wins."""
+        monkeypatch.setenv("ROLE", role)
+        monkeypatch.setenv("INDEX", "0")
+        store = {"kv_connector": "AscendStoreConnector", **fields}
+>       config = SingleContainerNodemanagerConfig.from_json(_single_container_user_config(store))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/node_manager/test_config.py:1316: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'motor.config.node_manager.SingleContainerNodemanagerConfig'>
+user_config_data = {'motor_deploy_config': {'d_instances_num': 1, 'deploy_mode': 'single_container', 'p_instances_num': 1}, 'motor_engine...kv_connector': 'MultiConnector', 'kv_connector_extra_config': {'connectors': [{...}, {...}]}}}, 'engine_type': 'vllm'}}
+
+    @classmethod
+    def from_json(cls, user_config_data: dict[str, Any]) -> "SingleContainerNodemanagerConfig":
+        config = cls()
+        deploy_mode = user_config_data.get("motor_deploy_config", {}).get("deploy_mode", "")
+        if deploy_mode != "single_container" or not Env.role or Env.index is None:
+            return config
+    
+        config.single_container_flag = True
+        index = int(Env.index)
+    
+        union_section = user_config_data.get(MOTOR_ENGINE_UNION_CONFIG_KEY)
+        prefill_section = user_config_data.get(MOTOR_ENGINE_PREFILL_CONFIG_KEY)
+        if union_section and not prefill_section:
+            if Env.role != "union":
+                return config
+    
+            union_resolver = ConfigResolver(union_section)
+            union_parallel_config = union_resolver.get_parallel_config()
+            u_dp_size = union_parallel_config.get(DP, 1)
+            u_world_size = union_parallel_config["world_size"]
+    
+            config.node_manager_port_offset = index
+            config.base_port_offset = index * u_dp_size * 2
+            config.device_offset = index * u_world_size
+            config.device_num = u_world_size
+            config.dp_rpc_port = int(union_parallel_config["dp_rpc_port"]) + index
+            return config
+    
+        p_instances_num = user_config_data['motor_deploy_config']['p_instances_num']
+        d_instances_num = user_config_data['motor_deploy_config']['d_instances_num']
+        encode_section = user_config_data.get(MOTOR_ENGINE_ENCODE_CONFIG_KEY, {})
+        prefill_section = user_config_data[MOTOR_ENGINE_PREFILL_CONFIG_KEY]
+        decode_section = user_config_data[MOTOR_ENGINE_DECODE_CONFIG_KEY]
+        encode_resolver = ConfigResolver(encode_section) if encode_section else None
+        prefill_resolver = ConfigResolver(prefill_section)
+        decode_resolver = ConfigResolver(decode_section)
+        encode_parallel_config = encode_resolver.get_parallel_config() if encode_resolver else {}
+        prefill_parallel_config = prefill_resolver.get_parallel_config()
+        decode_parallel_config = decode_resolver.get_parallel_config()
+        e_dp_size = encode_parallel_config.get(DP, 1)
+        p_dp_size = prefill_parallel_config.get(DP, 1)
+        d_dp_size = decode_parallel_config.get(DP, 1)
+        e_world_size = encode_parallel_config.get("world_size", 0)
+        p_world_size = prefill_parallel_config["world_size"]
+        d_world_size = decode_parallel_config["world_size"]
+    
+        d_node_manager_port_offset = p_instances_num * p_dp_size + index
+        d_base_port_offset = (p_instances_num * p_dp_size + index * d_dp_size) * 2
+        d_device_offset = p_instances_num * p_world_size + index * d_world_size
+    
+        e_node_manager_port_offset = d_instances_num * d_dp_size + d_node_manager_port_offset
+        e_base_port_offset = d_base_port_offset + e_dp_size
+        e_device_offset = d_device_offset + e_world_size
+    
+        kv_port_offset = 0
+        lookup_rpc_port_offset = 0
+        dp_rpc_port_offset = 0
+    
+        if Env.role == 'prefill':
+            config.node_manager_port_offset = index
+            config.base_port_offset = index * d_dp_size * 2
+            config.device_offset = index * p_world_size
+            config.device_num = p_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = index
+            dp_rpc_port_offset = index
+        elif Env.role == 'decode':
+            config.node_manager_port_offset = d_node_manager_port_offset
+            config.base_port_offset = d_base_port_offset
+            config.device_offset = d_device_offset
+            config.device_num = d_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = p_instances_num + index
+            dp_rpc_port_offset = p_instances_num + index
+        elif Env.role == 'encode':
+            config.node_manager_port_offset = e_node_manager_port_offset
+            config.base_port_offset = e_base_port_offset
+            config.device_offset = e_device_offset
+            config.device_num = e_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = index
+            dp_rpc_port_offset = index
+    
+        kv_config = user_config_data[MOTOR_ENGINE_PREFILL_CONFIG_KEY][ENGINE_CONFIG_KEY].get(KV_TRANSFER_CONFIG_KEY, {})
+        if kv_config:
+            if kv_config[KV_CONNECTOR_KEY] == MULTICONNECTOR:
+                extra_config = kv_config.get(KV_CONNECTOR_EXTRA_CONFIG_KEY)
+                connectors = extra_config.get(CONNECTORS_KEY) if isinstance(extra_config, dict) else None
+                if not isinstance(connectors, list) or len(connectors) < 2:
+                    raise ValueError(
+                        f"{KV_TRANSFER_CONFIG_KEY}.{KV_CONNECTOR_EXTRA_CONFIG_KEY}.{CONNECTORS_KEY} "
+                        f"must be a list of at least 2 connectors (transport first, store second) "
+                        f"when {KV_CONNECTOR_KEY} is {MULTICONNECTOR}"
+                    )
+                if not all(isinstance(connector, dict) for connector in connectors[:2]):
+                    raise ValueError(
+                        f"{KV_TRANSFER_CONFIG_KEY}.{KV_CONNECTOR_EXTRA_CONFIG_KEY}.{CONNECTORS_KEY} "
+                        "entries must be objects (connector configs)"
+                    )
+                config.kv_port = int(connectors[0][KV_PORT_KEY]) + kv_port_offset
+                store = connectors[1]
+                # UCM store carries no lookup_rpc_port. Skip ONLY UCM (use .get() to avoid a
+                # KeyError on the kv_connector lookup); every other store still direct-indexes
+                # lookup_rpc_port, so a genuine AscendStore missing its port fails fast exactly
+                # as before instead of being silently skipped.
+                if store.get(KV_CONNECTOR_KEY) != UCM_CONNECTOR:
+>                   config.lookup_rpc_port = int(store[LOOPUP_RPC_PORT_KEY]) + lookup_rpc_port_offset
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   KeyError: 'lookup_rpc_port'
+
+motor/config/node_manager.py:280: KeyError
+_____ test_g5_lookup_compatibility_retains_role_offset[fields2-0-decode-1] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7b0e101b8950>
+role = 'decode', offset = 1, fields = {}, base = 0
+
+    @pytest.mark.parametrize("role,offset", [("prefill", 0), ("decode", 1)])
+    @pytest.mark.parametrize("fields,base", [
+        ({"kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 20),
+        ({"lookup_rpc_port": "7", "kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 7),
+        ({}, 0),
+    ])
+    def test_g5_lookup_compatibility_retains_role_offset(monkeypatch, role, offset, fields, base):
+        """Nested/default ports must work on both roles; a legacy top-level port wins."""
+        monkeypatch.setenv("ROLE", role)
+        monkeypatch.setenv("INDEX", "0")
+        store = {"kv_connector": "AscendStoreConnector", **fields}
+>       config = SingleContainerNodemanagerConfig.from_json(_single_container_user_config(store))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/node_manager/test_config.py:1316: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'motor.config.node_manager.SingleContainerNodemanagerConfig'>
+user_config_data = {'motor_deploy_config': {'d_instances_num': 1, 'deploy_mode': 'single_container', 'p_instances_num': 1}, 'motor_engine...kv_connector': 'MultiConnector', 'kv_connector_extra_config': {'connectors': [{...}, {...}]}}}, 'engine_type': 'vllm'}}
+
+    @classmethod
+    def from_json(cls, user_config_data: dict[str, Any]) -> "SingleContainerNodemanagerConfig":
+        config = cls()
+        deploy_mode = user_config_data.get("motor_deploy_config", {}).get("deploy_mode", "")
+        if deploy_mode != "single_container" or not Env.role or Env.index is None:
+            return config
+    
+        config.single_container_flag = True
+        index = int(Env.index)
+    
+        union_section = user_config_data.get(MOTOR_ENGINE_UNION_CONFIG_KEY)
+        prefill_section = user_config_data.get(MOTOR_ENGINE_PREFILL_CONFIG_KEY)
+        if union_section and not prefill_section:
+            if Env.role != "union":
+                return config
+    
+            union_resolver = ConfigResolver(union_section)
+            union_parallel_config = union_resolver.get_parallel_config()
+            u_dp_size = union_parallel_config.get(DP, 1)
+            u_world_size = union_parallel_config["world_size"]
+    
+            config.node_manager_port_offset = index
+            config.base_port_offset = index * u_dp_size * 2
+            config.device_offset = index * u_world_size
+            config.device_num = u_world_size
+            config.dp_rpc_port = int(union_parallel_config["dp_rpc_port"]) + index
+            return config
+    
+        p_instances_num = user_config_data['motor_deploy_config']['p_instances_num']
+        d_instances_num = user_config_data['motor_deploy_config']['d_instances_num']
+        encode_section = user_config_data.get(MOTOR_ENGINE_ENCODE_CONFIG_KEY, {})
+        prefill_section = user_config_data[MOTOR_ENGINE_PREFILL_CONFIG_KEY]
+        decode_section = user_config_data[MOTOR_ENGINE_DECODE_CONFIG_KEY]
+        encode_resolver = ConfigResolver(encode_section) if encode_section else None
+        prefill_resolver = ConfigResolver(prefill_section)
+        decode_resolver = ConfigResolver(decode_section)
+        encode_parallel_config = encode_resolver.get_parallel_config() if encode_resolver else {}
+        prefill_parallel_config = prefill_resolver.get_parallel_config()
+        decode_parallel_config = decode_resolver.get_parallel_config()
+        e_dp_size = encode_parallel_config.get(DP, 1)
+        p_dp_size = prefill_parallel_config.get(DP, 1)
+        d_dp_size = decode_parallel_config.get(DP, 1)
+        e_world_size = encode_parallel_config.get("world_size", 0)
+        p_world_size = prefill_parallel_config["world_size"]
+        d_world_size = decode_parallel_config["world_size"]
+    
+        d_node_manager_port_offset = p_instances_num * p_dp_size + index
+        d_base_port_offset = (p_instances_num * p_dp_size + index * d_dp_size) * 2
+        d_device_offset = p_instances_num * p_world_size + index * d_world_size
+    
+        e_node_manager_port_offset = d_instances_num * d_dp_size + d_node_manager_port_offset
+        e_base_port_offset = d_base_port_offset + e_dp_size
+        e_device_offset = d_device_offset + e_world_size
+    
+        kv_port_offset = 0
+        lookup_rpc_port_offset = 0
+        dp_rpc_port_offset = 0
+    
+        if Env.role == 'prefill':
+            config.node_manager_port_offset = index
+            config.base_port_offset = index * d_dp_size * 2
+            config.device_offset = index * p_world_size
+            config.device_num = p_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = index
+            dp_rpc_port_offset = index
+        elif Env.role == 'decode':
+            config.node_manager_port_offset = d_node_manager_port_offset
+            config.base_port_offset = d_base_port_offset
+            config.device_offset = d_device_offset
+            config.device_num = d_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = p_instances_num + index
+            dp_rpc_port_offset = p_instances_num + index
+        elif Env.role == 'encode':
+            config.node_manager_port_offset = e_node_manager_port_offset
+            config.base_port_offset = e_base_port_offset
+            config.device_offset = e_device_offset
+            config.device_num = e_world_size
+            kv_port_offset = config.device_offset
+            lookup_rpc_port_offset = index
+            dp_rpc_port_offset = index
+    
+        kv_config = user_config_data[MOTOR_ENGINE_PREFILL_CONFIG_KEY][ENGINE_CONFIG_KEY].get(KV_TRANSFER_CONFIG_KEY, {})
+        if kv_config:
+            if kv_config[KV_CONNECTOR_KEY] == MULTICONNECTOR:
+                extra_config = kv_config.get(KV_CONNECTOR_EXTRA_CONFIG_KEY)
+                connectors = extra_config.get(CONNECTORS_KEY) if isinstance(extra_config, dict) else None
+                if not isinstance(connectors, list) or len(connectors) < 2:
+                    raise ValueError(
+                        f"{KV_TRANSFER_CONFIG_KEY}.{KV_CONNECTOR_EXTRA_CONFIG_KEY}.{CONNECTORS_KEY} "
+                        f"must be a list of at least 2 connectors (transport first, store second) "
+                        f"when {KV_CONNECTOR_KEY} is {MULTICONNECTOR}"
+                    )
+                if not all(isinstance(connector, dict) for connector in connectors[:2]):
+                    raise ValueError(
+                        f"{KV_TRANSFER_CONFIG_KEY}.{KV_CONNECTOR_EXTRA_CONFIG_KEY}.{CONNECTORS_KEY} "
+                        "entries must be objects (connector configs)"
+                    )
+                config.kv_port = int(connectors[0][KV_PORT_KEY]) + kv_port_offset
+                store = connectors[1]
+                # UCM store carries no lookup_rpc_port. Skip ONLY UCM (use .get() to avoid a
+                # KeyError on the kv_connector lookup); every other store still direct-indexes
+                # lookup_rpc_port, so a genuine AscendStore missing its port fails fast exactly
+                # as before instead of being silently skipped.
+                if store.get(KV_CONNECTOR_KEY) != UCM_CONNECTOR:
+>                   config.lookup_rpc_port = int(store[LOOPUP_RPC_PORT_KEY]) + lookup_rpc_port_offset
+                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   KeyError: 'lookup_rpc_port'
+
+motor/config/node_manager.py:280: KeyError
+=========================== short test summary info ============================
+FAILED tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields0-20-prefill-0]
+FAILED tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields0-20-decode-1]
+FAILED tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields2-0-prefill-0]
+FAILED tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields2-0-decode-1]
+================== 4 failed, 2 passed, 68 deselected in 0.14s ==================
+
+==========================================
+Test Result Summary
+==========================================
+Test Status:
+  ✓ Passed: 2
+  ✗ Failed: 4
+
+Overall Status:
+  ✗ Tests failed
+
+Hint: Check the output above for detailed information about failed tests
+==========================================
+

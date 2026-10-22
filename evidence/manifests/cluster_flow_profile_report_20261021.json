@@ -1,0 +1,22 @@
+{
+  "received_date": "2026-10-21",
+  "source_attachment": "/mnt/c/Users/ALIENWARE/.codex/attachments/dc06a2f0-8c4a-40ac-bfcb-0bb981f18e11/已粘贴的文本.txt",
+  "archived_report": "docs/traffic/CLUSTER_FLOW_PROFILE_REPORT_20260924.original.md",
+  "report_sha256": "b42c5fe3ad7fa58f7f7373e421fb6e3673d263936a58c24f979f02c6ace5ae63",
+  "bytes": 24859,
+  "byte_identical_to_attachment": true,
+  "archive_location_reason": "User explicitly requested original traffic modeling material under docs.",
+  "analysis": "docs/traffic/CLUSTER_FLOW_PROFILE_ANALYSIS_20260924.md",
+  "onsite_reported": {
+    "input_sha256": "89c3b69274d7b7923b43da1a607382f713321ce4082e67de19a1dfd989a3a8b3",
+    "patched_script_sha256": "07c0870f58c7da27b9105868b48af34a15e79b1340efab06fd6c00d4110c6f73",
+    "instance_uuid": "9a1c5866-aab8-4229-ae4c-51686b863d6e",
+    "requests": 5549,
+    "units": {
+      "ttft": "unknown",
+      "tpot": "unknown"
+    }
+  },
+  "local_original_script_sha256": "22a049696339cd691332213b47a00d27a2cdb37a8c174dcd5a79c6669456f2e4",
+  "raw_csv_available_locally": false
+}

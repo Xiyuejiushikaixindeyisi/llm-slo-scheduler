@@ -1,0 +1,12 @@
+{
+  "import_date": "2026-10-19",
+  "source": "/mnt/c/Users/ALIENWARE/.codex/attachments/a4f5c1d4-609b-4dc6-9da4-724502033f34/已粘贴的文本.txt",
+  "destination": "evidence/huawei/2026-10-19-g4-forensics/FGJSQ_P_ONLY_REPRO_FORENSICS.txt",
+  "sha256": "68aef44611f95124aac3084cb406657566adcbd8abe366ef24857281c0c189cc",
+  "transform": "none",
+  "evidence_type": "user_supplied_forensics_report",
+  "report_evidence_date": "2026-10-19",
+  "reported_runtime_tag": "20261015_134536",
+  "reported_experiment_group": "g4",
+  "runtime_status": "historical_stack_teardown; not a currently running service"
+}

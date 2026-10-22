@@ -1,0 +1,13 @@
+{
+  "import_date": "2026-10-20",
+  "source": "/mnt/c/Users/ALIENWARE/.codex/attachments/7ce549fb-e022-48f8-a073-8c4b94ba6e00/已粘贴的文本.txt",
+  "destination": "evidence/huawei/2026-10-20-waiting-study/WAITING_RUNNING_OPEN_CLOSED_REPORT.txt",
+  "sha256": "20092b4b9e7fc32c5b5ad6a27a3f79532d40cd0a7ae344bc1b336d4de1dd82b7",
+  "transform": "none",
+  "evidence_type": "user_supplied_experiment_summary",
+  "reported_experiments": [
+    "EXP_10.9 production trace replay",
+    "EXP_10.12 AISBench"
+  ],
+  "raw_measurements_available_locally": false
+}

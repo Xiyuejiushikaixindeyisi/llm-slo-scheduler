@@ -1,0 +1,7 @@
+{
+  "motor/config/node_manager.py": {
+    "before": "9d1121d46ac707d2168f5bb1606797029595c3dbb2b565d8fea0996299adac35",
+    "after": "46800951b22e5011045f33494cc21e4435940bedd09ac91854a76b96f56a648d",
+    "provenance": "locally reconstructed from handover P01; full onsite SHA256 unavailable"
+  }
+}

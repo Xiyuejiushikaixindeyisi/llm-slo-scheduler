@@ -1,0 +1,23 @@
+{
+  "received_date": "2026-10-21",
+  "source_attachment": "/mnt/c/Users/ALIENWARE/.codex/attachments/177fa8ca-d329-4f6d-8590-17372b398afc/已粘贴的文本.txt",
+  "archived_report": "docs/traffic/FINAL_WAITING_AND_ADMISSION_EVIDENCE_20261021.original.md",
+  "report_sha256": "29a964d3342d94a72e8c9f73cfa2783a67610e82e10e4128d91b6729a28b301a",
+  "bytes": 32091,
+  "byte_identical_to_attachment": true,
+  "analysis": "docs/traffic/FINAL_WAITING_AND_ADMISSION_REVIEW_20261021.md",
+  "discussion_brief": "docs/admission/DUAL_WAITING_QUEUE_DISCUSSION_BRIEF.md",
+  "raw_run_data_available_locally": false,
+  "archive_location_reason": "User requested raw traffic modeling material under docs.",
+  "local_reference_hashes": {
+    "src/fgjsq/policy.py": "68c2695dec1136b593a9b827bc05c5f43e333b8e79154eb424044f29bbfa4f07",
+    "src/motor_adapter/service.py": "10cca5403ae916d6044d781a60a30c8a095575888e624b84a0f74d4b5d6a2027",
+    "src/motor_adapter/body_observer.py": "586ff1fb72492190a74d55fea332f9447bc2e278ae316a99739c54c8b806f386",
+    "src/fgjsq/snapshot.py": "459b020bdf59c7e850a0338f44b6b23faadcc0413a24c7492e8bde8b7f00233a",
+    "src/slo_patch/slo/scheduler_with_predictor.py": "36c97c22e941d20fe7750a5c4d5acd717f9219c9ee784cf58d9323e781f4803a",
+    "upstream/vllm-v0.23.0/vllm/v1/metrics/stats.py": "08eb6bb969ad47e4207ba5568beaec35bdb09192b6db046f046dab4892ac1bf3",
+    "upstream/vllm-v0.23.0/vllm/v1/metrics/loggers.py": "ce2a0535d2b2b69e4368f34b692dac081be764e8d0eadab4f791b1afdcf43df4",
+    "upstream/vllm-v0.23.0/vllm/v1/core/sched/scheduler.py": "9ae1491f57a6294e32416b93ef2ea68107fa0d65c3a4d7f745f1261012f735e9"
+  },
+  "verification_scope": "Report text and existing local code only; report supplies mostly hash prefixes; not full onsite verification."
+}

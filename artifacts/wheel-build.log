@@ -1,0 +1,13 @@
+Looking in indexes: https://pypi.tuna.tsinghua.edu.cn/simple
+Processing /home/zhangxiyue/llm-slo-scheduler/artifacts/build/release-stage-3ach0xce/fgjsq-motor-p-0.2.0-20261019
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: slo-patch
+  Building wheel for slo-patch (pyproject.toml): started
+  Building wheel for slo-patch (pyproject.toml): finished with status 'done'
+  Created wheel for slo-patch: filename=slo_patch-0.2.0-py3-none-any.whl size=39779 sha256=aeeb20157b1fd18eccb3156cb04999c2a2a4010ad5901fba27e60d09c033b20a
+  Stored in directory: /home/zhangxiyue/.cache/pip/wheels/83/6a/f3/9d501dfc87c958c559fa804f48f4563000084c16f8596ac03f
+Successfully built slo-patch
+
+[notice] A new release of pip is available: 25.3 -> 26.2.1
+[notice] To update, run: /home/zhangxiyue/llm-slo-scheduler/.venv/bin/python -m pip install --upgrade pip

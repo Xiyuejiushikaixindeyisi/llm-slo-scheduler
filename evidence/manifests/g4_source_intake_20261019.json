@@ -1,0 +1,72 @@
+{
+  "recorded_date": "2026-10-19",
+  "scope": "raw user source intake; not a claim of onsite byte identity",
+  "files": [
+    {
+      "path": "evidence/source_drops/proxy/g4-20261015/load_balance_proxy_finegrained_p3d_pdhybrid.py",
+      "bytes": 81888,
+      "sha256": "a19838bb3f96a94e874e47c289cb0cfe2a04454db6b524e67473425053f26576",
+      "provenance": "user_placed_source_drop"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/setup.py",
+      "bytes": 720,
+      "sha256": "c9a5a8ca3f2bc3ac504e3d1654a2743bd38bd2aad81063158ccffa2e578d2116",
+      "provenance": "user_pasted_chat_archived_by_assistant"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/slo_patch/__init__.py",
+      "bytes": 439,
+      "sha256": "9acc027352b776aa0bd06090a5d75e4275972edff38f1c4ab343e4b36cc3c3ef",
+      "provenance": "user_placed_source_drop"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/slo_patch/activate.py",
+      "bytes": 983,
+      "sha256": "01d1cee7a21419ee48b5a55315ff3d1d7bbb0fd792c980ff7c415c9b63abdba3",
+      "provenance": "user_placed_source_drop"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/slo_patch/patch_core.py",
+      "bytes": 12060,
+      "sha256": "aa742051dd440abcd73864d16de0ae2aae8d7fc49a2e5c6fea36ccd2ce4be4cf",
+      "provenance": "user_placed_source_drop"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/slo_patch/patch_runtime.py",
+      "bytes": 16600,
+      "sha256": "d35663870b5dd111d029d732c1d9f291474661ebcbbc814d4f57921e91cb0b1d",
+      "provenance": "user_placed_source_drop"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/slo_patch/slo/batch_event_reporter.py",
+      "bytes": 4977,
+      "sha256": "0588f9c0379076507490512b553e0da171ba54a9138b36d736fb6b3823fee337",
+      "provenance": "user_placed_source_drop"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/slo_patch/slo/batch_reporter.py",
+      "bytes": 1189,
+      "sha256": "7ec2a7efd5c10e0b1b65bac6dcae0fbb5bdfd736d8bf0e792224d9d63da70181",
+      "provenance": "user_placed_source_drop"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/slo_patch/slo/predictor.py",
+      "bytes": 857,
+      "sha256": "f08e3e40782deb3f544aee3f6b4279761d00d5657e75825676c112c6e53695de",
+      "provenance": "user_placed_source_drop"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/slo_patch/slo/predictor_impl.py",
+      "bytes": 22783,
+      "sha256": "ca4f9d20077243cec679cd487db57e4db4dae89dfd8d1dbd71a34e6baa788aca",
+      "provenance": "user_placed_source_drop"
+    },
+    {
+      "path": "evidence/source_drops/slo_patch/g4-20261015/slo_patch/slo/scheduler_with_predictor.py",
+      "bytes": 20011,
+      "sha256": "1e03146c9f9251f3ca8f7db9302bcb7e6437cd01f8f73223baea645910e11ea8",
+      "provenance": "user_placed_source_drop"
+    }
+  ]
+}

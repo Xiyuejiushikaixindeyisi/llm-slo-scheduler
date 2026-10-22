@@ -1,0 +1,32 @@
+Cloning into '/home/zhangxiyue/llm-slo-scheduler/artifacts/build/g5-check-eqezkn_n/motor'...
+done.
+Note: switching to 'f203263d9742dd6fa76eaef658e0ff3a0f380301'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+{"status": "applied", "files": ["motor/coordinator/models/request.py", "motor/coordinator/domain/scheduling.py", "motor/coordinator/scheduler/runtime/scheduler_client.py", "motor/coordinator/scheduler/runtime/scheduler_server.py", "motor/coordinator/api_server/management_server.py", "motor/coordinator/router/strategies/unified_pd.py", "motor/coordinator/router/strategies/base.py", "motor/config/node_manager.py"], "initial_states": {"fgjsq": "before", "node-manager": "before"}}
+{"motor_root": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/g5-check-eqezkn_n/motor", "base_commit": "f203263d9742dd6fa76eaef658e0ff3a0f380301", "scope": "CPU development source; not an onsite image replica"}
+{"status": "already_aligned", "components": {"fgjsq": "after", "node-manager": "after"}}
+{"motor_root": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/g5-check-eqezkn_n/motor", "base_commit": "f203263d9742dd6fa76eaef658e0ff3a0f380301", "scope": "CPU development source; not an onsite image replica"}
+{
+  "passed": true,
+  "scope": "local",
+  "matched": 33,
+  "issues": {},
+  "output": "None"
+}
+{"name": "g5-baseline-alignment-0.1.0-20261022", "files": 71, "stage": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/g5-check-eqezkn_n/bundle", "archive_created": false}
+{"status": "already_aligned", "components": {"fgjsq": "after", "node-manager": "after"}}

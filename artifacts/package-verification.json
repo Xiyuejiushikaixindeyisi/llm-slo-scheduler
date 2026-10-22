@@ -1,0 +1,11 @@
+{
+  "syntax_files": 33,
+  "motor_install_apply_revert": "passed outside Git repository",
+  "unknown_source_rejection": "passed without modifying files",
+  "legacy_bytes_preserved": [
+    "predictor.py",
+    "predictor_impl.py",
+    "batch_reporter.py"
+  ],
+  "native_npu_validation": false
+}

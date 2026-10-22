@@ -1,0 +1,30 @@
+--- a/tests/node_manager/test_config.py
++++ b/tests/node_manager/test_config.py
+@@ -1300,3 +1300,27 @@
+     kcfg = _parse_kv({"backend": "memcache", "store_mode": "standalone", "global_segment_size": "1GB"})
+     assert kcfg.store_mode == ""
+     assert kcfg.global_segment_size == ""
++
++
++@pytest.mark.parametrize("role,offset", [("prefill", 0), ("decode", 1)])
++@pytest.mark.parametrize("fields,base", [
++    ({"kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 20),
++    ({"lookup_rpc_port": "7", "kv_connector_extra_config": {"lookup_rpc_port": "20"}}, 7),
++    ({}, 0),
++])
++def test_g5_lookup_compatibility_retains_role_offset(monkeypatch, role, offset, fields, base):
++    """Nested/default ports must work on both roles; a legacy top-level port wins."""
++    monkeypatch.setenv("ROLE", role)
++    monkeypatch.setenv("INDEX", "0")
++    store = {"kv_connector": "AscendStoreConnector", **fields}
++    config = SingleContainerNodemanagerConfig.from_json(_single_container_user_config(store))
++    assert config.lookup_rpc_port == base + offset
++
++
++def test_g5_invalid_explicit_lookup_port_is_not_silently_defaulted(monkeypatch):
++    monkeypatch.setenv("ROLE", "prefill")
++    monkeypatch.setenv("INDEX", "0")
++    store = {"kv_connector": "AscendStoreConnector", "lookup_rpc_port": "invalid",
++             "kv_connector_extra_config": {"lookup_rpc_port": "20"}}
++    with pytest.raises(ValueError):
++        SingleContainerNodemanagerConfig.from_json(_single_container_user_config(store))

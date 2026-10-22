@@ -1,0 +1,44 @@
+diff --git a/.agents/skills/motor-dev/bug-fix-history/INDEX.md b/.agents/skills/motor-dev/bug-fix-history/INDEX.md
+--- a/.agents/skills/motor-dev/bug-fix-history/INDEX.md
++++ b/.agents/skills/motor-dev/bug-fix-history/INDEX.md
+@@ -58,3 +58,5 @@
+ | 2026-09-09 | kv_conductor | map 格式 BlockStored 无法解析 | `kv_conductor/map-block-stored.md` | BlockStored, msgspec, map, deserialize_any |
+ | 2026-09-09 | kv_conductor | CPU/Disk 订阅器误按 vLLM 事件解析 | `kv_conductor/event-source-routing.md` | ZmqSubscriber, EventSource, PoolEvent, CPU, Disk |
+ | 2026-09-09 | coordinator | PD 分离请求在 Decode 才因 Prefill 改写字段被拒绝 | [pd-stream-options-late-rejection.md](coordinator/pd-stream-options-late-rejection.md) | coordinator, PD separation, stream_options, min_tokens, Decode HTTP-400, KV cache expiry |
++
++| 2026-10-22 | node_manager | G5 nested lookup port compatibility with role offsets | [g5-nested-lookup-port.md](node_manager/g5-nested-lookup-port.md) | MultiConnector, lookup_rpc_port, nested extra_config, P/D offset |
+diff --git a/.agents/skills/motor-dev/references/nodeman.md b/.agents/skills/motor-dev/references/nodeman.md
+--- a/.agents/skills/motor-dev/references/nodeman.md
++++ b/.agents/skills/motor-dev/references/nodeman.md
+@@ -466,3 +466,17 @@
+ - `tests/node_manager/core/services/native_engine/virtual_inference/test_worker.py`: warmup, loop intervals, failure threshold, abnormal flag, idempotent start and thread/client cleanup (vLLM requester only).
+ - `tests/node_manager/core/services/native_engine/virtual_inference/test_capabilities.py`: `should_enable_vllm_virtual_inference` gates (config / DP0 / headless / threshold).
+ - `tests/common/utils/test_ai_cube.py`: npu-smi watch support detection and usage parsing.
++
++
++## G5 local compatibility overlay (2026-10-22)
++
++For `SingleContainerNodemanagerConfig.from_json`, a non-UCM second MultiConnector
++store reads `lookup_rpc_port` from the top-level key first, otherwise from
++`kv_connector_extra_config`, otherwise `0`. Convert with `int` and retain the
++role/index offset; a malformed explicit port still fails. UCM continues to skip
++this lookup. This is the G5 report's semantic reconstruction; the onsite full-file
++SHA was not supplied. Do not replace a different onsite fix based only on hashes.
++
++Regression: `bash tests/run_tests.sh --serial tests/node_manager/test_config.py`.
++The G5 added cases failed four times against the old code, then all 74 config tests
++passed with the overlay. See `bug-fix-history/node_manager/g5-nested-lookup-port.md`.
+diff --git a/.agents/skills/motor-dev/bug-fix-history/node_manager/g5-nested-lookup-port.md b/.agents/skills/motor-dev/bug-fix-history/node_manager/g5-nested-lookup-port.md
+new file mode 100644
+--- /dev/null
++++ b/.agents/skills/motor-dev/bug-fix-history/node_manager/g5-nested-lookup-port.md
+@@ -0,0 +1,9 @@
++# [2026-10-22] G5 nested lookup port compatibility
++
++- **Symptom**: `KeyError: lookup_rpc_port` in single-container P/D configuration.
++- **Root cause**: `motor/config/node_manager.py` indexed only the top-level store field, while the G5 engine configuration carries it under `kv_connector_extra_config`.
++- **Why**: A legacy Motor config assumption was copied to the native-engine connector configuration.
++- **Fix**: Preserve top-level precedence, fall back to nested extra_config then `0`, retain `int`, P/D index offsets and the UCM skip. This follows the frozen G5 report; it is not a full-file byte reproduction of the unprovided onsite fix.
++- **Test interception**: Six parameterized P/D cases cover nested/top-level/default behavior; an additional test retains failure on an invalid explicit port. Existing tests cover UCM and legacy AscendStore. Old code: four failures/two passes; fixed file: all 74 tests pass.
++- **Scenario**: Single-container TP4 P/D with MultiConnector and nested AscendStore lookup port.
++- **Keywords**: MultiConnector, lookup_rpc_port, extra_config, P/D offset, G5.
