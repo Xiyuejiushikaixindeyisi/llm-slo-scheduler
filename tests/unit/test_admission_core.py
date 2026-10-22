@@ -279,3 +279,16 @@ def test_pressure_units_unknown_and_inclusive_boundary():
 def test_classifier_config_rejects_invalid(changes):
     with pytest.raises(ValueError):
         classifier(**changes)
+
+
+@pytest.mark.parametrize("cost, pressure, expected", [(10, True, Reason.PRESSURE),
+    (15, True, Reason.BOTH), (15, False, Reason.TAIL), (10, False, Reason.NOT_LONG)])
+def test_unified_cost_or_pressure_uses_one_credit(cost, pressure, expected):
+    c = classifier(quota_every=1, credit_cap=2)
+    decide(c, 10)
+    before = c.consumed
+    result = decide(c, cost, high_pressure=pressure)
+    assert result.reason is expected
+    assert c.consumed - before == int(result.tail)
+    assert not c.decide(None, budget_allows=True, pressure_valid=True, high_pressure=True).tail
+    assert not c.decide(10, budget_allows=True, pressure_valid=False, high_pressure=True).tail

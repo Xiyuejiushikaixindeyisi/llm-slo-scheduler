@@ -1,94 +1,99 @@
-# gf_admission 0.1.0rc1：实现、评审与实验方案
+# gf_admission 0.1.0rc2：修复、阈值探测与正式实验
 
-2026-10-22；基线 3b63b00546e7a6ffb2526dafc341969cebe22359；开发分支 backup/20261022-init。
-这是接通 Motor 的实验候选包，默认 off。用户要求的顺序是：完整本地交付 → Session 2 兜底评审 → 华为短验证 → AISBench。没有执行华为实验，没有性能收益结论，不满足合入 main 条件。
+2026-10-22；基线 3b63b00546e7a6ffb2526dafc341969cebe22359；开发分支 backup/20261022-init。rc1 已撤回，本文替代旧运行指南；历史错误由原评审保留。当前仅本地候选，Session 2 复评、华为真实栈验证及性能结论未完成，不能据此合并 main。
 
-## 本轮为什么继续，以及上轮为什么停止
+## 已批准的统一规则
 
-上轮交付 0.1.0.dev1 纯核心，是本 session 把阶段成果当作交付终点，停止过早；没有证据证明必须等待华为或 Session 2。此前不具备完整 runtime，不应拿旧包开展 admission 性能实验。现已继续完成 broker、客户端协议、Motor 接口、兼容校验、测试及增量交付工具。新包与旧 core 包名称、版本不同，不替换历史证据。
+可信正成本、有效压力下，成本偏长 OR 请求可路由 P 中最低 FG score >= H，且有共同 credit/S/V 预算、未受年龄保护，才进入 tail。无同成本或 benchmark 专用开关。normal FIFO 优先，tail 在实际候选 score <= L 时按 LIFO 放行，0 < L < H；每次 CAS fallback 重验、成功预留后重算。GF 队列不持 P/D 资源，不撤回已派发请求；P/D、FG 公式和 predictor 均保持 g5。
 
-开始 broker/协议/IPC 的门槛是：确认 Mgmt 全局所有权、锁/预留/释放语义、真实 transport 取消行为、HANDOFF 先 P 后 D、默认 off 边界，以及可运行的本地 mock/IPC 测试。上述信息来自固定源码，已具备。参数最优值、真实吞吐和完整 NPU 环境不属于编码门槛。
+高压时允许同成本新请求让行；GF 扣留闭环并发槽、减少引擎实际在途量是有效研究方向。入场调节和真实 LIFO 越序分别报告。实际未发生越序不能归因于 LIFO；只有入场调节也可比较端到端效果，不把降低实际引擎在途量自动判为造假。GF 等待包含在 AISBench TTFT 内。
 
-## 实现与边界
+## 修复与边界
 
-- 独立 wheel 只包含 gf_admission，没有 vLLM entrypoint。没有重写 FGJSQ 公式、predictor 特征/训练/标签。
-- Mgmt 一份 broker，共用原 FG lock；logical_nonce 去重后补 credit、冻结分类。normal FIFO、tail LIFO、数量/工作量/驻留预算；正常新请求仍服从 normal 队首。
-- enqueue 不持有 engine 请求体；在线 feature 在 worker 的专用单线程提取，IPC 只传成本、候选 generation 与原 g5 预留字段。GF queue residence 不预留 P/D。
-- normal 快路径可原子预留并返回 CLAIMED；等待路径为 QUEUED → READY_RESERVED → claim → CLAIMED。READY 持 P native/FG 两账且有租约；只有 claim 成功才能转发 P。
-- canonical reserve_deadline 在 Mgmt 真正预留时创建，排队不消耗原 30s reserve 命令窗口。每一次 CAS fallback 重新检查候选 FG score；压力不足停止本轮，而非跳过高压 P 去追逐最低成本。
-- unknown feature 不当零命中；zero cost 不污染正值 min/max；候选 generation 不一致回 unknown。事件新鲜度仅由经过 g5 身份与序号校验的 matched 事件更新。
-- 一条 worker WaitHub 同时承担长轮询和租约心跳，包括空闲与推理期间。wait < server 5s dispatch timeout，超时不是出队/取消。typed transport CANCELLED 重新抛出；未知 enqueue/claim 查同 key，禁止另起预留。
-- cancel-before-enqueue 有墓碑；取消不返还 credit。取消/领取在共享锁串行化；CLAIMED 不因 READY 租约或 worker 心跳丢失而自行释放。释放未确认保留 CLEANUP_PENDING；native CAS 抛出且结果不明时保留 uncertain record 并阻断新派发，不猜测减账。
-- finish_attempt、finish_request 沿用 g5 abort 兜底；shutdown 在销毁 SHM 前检查残留，拒绝把 CLAIMED/CLEANUP_PENDING 当成已清空。
-- drain 是停止新的让行并晋升已有 tail，继续普通 FIFO；不是停流量开关。运维须先停接入，再 drain、等双账归零，再停进程/切 off。
-- 配置每进程固定；不支持热切 mode/参数。所有 Mgmt/worker 必须同 digest。D 路由与引擎、P FCFS/running-first/8192/max24/async/SLO=0 不变。
-
-实际 runtime 变更仅四个既有文件：motor_adapter/{bindings,service}.py 与 Motor scheduler runtime/{scheduler_client,scheduler_server}.py。完整 before/after SHA 在 runtime-manifest.json；增量 diff 在 patches。开发笔记 patch 单独保存，不由部署器写入现场。
-
-## 与设计候选的有据取舍
-
-| 项目 | 实施及依据 | 风险/后续门槛 |
+| 项目 | rc2 行为 | 回归证据 |
 | --- | --- | --- |
-| submission_round | 当前 UnifiedPD _prepare_attempt_resource 收到 None 即结束本 attempt，不对同一 attempt 再 allocate；UNAVAILABLE 保留终局，真正新 attempt 才再排队 | 如现场出现同 attempt 的正常 resubmit，先扩协议，禁止删除旧墓碑绕过 |
-| 年龄 heap | 固定驻留且 FIFO 插入，tail 最老项就是下一到龄项；使用 OrderedDict 队首，有界晋升 | 动态 deadline/热更新未实现，不宣称支持 |
-| 通知缓存 | 不设独立无界消息队列；按 worker 的有界 ticket 集合取 revision > cursor 的最新状态，分批返回 | 可跳过中间状态但不会重复执行；票据 TTL 需覆盖请求+worker lease；不宣称重放完整事件日志 |
-| FeatureProvider | 复用固定 Motor _ensure_token_ids、query_conductor 的模板/租户/编码/超时/熔断；单线程且最多 2 个在途 future | 不是新增 async HTTP 协议；超时后底层工作未完成不能返还 permit。Python 无法强杀阻塞 tokenizer 线程；close 有残留计数，现场必须为零 |
-| 成本与压力 | 成本为 uncached + beta_cpu*CPU + beta_disk*Disk 的候选最小值；压力直接 g5 score | 不做毫秒拟合、不改 FG 预留成本；权重/score 阈值无性能标定 |
-| 账本部分失败 | guarded 分支保存 native/FG 记录，统一 abort 清理，未知 CAS 停新派发 | 无自动 crash recovery/分布式共识；Mgmt 重启和 CLAIMED worker 丢失必须现场对账 |
+| R1 | Motor attempt 编号不改，增加 submission_round；仅上一轮确认 UNAVAILABLE 且无预留才允许下一轮，传输重试沿用原 key；重新获取 feature/候选信息，逻辑分类/credit 不重扣；迟到取消覆盖同 attempt 后续轮次 | 真 UnifiedPD off/enforce 无资源后恢复；轮次/丢 ACK/取消/owner 测试 |
+| R2 | 同 owner、同 epoch 的 query/cancel/finish 可在 worker lease 过期后清理，不恢复新分配权限；失联 CLAIMED 仅在对应 FG record 的 native/FG 两个释放标志都确认时收敛 | 过期清理/被动对账/活跃未知保留；真实双账收尾 |
+| R3 | 总 feature deadline 覆盖候选 RPC＋executor；入口并发许可覆盖两阶段，后台 future 实际结束才归还许可；真实取消传播 | 8 请求/2 许可的慢 RPC、总超时、线程超时不提前归还、取消 |
+| R4 | 先筛残留再截断，返回 residual_total/residual_truncated | 多 CLOSED 在前、CLAIMED 在后及分页截断 |
+| 观测 | cost/pressure/both 分类原因；逻辑到达与提交次数分开；normal/protected/tail 派发、age/stale/drain 晋升、LIFO 越序计数；有界事件环、每 P W/N/score/event_age | 核心测试及真 Motor IPC tail→READY→claim→取消/释放 |
 
-取消/线程方案也核对了 [Python asyncio 文档](https://docs.python.org/3.12/library/asyncio-task.html#shielding-from-cancellation)：shield 不免除外层取消，任务必须有强引用。实现与 timeout 后仍持 permit 的测试据此设计。super-p95 固定 dd9c0895 原始片段及 SHA 在 tests/fixtures/admission；oracle 测试不是按新实现重写的期望。
+schema_version 与 admission capability 均为 2，混用 rc1 配置/worker 会拒绝。g5 event schema 保持 1，SHM 保持 schema 4。首轮 key=nonce:attempt；后续为 nonce:attempt:sN；attempt_seq 单独保存并沿用引擎事件身份。取消/finish 不需要存活租约，但仍验证 worker 与 coordinator epoch。结果未知不换 key、不 fallback。
 
-## 参数：显式实验起点，不是生产默认值
+unknown native CAS 仍停派发并保留 CLEANUP_PENDING；不猜测减账、不根据 score=0 或租约超时回收执行中的请求。对应释放证据若已被 g5 TTL 清除，不能推断丢失记录已经安全，需现场对账。CLAIMED/admission 关闭只说明这层资源责任处理完毕，不证明 D 或完整 HTTP 已结束。
 
-configs/gf_admission/{shadow,enforce}.example.json 需先填 cluster_uuid、model_spec 与参数来源。每次实验固定一份配置，记录 SHA/digest。
+每条请求生命周期诊断写入有界内存环，管理采样导出；共享锁内不新增日志文件 I/O。events 的 sequence 跳跃表示中间事件未采到，event_ring_overwritten 是环覆盖计数，不是客户端失败数。LIFO older_eligible 表示当时存在更旧且路由/压力合格的候选，未对旧候选试做 native CAS，不能称为硬件可执行性的完整证明。计数不保证所有事件正文永久保留。
 
-| 参数 | 候选值 | 依据 |
-| --- | --- | --- |
-| quota_every / quota_amount | 20 / 1 | 原型频率起点；累计让行比例受额度控制，不保证 P90 |
-| threshold_ratio / long_request_ratio | 0.8 / 1.5 | 固定原型双阈值，边界有 oracle |
-| credit_cap | 2 | 限制闲期累计额度后的突发让行；工程起点 |
-| max_pending / max_tail_requests | 256 / 16 | 有界背压，超限明确拒绝，不旁路重复 reserve |
-| max_tail_cost | 2097152 cost-token | 16×128K 的显式工作量预算；不是 NPU KV 容量 |
-| max_tail_wait_ms / scan_limit | 1000 / 4 | 保守限制让行驻留和一次资源不可用扫描；到龄只保证晋升，非完成截止 |
-| release_threshold | 0 g5 score | 仅空/零分候选释放 tail 的保守起点；可能过于保守 |
-| beta_cpu / beta_disk | 1 / 1 | 未标定时不给 CPU/Disk 省计算奖励；仅显式 NPU 覆盖降成本 |
-| wait / worker lease / READY lease | 1000 / 10000 / 5000 ms | 5s server headroom、worker liveness 和确认窗口分离 |
-| request wait / tombstone | 120000 / 180000 ms | 去重记录覆盖最大等待与 lease；不是 E2E SLO |
-| tick / pump items / pump time | 20ms / 16 / 2ms | 有界周期与批次；管理/取消共享锁仍需现场观察 |
-| feature timeout / in-flight | 100ms / 2 | 限制 GF 新增前处理延迟与线程积压；底层 Motor HTTP 仍为 3s |
-| event freshness / cleanup retries | 1000ms / 3 | 陈旧压力停止新增让行；释放失败保留可见残留 |
+pump_ms 是派发循环的软时间预算，维护、一次 CAS、采样和晋升可能超过它；不是 2ms 锁时长硬上限。provider Python 线程不能强杀，关闭残留必须记录；元数据 RPC 总 deadline 受事件循环调度延迟影响。
 
-没有要求用户继续收集 GB 数据、完整 trace、权重模型或额外参数意见。现场开始前才需确认实际 Python/安装路径、同一集群规格身份、可用 Conductor 分层协议和原生 .so；这些属于兼容/短验证，不是再开十小时实验。
+## 配置与探测
 
-## 包、安装和回退
+独立包默认 off。configs/gf_admission/enforce.example.json 的 H/L 为 null，不能原样开启。shadow 模板 H=2/L=1 仅用于引导观测，不是标定结论；shadow 不预留/延迟业务，也不能拿 shadow 的队列预算统计当 enforce 的仿真。
 
-包内有独立 wheel、四文件 payload、增量 patch、manifest、配置、测试、参考 Motor Python 源码和本说明。reference-motor 仅用于 CPU 测试/审阅，**不可覆盖现场整棵 Motor，也不是可安装的 Motor wheel**。不包含本机编译 .so，不打包现场 warm model，不重装 slo-patch/引擎。
+首轮固定候选：quota=1/20、credit_cap=2、tail数量上限2、tail驻留5s、scan=4；成本权重CPU/Disk=1、成本上限2097152（估计 token，不是 KV 容量）；成本双阈值0.8/1.5保留。若5s没有合适作用空间，可在短验证阶段比较10s，但不能无限拉长驻留；正式运行前冻结。未知成本和零成本不进入tail，不把未知缓存当零命中。
 
-先解压到新目录，校验 SHA256.json。用现场原 Python 找到真正 import 路径，motor-root 指向包含 motor/ 的目录，adapter-root 指向包含 motor_adapter/、fgjsq/、slo_patch/ 的目录：
+用户授权华为在正式实验前优先读取已有 B16×66K/128K AISBench 或生产重放结果；已有时间对齐的压力/等待证据足够时不要重跑。缺少对应状态时，在原 g5 或 shadow 下对 B16×实际66K/128K、目标缓存50%做必要短探测，建议每长度先5–10分钟，明确运行时长与未稳定的限制。探测不算正式对照结果，也不扩成流量建模项目。
+
+同时收集：实际P实例ID；FG committed_tokens W、未释放数 N、score；时间戳和采样间隔；已有引擎 waiting请求数/可得waiting tokens及其定义；有身份匹配的批事件间隔；AISBench请求发送/首包/完成及已有逐请求首次调度时间。没有逐请求关联就只报告时间窗共现，不相减分位数、不把TTFT残差当排队下界。FG W包含未完成估计工作，不等于引擎waiting token。
+
+初版压力严格沿用 score=W*(ceil(N/max_seqs)+1)/2；当0<N<=max_seqs时score=W，不能将此条件外推到所有时刻。以所有可路由P最低score达到H表示没有低压去处；报告长尾发生时每P及该最低值的分布，避免用最忙P的token数直接代入H。
+
+建议选择流程：比较“长等待窗口”与“较低等待窗口”的最低score分布，先考虑长等待窗口P25/P50附近为H、较低等待窗口P50/P75附近为L，要求0<L<H。这些只是首轮候选依据。分布重叠/无低压窗口时明确写探索性选择和理由，不伪造分离点；在短enforce观察tail入队、直接放行、晋升与GF等待后固定一组。每个长度一组H/L，B16/18/20沿用该组，不在正式结果出来后偷偷按并发优化。event_fresh_ms 根据匹配事件间隔探测并留明确余量，不能默认1s有效；很久没事件且无法确认状态时仍保守晋升。基于预测TTFT的动态阈值留下一版。
+
+提供三个可执行子命令：
+
+```sh
+# 在现有现场Python环境；管理密钥通过环境安全注入，不写进argv/报告。
+python scripts/experiments/gf_pressure_probe.py collect --url "$MGMT_URL" --instances "$P_IDS" --run-id probe-66k-b16 --input-tokens "$ACTUAL_TOKENS" --concurrency 16 --duration 600 --interval 0.5 --output probe-66k.jsonl
+# shadow/enforce时可加 --admission；TLS使用 --ca-file，不关闭证书校验。
+python scripts/experiments/gf_pressure_probe.py summarize --input probe-66k.jsonl --windows waiting-windows.json --output probe-66k-summary.json
+PYTHONPATH=src python scripts/experiments/gf_pressure_probe.py freeze --template configs/gf_admission/enforce.example.json --evidence probe-66k-summary.json --cluster-uuid "$CLUSTER_UUID" --model-spec "$MODEL_SPEC" --high "$H" --low "$L" --event-fresh-ms "$FRESH_MS" --rationale "$RATIONALE" --output enforce-66k.json > enforce-66k-freeze.json
+```
+
+waiting-windows.json 为数组，每项含 start_s/end_s/label（例如long_wait/reference）及可另加source说明；时间为Unix秒，对齐实际记录。无等待定位证据可不传 --windows，但须标记阈值只是压力探索。工具输出 per-P W/N/score分位与集群最低score分位，缺任何指定P的样本拒收。已有记录可转换为同一JSONL结构并保留转换脚本/原始字段。每长度独立文件，不混合规格/不同基线。
+
+## 安装、自检与回退
+
+包含独立 wheel、四文件增量 payload、精确manifest/patch、测试、参考Motor Python源码、探测/监控工具。reference-motor只供CPU测试/代码审阅，不安装为Motor、不覆盖现场目录；没有本机.so、权重或引擎wheel。保留NodeManager fix1、engine_files.json、warm predictor、D/引擎配置。
 
 ```sh
 python scripts/validate/verify_gf_runtime_bundle.py .
-python scripts/deploy/gf_admission_install.py --bundle . --motor-root /actual/motor-parent --adapter-root /actual/site-packages --state-dir /persistent/gf-0.1.0rc1-backup --action check
+python scripts/deploy/gf_admission_install.py --bundle . --motor-root "$MOTOR_PARENT" --adapter-root "$ADAPTER_PARENT" --state-dir "$BACKUP_RC2" --action check
+# 在实际解释器且已有CPU依赖时运行；不联网补依赖。
+bash scripts/validate/run_gf_runtime_tests.sh
+# 完成针对新包的复评、停接入、完整请求结束、清账及停止Coordinator后：
+python scripts/deploy/gf_admission_install.py --bundle . --motor-root "$MOTOR_PARENT" --adapter-root "$ADAPTER_PARENT" --state-dir "$BACKUP_RC2" --action apply
+python -m pip install --no-deps --no-index wheels/gf_admission-0.1.0rc2-py3-none-any.whl
 ```
 
-check 完全只读。unknown target hash 或 protected g5 Python 依赖漂移直接拒绝；不要 --force 或改 manifest 让它通过。NodeManager fix1 和 engine_files.json 是 observe-only，记录现场 hash，不替换，不冒充现场逐字节核对成功。
+路径来自现场import，不能照抄本机路径；必须已有anyio4。apply/rollback为整组校验、全部preimage备份后逐文件原子替换，不是跨文件原子事务。要求进程停止；未知hash不强制覆盖，先保留diff定位。若现场已装rc1，先用其真实journal回退至g5；不要直接让rc2接受rc1 hash。安装器故障保留journal，同参恢复；不能覆盖未知现场修复。
 
-Session 2 评审通过并完成停流/清账后，原路径同参 `--action apply`，再在 Coordinator 运行环境执行 `python -m pip install --no-deps --no-index wheels/gf_admission-0.1.0rc1-py3-none-any.whl`。确认已有 anyio 4；不安装/升级 NPU 栈。不要在 P/D engine 环境全量重装。所有 worker 与 Mgmt 设置相同 GF_ADMISSION_CONFIG，先 shadow。空环境变量或 off.json 走 g5 原路径，off 不导入可选 gf_admission。
+所有worker/Mgmt使用同一配置digest，改变mode/阈值需停流排空后重启Coordinator。off.json或不设置GF_ADMISSION_CONFIG恢复原g5路径。schema2只属于admission，不能修改原引擎event schema。
 
-安装器先校验全体，再保存全部 preimage/journal，再原子替换每个文件；不是跨文件原子事务，进程必须停止。中途失败保留 journal，可同参 apply 或 rollback；install.lock 如果因进程被 kill 留下，只能确认旧安装器已结束后由运维删除。重复 apply/rollback 已测试。rollback 仅恢复本安装器已备份且 after/before 匹配的四文件，未知现场后续修改拒绝回退，要求先审阅。
+回退：停止新请求→/admission/v1/drain→等QUEUED/READY/CLAIMED/CLEANUP、open_native/open_fg、完整HTTP/P/D在途全部结束→停Coordinator→改off→同参 --action rollback→重启g5→小请求验证。drain只停止新增让行并晋升，不是停流开关；两账为零不单独证明D/E2E结束。
 
-回退顺序：停接入 → POST /admission/v1/drain → 确认 QUEUED/READY/CLAIMED/CLEANUP 与 g5 open_native/open_fg 全归零 → 停 Coordinator → GF_ADMISSION_CONFIG 改 off 或移除 → 原安装参数 `--action rollback` → 重启 g5 → 小请求核对。wheel 可保留而不激活；无需为回退删除任何现场文件。
+## 正式矩阵与比较
 
-状态接口 GET /admission/v1/state、POST /admission/v1/drain 复用 Mgmt 鉴权；同时保留 /fgjsq/v1/loads、/fgjsq/v1/events。日志 gf_admission key/state/revision/elapsed_ms 是阶段诊断，不是正式 TTFT。CLEANUP_PENDING、fault、claimed_worker_lost、provider shutdown_residual 非零都应停止升阶，保留 reservation/key/epoch/generation 和现场账本核对；禁止猜测减账。
+见 experiments/plans/GF_ADMISSION_RC2_AISBENCH_20261022.json。64K业务规格使用现场实际约66K输入，128K记录实际token数（旧126000不能无声改名131072）。每组同输入tokenization/template、输出长度、数据/顺序、seed、缓存预热、模型、predictor状态及超时/重试策略；共享prefix50%不等于实测NPU命中50%。避免循环相同完整prompt造成后续接近100%命中。
 
-## 实验升阶门槛
+B是集群并发16/18/20，不乘3。使用现场AISBench流式模型、闭环配置，核对其版本下batch_size/concurrency及request_rate语义。先用一个短case确认发送并发与完成补发，再固定正式case。六格各做g5 off/enforce配对；优先B16，两次配对确认核心结论，再推进18/20。其余格首次结果可以先报告，声称扩容收益前需重复；不把六格一次运行写成稳定结论。建议每格每模式至少400请求作为第一轮量级，实际样本/持续时间由现场根据成本在看正式结果前确定并固定，不能因结果不好提前截断；记录尾部样本量和不确定性。
 
-1. **本地交付**：源码/包校验、核心 oracle、事务故障、真 transport/跨进程、off 回归、安装回退测试通过；未覆盖项明确列出。完整测试报告见 IMPLEMENTATION_STATUS。
-2. **Session 2**：审完整包，重点核对 guard 的取分点、让行与晋升规则、参数是否适合观测、生命周期与待覆盖项；输出 blocker/非阻断建议及理由。该评审不回溯阻塞本 session 已授权编码。
-3. **华为短验证**：实际 Python 3.12/镜像 import、原生 schema-4 CAS、真 worker/P/D、鉴权事件 matched、取消/故障清账、off 回退；先小样本，不开全矩阵。unknown=100%、无有效 matched、零实际 tail、残留账本或 ABI 失败均不得进入收益压测。
-4. **AISBench**：前三项通过才冻结镜像/配置/模型/输入输出/并发/seed/warmup。先选一个已知 g5 规格点做 off/enforce 配对，不先跑十档；数据支持再扩展。记录全体成功/失败/取消，不能删最慢让行组。正式 TTFT/TPOT 使用 AISBench 原汇总器。B=16 是整个 3P3D 集群并发。
-5. **收益/合并**：全体 P90 TTFT 改善、吞吐提升或不下降、分档 P90 TPOT 满足 32K 32ms/64K 30ms/128K 40ms；业务 TTFT 目标 12/27/30s 同时报距离。至少重复配对，给原始数值与波动，当前没有授权用任意百分比伪造收益门槛。P95 只补充。若仅工程正确/基础设施价值或收益不稳定，交用户裁决，不自动 merge main。
+主要目标为B16全体请求P90 TTFT改善，或B18/20达到同一SLO；64K TTFT27s/TPOT30ms，128K30s/40ms。同步报告QPS、有效SLO内吞吐、输出吞吐、失败/超时/取消/未完成及tail分布；P95补充。不得只统计normal、只选快的完成请求，不能将失败从总体消失；AISBench成功请求分位与总请求失败账并列。尾部请求需完成/明确终局后结束run，稳态窗口与全程结果均保存。吞吐下降需如实披露，不默认任意容忍度；是否接受仅入场调节或性能权衡由结果与用户目标裁决。
 
-## 给 Session 2 的有证据建议
+## 后台监控
 
-优先审四项：score=0 与 1s 晋升是否令 tail 几乎无调序；beta=1 的成本排序是否已足够区分 NPU 命中；历史全程 min/max 对离群长请求是否敏感；CLAIMED 失联/未知 CAS 的停止与人工对账契约是否可接受。前两项需要短 shadow/enforce 的命中率、tail 比例、晋升/pressure_deferred 数据，不能凭 CPU 测试选最优值。若同质大请求均进 normal 或到龄前没有竞争，建议停止扩十档并报告策略无可利用机会，而不是盲目提高牺牲额度。只有看到实际候选与收益证据，才讨论滑动阈值、压力曲线；waiting 重排、抢占、chunk 动态化仍不在本版本。
+scripts/experiments/gf_watchdog.py 后台持有一条AISBench子进程，正常15s检查不调用模型；连续3次health失败停止自己启动的benchmark进程组，保留日志和event.json并调用通知适配器。它不杀整个Python环境、不自动改代码、不重启引擎、不自动重跑。成功完成也发送一次事件，便于agent启动下一格。
+
+华为agent须创建/验证两个现场适配器：health返回0表示健康，非0表示有证据的异常；notify接收event.json绝对路径，通过实际可用agent runner/事件API唤醒当前agent。JSON文件保存argv数组，禁止shell字符串。health检查引擎进程、就绪、错误及请求/批次进展；不能单凭日志静默判长prefill卡死。进展超时根据短探测实测上界并留余量，OOM/进程退出/持续服务错误单独判定。需要先人工注入无害故障，验证agent实际收到；通知命令返回0本身不等于agent消费。没有真实唤醒接口时必须报告，不能声称无人值守恢复已实现。
+
+```sh
+nohup python scripts/experiments/gf_watchdog.py --command case-command.json --health health-command.json --notify notify-command.json --output "$NEW_RUN_DIR" > "$WATCHDOG_LOG" 2>&1 &
+```
+
+必须在新run目录运行，不复用覆盖。异常时agent保留首错、配置/digest、镜像、NPU/engine/Motor日志及请求账；先定位复现再修复，测试后恢复。每格最多两次自动流程中的修复重试，连续同类失败或账本未知则停格并告警，禁止无限循环。代码/参数变更须新版本、完整diff/hash、新run_id，受影响的off/enforce配对重跑；失败运行永久保留。真实告警只通知已授权的实验agent，不增加对外群发。
+
+## 验收顺序
+
+本地正确性与完整交付→Session2针对新包复评→华为真实Python/native SHM/P/D、取消、事件、回退短验证→已有证据核对/必要短探测→冻结参数与通知演练→正式矩阵。全unknown、无有效事件、无真实tail入队或资源残留不得解释为算法收益；先debug再升阶。无LIFO越序但有真实入场调节时准确标记机制归因，不伪造越序。
+
+本机mock/IPC、脚本测试和wheel验证不替代910B2验证。详见实施状态和 evidence/local。现场回传自包含Markdown，关键源码/diff/命令/表格/首错嵌入正文，内网路径仅作索引。无现场结果不合并main。

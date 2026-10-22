@@ -3,4 +3,4 @@
 Runtime activation requires the explicit, version-checked Motor g5 hooks.
 """
 
-__version__ = "0.1.0rc1"
+__version__ = "0.1.0rc2"

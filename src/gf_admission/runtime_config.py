@@ -37,9 +37,10 @@ class RuntimeConfig:
     beta_cpu: float
     beta_disk: float
     feature_kind: str
+    high_pressure_threshold: float
 
     def __post_init__(self):
-        if type(self.schema_version) is not int or self.schema_version != 1:
+        if type(self.schema_version) is not int or self.schema_version != 2:
             raise ValueError("unsupported admission schema")
         if self.mode not in ("off", "shadow", "enforce"):
             raise ValueError("invalid admission mode")
@@ -60,8 +61,15 @@ class RuntimeConfig:
             "feature_timeout_ms",
         ):
             finite(name, getattr(self, name), positive=True)
-        for name in ("release_threshold", "beta_cpu", "beta_disk"):
+        for name in (
+            "release_threshold",
+            "high_pressure_threshold",
+            "beta_cpu",
+            "beta_disk",
+        ):
             finite(name, getattr(self, name))
+        if not 0 < self.release_threshold < self.high_pressure_threshold:
+            raise ValueError("require 0 < release_threshold < high_pressure_threshold")
         for name in (
             "max_records",
             "max_workers",

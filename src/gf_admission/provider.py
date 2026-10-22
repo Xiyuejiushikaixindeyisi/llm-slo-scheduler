@@ -20,11 +20,13 @@ class MotorFeatureProvider:
         self.config = admission_client.config
         self.executor = None
         self.futures = set()
+        self.inflight = 0
         self.closed = False
         self.metrics = Counter()
 
     def _done(self, future):
         self.futures.discard(future)
+        self.inflight -= 1
         if not future.cancelled():
             future.exception()
 
@@ -103,9 +105,14 @@ class MotorFeatureProvider:
         if self.closed or self.config.feature_kind == "unknown":
             self.metrics["unknown"] += 1
             return {"cost": None}
-        if len(self.futures) >= self.config.feature_max_inflight:
+        if self.inflight >= self.config.feature_max_inflight:
             self.metrics["capacity_unknown"] += 1
             return {"cost": None}
+        self.inflight += 1
+        started = asyncio.get_running_loop().time()
+        deadline = started + self.config.feature_timeout_ms / 1000
+        handed_to_thread = False
+        stage = "metadata"
         try:
             constraints = {
                 k: v
@@ -117,34 +124,46 @@ class MotorFeatureProvider:
                     "required_dispatch_capability",
                 )
             }
-            result = await self.client.rpc(
-                self.client.data("features", constraints=constraints)
+            result = await asyncio.wait_for(
+                self.client.rpc(self.client.data("features", constraints=constraints)),
+                max(0, deadline - asyncio.get_running_loop().time()),
             )
             if not result["candidates"]:
+                self.metrics["unknown_no_candidates"] += 1
                 return {"cost": None}
-            # Recheck after the RPC await: other requests may have filled slots.
-            if len(self.futures) >= self.config.feature_max_inflight:
-                self.metrics["capacity_unknown"] += 1
-                return {"cost": None}
+            if asyncio.get_running_loop().time() >= deadline:
+                raise asyncio.TimeoutError()
             if self.executor is None:
                 self.executor = ThreadPoolExecutor(
                     max_workers=1, thread_name_prefix="gf-feature"
                 )
+            stage = "tokenizer_conductor"
             future = asyncio.get_running_loop().run_in_executor(
                 self.executor, self._extract_sync, request, result["candidates"]
             )
             self.futures.add(future)
+            handed_to_thread = True
             future.add_done_callback(self._done)
             result = await asyncio.wait_for(
-                asyncio.shield(future), self.config.feature_timeout_ms / 1000
+                asyncio.shield(future),
+                max(0, deadline - asyncio.get_running_loop().time()),
             )
             self.metrics["known" if result["cost"] is not None else "unknown"] += 1
             return result
         except asyncio.CancelledError:
             raise
         except Exception as error:  # noqa: BLE001 - transaction/task fault boundary
-            self.metrics["unknown_" + type(error).__name__] += 1
+            self.metrics["unknown_" + stage + "_" + type(error).__name__] += 1
             return {"cost": None}
+        finally:
+            if not handed_to_thread:
+                self.inflight -= 1
+            elapsed = (asyncio.get_running_loop().time() - started) * 1000
+            self.metrics["prepare_calls"] += 1
+            self.metrics["prepare_total_ms"] += elapsed
+            self.metrics["prepare_max_ms"] = max(
+                self.metrics["prepare_max_ms"], elapsed
+            )
 
     async def close(self):
         self.closed = True

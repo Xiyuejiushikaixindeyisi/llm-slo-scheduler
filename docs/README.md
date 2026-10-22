@@ -28,3 +28,6 @@
 实验原始结果放 experiments/runs；整理后的分析放 experiments/analysis。原始内网材料通常存evidence；本次流量原报告按用户要求完整存docs/traffic，接收hash仍存evidence/manifests。正文使用相对链接引用。三份已有研究文档的迁移记录见 [迁移清单](../evidence/manifests/workspace_import.json)。
 
 当前工程交付：[FGJSQ＋predictor＋Motor 说明](engineering/FGJSQ_MOTOR_DELIVERY.md) · [实验机 agent prompt](engineering/HUAWEI_AGENT_PROMPT_FGJSQ_MOTOR.md)。
+
+
+2026-10-22 rc2 修复交付入口：`docs/engineering/GF_ADMISSION_RC2_REPAIR_REPORT_20261022.md`；统一高压规则已获用户批准，阈值由华为正式实验前探测后冻结。旧rc1交付已撤回，复评/现场验收尚待完成。

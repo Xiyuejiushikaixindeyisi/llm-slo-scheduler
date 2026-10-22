@@ -12,6 +12,8 @@ from .config import ClassifierConfig, finite
 
 class Reason(str, Enum):
     TAIL = "tail"
+    PRESSURE = "pressure"
+    BOTH = "cost_and_pressure"
     UNKNOWN = "unknown_cost"
     ZERO = "zero_cost"
     NOT_LONG = "not_long"
@@ -48,6 +50,7 @@ class Classifier:
         pressure_valid: bool,
         protected: bool = False,
         supported: bool = True,
+        high_pressure: bool = False,
     ) -> Decision:
         # Validate before changing any accounting, including arrival credit.
         if cost is not None:
@@ -62,14 +65,17 @@ class Classifier:
         if cost is not None and cost > 0:
             self.minimum = cost if self.minimum is None else min(self.minimum, cost)
             self.maximum = cost if self.maximum is None else max(self.maximum, cost)
-        reason = self._reason(cost, budget_allows, pressure_valid, protected, supported)
-        if reason is Reason.TAIL:
+        reason = self._reason(
+            cost, budget_allows, pressure_valid, protected, supported, high_pressure
+        )
+        tail = reason in (Reason.TAIL, Reason.PRESSURE, Reason.BOTH)
+        if tail:
             self.credit -= 1
             self.consumed += 1
-        return Decision(reason is Reason.TAIL, reason, cost)
+        return Decision(tail, reason, cost)
 
     def _reason(
-        self, cost, budget_allows, pressure_valid, protected, supported
+        self, cost, budget_allows, pressure_valid, protected, supported, high_pressure
     ) -> Reason:
         if not supported:
             return Reason.UNSUPPORTED
@@ -81,13 +87,18 @@ class Classifier:
             return Reason.ZERO
         if not pressure_valid:
             return Reason.PRESSURE_UNKNOWN
-        if (
-            cost < self.config.threshold_ratio * self.maximum
-            or cost < self.config.long_request_ratio * self.minimum
-        ):
+        long_cost = (
+            cost >= self.config.threshold_ratio * self.maximum
+            and cost >= self.config.long_request_ratio * self.minimum
+        )
+        if not long_cost and not high_pressure:
             return Reason.NOT_LONG
         if self.credit == 0:
             return Reason.NO_CREDIT
         if not budget_allows:
             return Reason.BUDGET
-        return Reason.TAIL
+        return (
+            Reason.BOTH
+            if long_cost and high_pressure
+            else (Reason.TAIL if long_cost else Reason.PRESSURE)
+        )

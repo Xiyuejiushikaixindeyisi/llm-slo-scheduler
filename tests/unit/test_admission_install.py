@@ -45,7 +45,7 @@ def prepared(tmp_path):
                 "git",
                 "apply",
                 "--reverse",
-                str(ROOT / "patches" / folder / "g5-gf-admission-0.1.0rc1.patch"),
+                str(ROOT / "patches" / folder / "g5-gf-admission-0.1.0rc2.patch"),
             ],
             cwd=target,
             check=True,
@@ -116,5 +116,5 @@ def test_enabled_runtime_contract_checks_all_hook_and_protected_sources():
     from gf_admission.compatibility import validate_runtime
 
     validate_runtime.cache_clear()
-    assert validate_runtime() == "0.1.0rc1"
+    assert validate_runtime() == "0.1.0rc2"
     validate_runtime.cache_clear()

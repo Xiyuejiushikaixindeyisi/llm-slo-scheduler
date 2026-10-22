@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "version": "0.1.0rc1",
+  "version": "0.1.0rc2",
   "baseline_commit": "3b63b00546e7a6ffb2526dafc341969cebe22359",
   "changes": {
     "src/motor_adapter/bindings.py": {
       "root": "adapter",
       "relative": "motor_adapter/bindings.py",
       "before": "053652d6f8e1b9e69df553cb5077c881a029cec8e38a3699f5d3d4c7bb494a0b",
-      "after": "dba8c084a1f1ae4e1ad6fd9a4dc73d0cca695ff812a465f7b6c391b8b160f7e0"
+      "after": "3f8741d9978118d4002e1362442e113b61d972843a516f1e2a35ebdc7d71b0e6"
     },
     "src/motor_adapter/service.py": {
       "root": "adapter",

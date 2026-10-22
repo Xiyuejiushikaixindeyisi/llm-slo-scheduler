@@ -42,7 +42,7 @@ def main():
     args = p.parse_args()
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
-    stage = out / "gf-admission-0.1.0rc1"
+    stage = out / "gf-admission-0.1.0rc2"
     stage.mkdir()
     contract = json.loads((ROOT / "src/gf_admission/runtime_contract.json").read_text())
     (stage / "runtime-manifest.json").write_text(json.dumps(contract, indent=2) + "\n")
@@ -65,8 +65,14 @@ def main():
         "configs/gf_admission",
         "patches/motor",
         "patches/gf_admission",
+        "scripts/experiments",
     ):
         copytree(ROOT / name, stage / name)
+    copytree(
+        motor / ".agents/skills/motor-dev",
+        stage / "reference-motor/.agents/skills/motor-dev",
+    )
+    shutil.copy2(motor / "AGENTS.md", stage / "reference-motor/AGENTS.md")
     for name in ("motor", "tests", "scripts"):
         copytree(motor / name, stage / "reference-motor" / name)
     for name in ("requirements.txt", "pyproject.toml", "setup.cfg"):
@@ -79,6 +85,12 @@ def main():
         "scripts/validate/smoke.py",
         "docs/engineering/GF_ADMISSION_RUNTIME_GUIDE.md",
         "docs/engineering/GF_ADMISSION_IMPLEMENTATION_STATUS.md",
+        "docs/engineering/GF_ADMISSION_RC2_REPAIR_REPORT_20261022.md",
+        "docs/admission/GF_PRESSURE_ADMISSION_REVISION_20261022.md",
+        "experiments/plans/GF_ADMISSION_RC2_AISBENCH_20261022.json",
+        "packages/gf_admission/pyproject.toml",
+        "scripts/package/build_gf_runtime_bundle.py",
+        "scripts/dev/refresh_gf_contract.py",
         "docs/engineering/HUAWEI_AGENT_PROMPT_GF_RUNTIME.md",
         "docs/admission/G5_GF_DUAL_QUEUE_IMPLEMENTATION_DESIGN.md",
         "docs/admission/GF_SUPER_P95_DESIGN_DISCUSSION.md",
@@ -99,16 +111,41 @@ def main():
         "motor.xml",
         "project-tests.log",
         "motor-tests.log",
-        "motor-precommit.log",
-        "precommit-format-only.diff",
+        "ruff.log",
         "extracted-tests.log",
+        "extracted-initial-failure.log",
+        "wheel-check.log",
+        "control_microbench.py",
+        "control_microbench.json",
     ):
-        source = ROOT / "artifacts/gf-admission" / name
+        source = ROOT / "artifacts/gf-admission-rc2" / name
         dest = stage / "evidence/local" / name
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, dest)
-    source = ROOT / "evidence/manifests/gf_admission_runtime_20261022.json"
+    source = ROOT / "evidence/manifests/gf_admission_rc2_20261022.json"
     shutil.copy2(source, stage / "evidence/local/summary.json")
+    # Source-delta evidence records the working checkout without staging others' edits.
+    (stage / "evidence/local/working-tree-status.txt").write_bytes(
+        subprocess.check_output(["git", "status", "--short"], cwd=ROOT)
+    )
+    (stage / "evidence/local/rc1-to-rc2.patch").write_bytes(
+        subprocess.check_output(
+            [
+                "git",
+                "diff",
+                "0bb3e40",
+                "--",
+                "src/gf_admission",
+                "src/motor_adapter/bindings.py",
+                "configs/gf_admission",
+                "packages/gf_admission",
+                "tests/unit/test_admission_broker.py",
+                "tests/unit/test_admission_core.py",
+                "tests/integration/test_admission_runtime.py",
+            ],
+            cwd=ROOT,
+        )
+    )
     # Include tool fixtures needed by existing project regression tests.
     for folder in ("scripts/deploy", "scripts/collect", "scripts/validate"):
         for source in (ROOT / folder).glob("*.py"):
@@ -172,7 +209,7 @@ def main():
         ],
         check=True,
     )
-    archive = out / "gf-admission-0.1.0rc1-20261022.tar.gz"
+    archive = out / "gf-admission-0.1.0rc2-20261022.tar.gz"
     with tarfile.open(archive, "w:gz") as tar:
         tar.add(stage, arcname=stage.name)
     print(

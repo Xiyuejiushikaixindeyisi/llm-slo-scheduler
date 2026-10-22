@@ -55,14 +55,14 @@ class Ledger:
 def config(**changes):
     return replace(
         RuntimeConfig(
-            1,
+            2,
             "enforce",
             "test-cluster",
             "test-model",
             "synthetic tests",
             ClassifierConfig(1, 1, 0.8, 1.5, 10),
             QueueLimits(50, 20, 100000, 100, 3, 256),
-            0,
+            0.000001,
             10,
             20,
             500,
@@ -82,6 +82,7 @@ def config(**changes):
             1,
             1,
             "unknown",
+            10000,
         ),
         **changes,
     )
@@ -347,7 +348,7 @@ async def test_client_lost_enqueue_ack_idle_heartbeat_and_cancellation():
         if data["op"] == "hello":
             return {
                 "admission_digest": b.config.digest,
-                "admission_schema": 1,
+                "admission_schema": 2,
                 "admission_mode": "enforce",
                 "coordinator_epoch": s.epoch,
             }
@@ -396,7 +397,7 @@ async def test_client_cancellation_after_commit_and_provider_capacity(monkeypatc
         if data["op"] == "hello":
             return {
                 "admission_digest": b.config.digest,
-                "admission_schema": 1,
+                "admission_schema": 2,
                 "admission_mode": "enforce",
                 "coordinator_epoch": s.epoch,
             }
@@ -516,5 +517,176 @@ async def test_fg_commit_failure_retains_native_until_release_confirmed(monkeypa
         assert b.tickets["partial:1"].state is State.CANCELLED
         snapshot = await s.snapshot()
         assert snapshot["open_fg"] == snapshot["open_native"] == 0
+    finally:
+        await b.close()
+
+
+@pytest.mark.asyncio
+async def test_confirmed_unavailable_resubmits_without_reclassification():
+    from gf_admission.client import AdmissionClient
+
+    b, s, ledger, _clock = stack()
+
+    async def send(data):
+        if data["op"] == "hello":
+            return {
+                "admission_digest": b.config.digest,
+                "admission_schema": 2,
+                "admission_mode": "enforce",
+                "coordinator_epoch": s.epoch,
+            }
+        return await b.handle(data)
+
+    client = AdmissionClient(send, b.config)
+    payload = {
+        "req_id": "retry",
+        "estimated_tokens": 10,
+        "native_tokens": 5,
+        "cost": None,
+    }
+    try:
+        ledger.available = False
+        assert await client.allocate("retry", 1, payload) is None
+        ledger.available = True
+        reply = await client.allocate("retry", 1, dict(payload, estimated_tokens=20))
+        assert reply["state"] == "CLAIMED" and reply["key"] == "retry:1:s1"
+        assert reply["ack"]["attempt_seq"] == 1 and len(ledger.adds) == 1
+        assert b.classifier.arrivals == 1 and b.metrics["submissions"] == 2
+        assert (await b.handle(command(b, "query", "retry", worker=client.worker)))[
+            "state"
+        ] == "UNAVAILABLE"
+        foreign = command(b, "cancel", "retry", worker="foreign")
+        foreign.update(key="retry:1:s9", submission_round=9)
+        with pytest.raises(ValueError, match="owner"):
+            await b.handle(foreign)
+        assert sum(ledger.loads.values()) == 5
+        # A late cancellation of round zero cannot leave round one executing.
+        await b.handle(command(b, "cancel", "retry", worker=client.worker))
+        assert sum(ledger.loads.values()) == 0
+        next_round = command(
+            b, "enqueue", "retry", worker=client.worker, payload=payload
+        )
+        next_round.update(submission_round=2, key="retry:1:s2")
+        with pytest.raises(ValueError, match="UNAVAILABLE"):
+            await b.handle(next_round)
+    finally:
+        await client.finish("retry")
+        await client.close()
+        await b.close()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("cleanup", ["query", "cancel", "finish", "reconcile"])
+async def test_expired_owner_cleanup_without_reviving_lease(cleanup):
+    b, s, ledger, clock = stack()
+    try:
+        await enqueue(b, "stale", None)
+        clock.now += b.config.worker_lease_ms + 1
+        await b.step()
+        assert b.tickets["stale:1"].state is State.CLAIMED
+        await s.command({"op": "abort", "key": "stale:1", "coordinator_epoch": s.epoch})
+        if cleanup == "reconcile":
+            await b.step()
+        else:
+            await b.handle(command(b, cleanup, "stale"))
+            if cleanup == "query":
+                await b.handle(command(b, "finish", "stale"))
+        assert b.workers["worker1"].dead
+        assert (await b.snapshot())["residual_total"] == 0
+        assert sum(ledger.loads.values()) == 0
+        with pytest.raises(ValueError, match="lease expired"):
+            await enqueue(b, "new", None)
+    finally:
+        await b.close()
+
+
+@pytest.mark.asyncio
+async def test_metadata_rpc_obeys_total_feature_deadline_and_capacity():
+    import time
+    from types import SimpleNamespace
+
+    from gf_admission.provider import MotorFeatureProvider
+
+    active = peak = 0
+
+    async def rpc(data):
+        nonlocal active, peak
+        active += 1
+        peak = max(peak, active)
+        try:
+            await asyncio.sleep(1)
+            return {"candidates": []}
+        finally:
+            active -= 1
+
+    provider = MotorFeatureProvider(
+        SimpleNamespace(
+            config=config(feature_kind="motor_conductor", feature_timeout_ms=20),
+            rpc=rpc,
+            data=lambda *args, **kw: kw,
+        )
+    )
+    start = time.monotonic()
+    try:
+        results = await asyncio.gather(*(provider.extract(None, {}) for _ in range(8)))
+        assert all(x == {"cost": None} for x in results)
+        assert time.monotonic() - start < 0.5 and peak == 2 and active == 0
+        assert provider.inflight == 0 and provider.metrics["capacity_unknown"] == 6
+        task = asyncio.create_task(provider.extract(None, {}))
+        await asyncio.sleep(0)
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+        assert provider.inflight == 0
+    finally:
+        await provider.close()
+
+
+@pytest.mark.asyncio
+async def test_residual_sample_filters_before_limit_and_reports_truncation():
+    b, _s, _ledger, _clock = stack(changes_batch=2)
+    try:
+        for i in range(3):
+            await enqueue(b, "closed" + str(i), None)
+            await b.handle(command(b, "finish", "closed" + str(i)))
+        for i in range(3):
+            await enqueue(b, "live" + str(i), None)
+        snap = await b.snapshot()
+        assert snap["residual_total"] == 3 and snap["residual_truncated"]
+        assert len(snap["residual_sample"]) == 2
+        assert all(t["key"].startswith("live") for t in snap["residual_sample"])
+        for i in range(3):
+            await b.handle(command(b, "finish", "live" + str(i)))
+    finally:
+        await b.close()
+
+
+@pytest.mark.asyncio
+async def test_homogeneous_pressure_trigger_candidate_scope_lifo_and_age():
+    b, s, _ledger, clock = stack(
+        high_pressure_threshold=10, release_threshold=1, changes_batch=50
+    )
+    try:
+        await seed_pressure(b, s)
+        # Same cost as the first sample; classification no longer requires heterogeneity.
+        a = await enqueue(b, "older", 1)
+        z = await enqueue(b, "newer", 1)
+        assert a["state"] == z["state"] == "QUEUED"
+        assert b.metrics["decision_pressure"] == 2
+        s.policy.release("synthetic")
+        # The newly idle alternate P defeats a pool-wide max-pressure trigger.
+        low = await enqueue(b, "low", 1)
+        assert low["state"] == "CLAIMED"
+        await b.handle(command(b, "finish", "low"))
+        await b.step()
+        assert b.tickets["newer:1"].state is State.READY
+        assert b.tickets["older:1"].state is State.QUEUED
+        assert b.metrics["lifo_overtake_dispatches"] == 1
+        clock.now += b.config.limits.max_tail_wait_ms
+        await b.step()
+        assert b.metrics["promoted_age"] == 1
+        assert b.metrics["dispatch_protected"] == 1
+        for nonce in ("older", "newer", "seed"):
+            await b.handle(command(b, "finish", nonce))
     finally:
         await b.close()

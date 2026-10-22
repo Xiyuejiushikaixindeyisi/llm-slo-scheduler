@@ -17,6 +17,8 @@ class AdmissionClient:
         self.epoch = None
         self.hello_lock = asyncio.Lock()
         self.pending = {}
+        self.pending_identity = {}
+        self.rounds = {}
         self.hub = None
         self.revision = 0
         self.closed = False
@@ -34,7 +36,7 @@ class AdmissionClient:
             if reply is None or reply.get("admission_digest") != self.config.digest:
                 raise RuntimeError("Mgmt admission capability/config mismatch")
             if (
-                reply.get("admission_schema") != 1
+                reply.get("admission_schema") != 2
                 or reply.get("admission_mode") != self.config.mode
             ):
                 raise RuntimeError("Mgmt admission mode/schema mismatch")
@@ -52,7 +54,11 @@ class AdmissionClient:
         if nonce is not None:
             value.update(logical_nonce=nonce)
         if attempt is not None:
-            value.update(attempt_seq=attempt, key=nonce + ":" + str(attempt))
+            round_id = self.rounds.get((nonce, attempt), 0)
+            key = nonce + ":" + str(attempt)
+            if round_id:
+                key += ":s" + str(round_id)
+            value.update(attempt_seq=attempt, submission_round=round_id, key=key)
         return value
 
     async def rpc(self, data):
@@ -120,11 +126,16 @@ class AdmissionClient:
         if len(self.pending) >= self.config.limits.max_pending:
             raise RuntimeError("worker admission capacity reached")
         await self.hello()
-        key = nonce + ":" + str(attempt)
+        if (nonce, attempt) not in self.rounds:
+            if len(self.rounds) >= self.config.max_records:
+                raise RuntimeError("worker logical transaction capacity reached")
+            self.rounds[nonce, attempt] = 0
+        key = self.data("enqueue", nonce, attempt)["key"]
         if key in self.pending:
             raise RuntimeError("concurrent allocation for the same logical attempt")
         future = asyncio.get_running_loop().create_future()
         self.pending[key] = future
+        self.pending_identity[key] = (nonce, attempt)
         try:
             if self.provider is not None:
                 payload = dict(
@@ -154,6 +165,9 @@ class AdmissionClient:
                     )
                 )
             if reply["state"] == "UNAVAILABLE":
+                # Advance only after an authoritative no-reservation result.
+                # RPC retries and ACK recovery within this call keep the same key.
+                self.rounds[nonce, attempt] += 1
                 return None
             if reply["state"] != "CLAIMED":
                 raise RuntimeError("admission transaction ended: " + reply["state"])
@@ -163,6 +177,7 @@ class AdmissionClient:
             raise
         finally:
             self.pending.pop(key, None)
+            self.pending_identity.pop(key, None)
             if not future.done():
                 future.cancel()
             elif not future.cancelled():
@@ -202,6 +217,7 @@ class AdmissionClient:
     async def finish(self, nonce):
         if self.epoch is not None and self.config.mode == "enforce":
             await self.rpc(self.data("finish", nonce))
+            self.rounds = {k: v for k, v in self.rounds.items() if k[0] != nonce}
 
     async def close(self):
         self.closed = True
@@ -212,9 +228,8 @@ class AdmissionClient:
             task.cancel()
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
-        for key in list(self.pending):
-            nonce, attempt = key.rsplit(":", 1)
-            await self.cancel(nonce, int(attempt))
+        for nonce, attempt in list(self.pending_identity.values()):
+            await self.cancel(nonce, attempt)
         if self.provider is not None:
             await self.provider.close()
         logger.info(

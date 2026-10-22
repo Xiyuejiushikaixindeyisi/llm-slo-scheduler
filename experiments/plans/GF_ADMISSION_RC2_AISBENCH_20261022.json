@@ -1,0 +1,83 @@
+{
+  "version": "0.1.0rc2",
+  "status": "onsite_probe_and_review_required",
+  "closed_loop": true,
+  "prefix_target_hit_rate": 0.5,
+  "scope": "one 3P3D cluster; B is total concurrency",
+  "cases": [
+    {
+      "spec": "64K_business_actual_66K",
+      "actual_input_tokens": "resolve from frozen onsite dataset/tokenizer",
+      "concurrency": 16,
+      "modes": [
+        "off",
+        "enforce"
+      ],
+      "p90_ttft_s": 27,
+      "p90_tpot_ms": 30
+    },
+    {
+      "spec": "64K_business_actual_66K",
+      "actual_input_tokens": "resolve from frozen onsite dataset/tokenizer",
+      "concurrency": 18,
+      "modes": [
+        "off",
+        "enforce"
+      ],
+      "p90_ttft_s": 27,
+      "p90_tpot_ms": 30
+    },
+    {
+      "spec": "64K_business_actual_66K",
+      "actual_input_tokens": "resolve from frozen onsite dataset/tokenizer",
+      "concurrency": 20,
+      "modes": [
+        "off",
+        "enforce"
+      ],
+      "p90_ttft_s": 27,
+      "p90_tpot_ms": 30
+    },
+    {
+      "spec": "128K",
+      "actual_input_tokens": "resolve from frozen onsite dataset/tokenizer",
+      "concurrency": 16,
+      "modes": [
+        "off",
+        "enforce"
+      ],
+      "p90_ttft_s": 30,
+      "p90_tpot_ms": 40
+    },
+    {
+      "spec": "128K",
+      "actual_input_tokens": "resolve from frozen onsite dataset/tokenizer",
+      "concurrency": 18,
+      "modes": [
+        "off",
+        "enforce"
+      ],
+      "p90_ttft_s": 30,
+      "p90_tpot_ms": 40
+    },
+    {
+      "spec": "128K",
+      "actual_input_tokens": "resolve from frozen onsite dataset/tokenizer",
+      "concurrency": 20,
+      "modes": [
+        "off",
+        "enforce"
+      ],
+      "p90_ttft_s": 30,
+      "p90_tpot_ms": 40
+    }
+  ],
+  "thresholds": "one frozen H/L pair per input length from B16 existing/short probe; not per-B tuning",
+  "suggested_min_requests_per_mode": 400,
+  "repeat": "B16 paired repeat; repeat B18/20 before stable capacity claims",
+  "formal_sample_count": "onsite freeze before viewing formal outcomes",
+  "output_length": "reuse intended onsite workload, identical within pairs; record actual",
+  "watchdog": "scripts/experiments/gf_watchdog.py; site health + real agent notification adapters required",
+  "dynamic_ttft_threshold": "next version, not implemented",
+  "max_repair_retries_per_case": 2
+}

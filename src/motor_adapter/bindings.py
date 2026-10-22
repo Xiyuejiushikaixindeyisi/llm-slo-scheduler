@@ -110,7 +110,7 @@ async def dispatch(dispatcher, request):
             data = await dispatcher._fgjsq_service.command(request.data)
             if broker is not None:
                 if op == "hello":
-                    data.update(admission_schema=1, admission_mode=broker.config.mode,
+                    data.update(admission_schema=2, admission_mode=broker.config.mode,
                                 admission_digest=broker.config.digest)
                 else:
                     broker.notify()

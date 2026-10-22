@@ -20,7 +20,7 @@ def main():
     motor = ROOT / baseline["motor_checkout"]
     contract = {
         "schema_version": 1,
-        "version": "0.1.0rc1",
+        "version": "0.1.0rc2",
         "baseline_commit": BASE,
         "changes": {},
         "protected": {},
@@ -100,7 +100,7 @@ def main():
     for kind, lines in patches.items():
         target = ROOT / "patches" / ("motor" if kind == "motor" else "gf_admission")
         target.mkdir(parents=True, exist_ok=True)
-        (target / "g5-gf-admission-0.1.0rc1.patch").write_text("".join(lines))
+        (target / "g5-gf-admission-0.1.0rc2.patch").write_text("".join(lines))
     print("Four-file runtime contract refreshed; protected baselines remain immutable.")
 
 

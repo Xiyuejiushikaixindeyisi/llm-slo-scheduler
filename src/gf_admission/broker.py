@@ -6,7 +6,7 @@ import json
 import logging
 import time
 import uuid
-from collections import Counter
+from collections import Counter, deque
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -41,6 +41,8 @@ class Ticket:
     fingerprint: str
     payload: dict
     expires: float
+    attempt_seq: int = 1
+    submission_round: int = 0
     state: State = State.QUEUED
     revision: int = 0
     command: dict | None = None
@@ -84,6 +86,9 @@ class AdmissionBroker:
         self.logicals: dict[str, Logical] = {}
         self.metrics = Counter()
         self.last_event: dict[str, float] = {}
+        self.events = deque(maxlen=config.changes_batch)
+        self.event_sequence = 0
+        self.checked_score = None
         self.revision = 0
         self.draining = False
         self.closed = False
@@ -104,7 +109,11 @@ class AdmissionBroker:
 
     def notify(self, accepted_instances=()):
         for instance in accepted_instances:
-            self.last_event[str(instance)] = self.clock()
+            key = str(instance)
+            self.last_event.pop(key, None)
+            if len(self.last_event) >= self.config.max_records:
+                self.last_event.pop(next(iter(self.last_event)))
+            self.last_event[key] = self.clock()
         self.wake.set()
 
     def _change(self, ticket, state=None):
@@ -117,13 +126,23 @@ class AdmissionBroker:
         worker = self.workers[ticket.worker]
         worker.revision = self.revision
         worker.event.set()
-        logger.info(
-            "gf_admission key=%s state=%s revision=%s elapsed_ms=%.3f error=%s",
-            ticket.key,
-            ticket.state.value,
-            ticket.revision,
-            max(0, self.clock() - (ticket.expires - self.config.request_wait_ms)),
-            ticket.error,
+        self._event(
+            "state", key=ticket.key, state=ticket.state.value, error=ticket.error
+        )
+
+    def _event(self, event, **fields):
+        # Bounded diagnostics, consumed through authenticated snapshot polling.
+        # No logger/file I/O while the shared reservation lock is held.
+        self.event_sequence += 1
+        if len(self.events) == self.events.maxlen:
+            self.metrics["event_ring_overwritten"] += 1
+        self.events.append(
+            dict(
+                sequence=self.event_sequence,
+                monotonic_ms=self.clock(),
+                event=event,
+                **fields,
+            )
         )
 
     def _reply(self, ticket):
@@ -138,7 +157,7 @@ class AdmissionBroker:
             "error": ticket.error,
         }
 
-    def _worker(self, name):
+    def _worker(self, name, *, cleanup=False):
         if not isinstance(name, str) or not 1 <= len(name) <= 128:
             raise ValueError("invalid worker_epoch")
         worker = self.workers.get(name)
@@ -149,6 +168,8 @@ class AdmissionBroker:
             worker = self.workers[name] = Worker(now)
         elif worker.dead or now - worker.seen > self.config.worker_lease_ms:
             worker.dead = True
+            if cleanup:
+                return worker  # owner/epoch checks still apply; no lease renewal
             raise ValueError("worker lease expired; old tickets must not be replayed")
         worker.seen = now
         return worker
@@ -170,7 +191,11 @@ class AdmissionBroker:
         if not isinstance(nonce, str) or not 1 <= len(nonce) <= 128:
             raise ValueError("invalid logical nonce")
         integer("attempt_seq", attempt, minimum=1)
+        round_id = data.get("submission_round", 0)
+        integer("submission_round", round_id)
         key = nonce + ":" + str(attempt)
+        if round_id:
+            key += ":s" + str(round_id)
         if data.get("key") != key:
             raise ValueError("key does not match logical attempt identity")
         return nonce, key
@@ -186,13 +211,19 @@ class AdmissionBroker:
             if not r.fg_released
         )
 
+    def _minimum_pressure(self, payload):
+        candidates = self.service.backend.candidates(payload)
+        ranked = self.service.policy.rank([str(c["instance_id"]) for c in candidates])
+        if not ranked or not self._pressure_valid():
+            return None
+        return self.service.policy.score(ranked[0])
+
     def _guard(self, candidate):
         if not self._pressure_valid():
             return False
         instance = str(candidate["instance_id"])
-        return self.gate.allows(
-            Pressure(self.service.policy.score(instance), True, "fg_ledger")
-        )
+        self.checked_score = self.service.policy.score(instance)
+        return self.gate.allows(Pressure(self.checked_score, True, "fg_ledger"))
 
     def _enqueue(self, data):
         nonce, key = self._identity(data)
@@ -240,16 +271,42 @@ class AdmissionBroker:
             or len(self.logicals) >= self.config.max_records
         ):
             raise CapacityError("admission transaction capacity reached")
+        round_id = data.get("submission_round", 0)
+        if round_id:
+            previous_key = nonce + ":" + str(data["attempt_seq"])
+            if round_id > 1:
+                previous_key += ":s" + str(round_id - 1)
+            previous = self.tickets.get(previous_key)
+            if (
+                previous is None
+                or previous.worker != data["worker_epoch"]
+                or previous.state is not State.UNAVAILABLE
+                or previous.key in self.service.keys
+            ):
+                raise ValueError(
+                    "new submission requires confirmed UNAVAILABLE without reservation"
+                )
         self.queue.check_capacity(key)
         logical = self.logicals.get(nonce)
         if logical is None:
+            pressure = self._minimum_pressure(payload)
             decision = self.classifier.decide(
                 cost,
                 budget_allows=self.queue.tail_allows(cost),
                 pressure_valid=self._pressure_valid(),
                 protected=self.draining,
+                high_pressure=pressure is not None
+                and pressure >= self.config.high_pressure_threshold,
             )
             logical = self.logicals[nonce] = Logical(data["worker_epoch"], decision)
+            self.metrics["decision_" + decision.reason.value] += 1
+            self._event(
+                "classification",
+                key=key,
+                reason=decision.reason.value,
+                cost=cost,
+                minimum_score=pressure,
+            )
         elif logical.worker != data["worker_epoch"] or logical.finished_at is not None:
             raise ValueError("logical request finished or owner changed")
         # A true new attempt cannot overlap a live reservation or queued attempt.
@@ -257,7 +314,7 @@ class AdmissionBroker:
             t.nonce == nonce and t.state not in TERMINAL for t in self.tickets.values()
         ):
             raise ValueError("logical request already has a live attempt")
-        self.metrics["decision_" + logical.decision.reason.value] += 1
+        self.metrics["submissions"] += 1
         tail = (
             logical.decision.tail
             and not logical.protected
@@ -273,6 +330,8 @@ class AdmissionBroker:
             dict(payload),
             self.clock() + self.config.request_wait_ms,
         )
+        ticket.attempt_seq = data["attempt_seq"]
+        ticket.submission_round = round_id
         self.tickets[key] = ticket
         self.workers[ticket.worker].keys.add(key)
         self.queue.add(key, cost, tail=tail, protected=logical.protected)
@@ -316,16 +375,24 @@ class AdmissionBroker:
 
     def _maintenance_locked(self):
         now = self.clock()
-        self.last_event = {
-            k: v
-            for k, v in self.last_event.items()
-            if now - v <= self.config.event_fresh_ms
-        }
         for name, worker in list(self.workers.items()):
             if now - worker.seen > self.config.worker_lease_ms:
                 worker.dead = True
                 worker.event.set()
         for key, ticket in list(self.tickets.items()):
+            if ticket.state is State.CLAIMED and self.workers[ticket.worker].dead:
+                record = self.service.records.get(self.service.keys.get(key))
+                if (
+                    record is not None
+                    and not record.uncertain_native
+                    and record.native_released
+                    and record.fg_released
+                ):
+                    self._change(ticket, State.CLOSED)
+                    self.metrics["reconciled_released_claim"] += 1
+                    self._event(
+                        "reconciled", key=key, evidence="native_and_fg_released"
+                    )
             if (
                 ticket.state is State.QUEUED
                 and (now >= ticket.expires or self.workers[ticket.worker].dead)
@@ -360,12 +427,19 @@ class AdmissionBroker:
     def _pump_locked(self, fast_key=None):
         if self.config.mode != "enforce" or self.closed or self.fault:
             return
+        promotion_reason = (
+            "drain"
+            if self.draining
+            else ("stale" if not self._pressure_valid() else "age")
+        )
         for key in self.queue.promote(
             max_items=self.config.pump_items,
-            force=self.draining or not self._pressure_valid(),
+            force=promotion_reason != "age",
         ):
             self.logicals[self.tickets[key].nonce].protected = True
             self.metrics["promoted"] += 1
+            self.metrics["promoted_" + promotion_reason] += 1
+            self._event("promotion", key=key, reason=promotion_reason)
         started = time.perf_counter()
         count = 0
         while (
@@ -386,13 +460,32 @@ class AdmissionBroker:
                 command.update(
                     op="reserve",
                     key=ticket.key,
-                    attempt_seq=int(ticket.key.rsplit(":", 1)[1]),
+                    attempt_seq=ticket.attempt_seq,
                     coordinator_epoch=self.service.epoch,
                     reserve_deadline=self.service.clock()
                     + self.service.config.reserve_window_s,
                 )
                 try:
                     self.service._prune()
+                    # Observe BEFORE CAS: diagnostics must never interrupt a
+                    # successful reservation before its ticket records ownership.
+                    older = 0
+                    if entry.tail:
+                        for older_entry in self.queue.tail.values():
+                            older_ticket = self.tickets[older_entry.key]
+                            if (
+                                older_entry.sequence >= entry.sequence
+                                or self.clock() >= older_ticket.expires
+                                or self.workers[older_ticket.worker].dead
+                            ):
+                                continue
+                            pressure = self._minimum_pressure(older_ticket.payload)
+                            if (
+                                pressure is not None
+                                and pressure <= self.config.release_threshold
+                            ):
+                                older += 1
+                    self.checked_score = None
                     ack = self.service._reserve(
                         command,
                         self._guard if entry.tail else None,
@@ -416,6 +509,26 @@ class AdmissionBroker:
                     self.queue.remove(ticket.key)
                     self._change(ticket, State.UNAVAILABLE)
                 else:
+                    ticket.command, ticket.ack = command, ack
+                    if older:
+                        self.metrics["lifo_overtake_dispatches"] += 1
+                    source = (
+                        "tail"
+                        if entry.tail
+                        else ("protected" if entry.protected else "normal")
+                    )
+                    self.metrics["dispatch_" + source] += 1
+                    instance = str(ack["instance_id"])
+                    self._event(
+                        "dispatch",
+                        key=ticket.key,
+                        source=source,
+                        older_eligible=older,
+                        instance_id=instance,
+                        score_checked=self.checked_score,
+                        score_after=self.service.policy.score(instance),
+                        wait_ms=self.clock() - entry.enqueued_ms,
+                    )
                     self.queue.remove(ticket.key)
                     ticket.command, ticket.ack = command, ack
                     if ticket.key == fast_key and not entry.tail:
@@ -452,8 +565,12 @@ class AdmissionBroker:
             self._start()
         worker_name = data.get("worker_epoch")
         async with self.lock:
-            worker = self._worker(worker_name)
             op = data.get("op")
+            worker = self._worker(
+                worker_name,
+                cleanup=op
+                in ("admission_query", "admission_cancel", "admission_finish"),
+            )
             if op == "admission_enqueue":
                 return self._enqueue(data)
             if op == "admission_features":
@@ -519,15 +636,42 @@ class AdmissionBroker:
                 if op == "admission_cancel":
                     if ticket is None:
                         nonce, key = self._identity(data)
+                        logical = self.logicals.get(nonce)
+                        if (
+                            logical is not None and logical.worker != worker_name
+                        ) or any(
+                            t.nonce == nonce and t.worker != worker_name
+                            for t in self.tickets.values()
+                        ):
+                            raise ValueError("logical owner mismatch")
                         if len(self.tickets) >= self.config.max_records:
                             raise CapacityError(
                                 "cancellation tombstone capacity reached"
                             )
-                        ticket = Ticket(key, nonce, worker_name, "", {}, self.clock())
+                        ticket = Ticket(
+                            key,
+                            nonce,
+                            worker_name,
+                            "",
+                            {},
+                            self.clock(),
+                            attempt_seq=data["attempt_seq"],
+                            submission_round=data.get("submission_round", 0),
+                        )
                         self.tickets[key] = ticket
                         worker.keys.add(key)
-                    if ticket.state not in TERMINAL:
-                        self._cleanup(ticket, State.CANCELLED)
+                    # A delayed cancellation also covers later confirmed-no-reserve
+                    # submission rounds of this Motor attempt.
+                    for related in self.tickets.values():
+                        if (
+                            related.nonce == ticket.nonce
+                            and related.attempt_seq == ticket.attempt_seq
+                            and (
+                                related.state not in TERMINAL
+                                or related.state is State.UNAVAILABLE
+                            )
+                        ):
+                            self._cleanup(related, State.CANCELLED)
                     self.wake.set()
                     return self._reply(ticket)
                 if op == "admission_claim":
@@ -608,7 +752,30 @@ class AdmissionBroker:
 
     async def snapshot(self):
         async with self.lock:
+            residual = [
+                t
+                for t in self.tickets.values()
+                if t.state in (State.CLAIMED, State.CLEANUP)
+            ]
+            policy = self.service.policy.snapshot()
+            now = self.clock()
             return {
+                "schema_version": 2,
+                "monotonic_ms": now,
+                "wall_time_s": time.time(),
+                "pressure": {
+                    i: dict(
+                        values,
+                        event_age_ms=(now - self.last_event[i])
+                        if i in self.last_event
+                        else None,
+                    )
+                    for i, values in policy.items()
+                },
+                "events": list(self.events),
+                "event_sequence": self.event_sequence,
+                "residual_total": len(residual),
+                "residual_truncated": len(residual) > self.config.changes_batch,
                 "mode": self.config.mode,
                 "config_digest": self.config.digest,
                 "residual_sample": [
@@ -618,8 +785,7 @@ class AdmissionBroker:
                         "error": t.error,
                         "reservation_id": self.service.keys.get(t.key),
                     }
-                    for t in list(self.tickets.values())[: self.config.changes_batch]
-                    if t.state in (State.CLAIMED, State.CLEANUP)
+                    for t in residual[: self.config.changes_batch]
                 ],
                 "states": dict(Counter(t.state.value for t in self.tickets.values())),
                 "normal": len(self.queue.normal),
