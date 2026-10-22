@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "mode": "shadow",
+  "cluster_uuid": "REPLACE_WITH_CLUSTER_UUID",
+  "model_spec": "REPLACE_WITH_MODEL_AND_LENGTH_SPEC",
+  "parameter_source": "experimental-v1; budget 1/20, score=0 conservative empty-P release; not calibrated",
+  "classifier": {
+    "quota_every": 20,
+    "quota_amount": 1,
+    "threshold_ratio": 0.8,
+    "long_request_ratio": 1.5,
+    "credit_cap": 2
+  },
+  "limits": {
+    "max_pending": 256,
+    "max_tail_requests": 16,
+    "max_tail_cost": 2097152,
+    "max_tail_wait_ms": 1000,
+    "scan_limit": 4,
+    "max_key_bytes": 256
+  },
+  "release_threshold": 0,
+  "tick_ms": 20,
+  "wait_ms": 1000,
+  "worker_lease_ms": 10000,
+  "ready_lease_ms": 5000,
+  "request_wait_ms": 120000,
+  "tombstone_ms": 180000,
+  "max_records": 4096,
+  "max_workers": 32,
+  "max_payload_bytes": 16384,
+  "changes_batch": 32,
+  "pump_items": 16,
+  "pump_ms": 2,
+  "cleanup_retries": 3,
+  "event_fresh_ms": 1000,
+  "feature_timeout_ms": 100,
+  "feature_max_inflight": 2,
+  "beta_cpu": 1,
+  "beta_disk": 1,
+  "feature_kind": "motor_conductor"
+}

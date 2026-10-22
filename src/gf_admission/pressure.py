@@ -1,4 +1,5 @@
 """Read FG scores without converting them into uncalibrated milliseconds."""
+
 from dataclasses import dataclass
 
 from .config import finite

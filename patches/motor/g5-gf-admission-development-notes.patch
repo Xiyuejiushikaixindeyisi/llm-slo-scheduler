@@ -1,0 +1,41 @@
+--- a/.agents/skills/motor-dev/references/coordinator.md
++++ b/.agents/skills/motor-dev/references/coordinator.md
+@@ -428,3 +428,18 @@
+ ```
+ 
+ For metrics-specific development, read `references/metrics.md`.
++
++
++## Optional GF admission overlay (gf-admission 0.1.0rc1)
++
++The exact g5 overlay adds connection hello/close hooks and a dispatcher shutdown
++resource guard. `GF_ADMISSION_CONFIG` is default off and immutable per process.
++Enabled workers use the existing `fgjsq_v1` message envelope with versioned
++`admission_*` operations; ordinary server dispatch still has the 5s timeout.
++A single worker long poll is also the liveness heartbeat, even during inference
++and idle periods. Mgmt owns one broker under the original FG reservation lock.
++Queue residence carries neither P nor D reservations. READY has a claim lease;
++CLAIMED is not released merely because a heartbeat disappears. Drain/reconcile
++workers before destroying workload SHM; unresolved ownership refuses teardown.
++Implementation/tests and install contract are maintained in the parent
++llm-slo-scheduler repository, not in native engine scheduling.
+--- a/.agents/skills/motor-dev/bug-fix-history/INDEX.md
++++ b/.agents/skills/motor-dev/bug-fix-history/INDEX.md
+@@ -60,3 +60,5 @@
+ | 2026-09-09 | coordinator | PD 分离请求在 Decode 才因 Prefill 改写字段被拒绝 | [pd-stream-options-late-rejection.md](coordinator/pd-stream-options-late-rejection.md) | coordinator, PD separation, stream_options, min_tokens, Decode HTTP-400, KV cache expiry |
+ 
+ | 2026-10-22 | node_manager | G5 nested lookup port compatibility with role offsets | [g5-nested-lookup-port.md](node_manager/g5-nested-lookup-port.md) | MultiConnector, lookup_rpc_port, nested extra_config, P/D offset |
++
++| 2026-10-22 | coordinator | Admission worker lease must outlive request wait | [gf-admission-worker-lease.md](coordinator/gf-admission-worker-lease.md) | admission, heartbeat, idle, lease |
+--- /dev/null
++++ b/.agents/skills/motor-dev/bug-fix-history/coordinator/gf-admission-worker-lease.md
+@@ -0,0 +1,9 @@
++# [2026-10-22] Admission worker lease must include inference and idle time
++
++- Symptom: a worker that finishes its waiting phase can lose its admission lease while inference continues or between requests.
++- Root cause: the first client draft stopped its wait task when the local pending map became empty.
++- Why: queue waiting ownership and worker process lifetime were incorrectly conflated.
++- Fix: keep one bounded long-poll heartbeat from capability hello until client close; collect errors and fail subsequent allocations after a hub fault.
++- Test interception: parent repository `test_client_lost_enqueue_ack_idle_heartbeat_and_cancellation` waits beyond a worker lease then allocates again; the lease remains valid. Real Motor ZMQ multi-worker/cross-process coverage checks the shared broker path.
++- Scenario: enforce/shadow worker with no queued request but a long-running P/D request or idle gap.
++- Keywords: admission, worker lease, heartbeat, idle, lifecycle.

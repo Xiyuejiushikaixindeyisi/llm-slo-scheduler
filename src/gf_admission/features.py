@@ -1,4 +1,5 @@
 """Immutable, exclusive tier coverage. Unknown is never a zero-hit estimate."""
+
 from dataclasses import dataclass
 
 from .config import finite, integer
@@ -14,7 +15,14 @@ class TierCoverage:
     disk_tokens: int
 
     def __post_init__(self) -> None:
-        for name in ("instance_id", "endpoint_id", "generation", "npu_tokens", "cpu_tokens", "disk_tokens"):
+        for name in (
+            "instance_id",
+            "endpoint_id",
+            "generation",
+            "npu_tokens",
+            "cpu_tokens",
+            "disk_tokens",
+        ):
             integer(name, getattr(self, name))
 
 
@@ -31,7 +39,9 @@ class FeatureSnapshot:
         finite("observed_ms", self.observed_ms)
         if self.prompt_tokens is not None:
             integer("prompt_tokens", self.prompt_tokens, minimum=1)
-        if not isinstance(self.coverage, tuple) or not all(isinstance(c, TierCoverage) for c in self.coverage):
+        if not isinstance(self.coverage, tuple) or not all(
+            isinstance(c, TierCoverage) for c in self.coverage
+        ):
             raise ValueError("coverage must be an immutable tuple of TierCoverage")
         if len({c.instance_id for c in self.coverage}) != len(self.coverage):
             raise ValueError("one endpoint per P instance is required")
@@ -58,9 +68,14 @@ class CostModel:
         if not self.version:
             raise ValueError("explicit cost model version required")
 
-    def estimate(self, snapshot: FeatureSnapshot,
-                 candidates: tuple[tuple[int, int, int], ...], *, now_ms: float,
-                 max_age_ms: float) -> tuple[float | None, tuple[float, ...]]:
+    def estimate(
+        self,
+        snapshot: FeatureSnapshot,
+        candidates: tuple[tuple[int, int, int], ...],
+        *,
+        now_ms: float,
+        max_age_ms: float,
+    ) -> tuple[float | None, tuple[float, ...]]:
         """Return min and per-candidate costs; missing eligible coverage is unknown.
 
         Timestamps belong to the caller's monotonic clock domain, never to a
@@ -68,17 +83,27 @@ class CostModel:
         """
         finite("now_ms", now_ms)
         finite("max_age_ms", max_age_ms, positive=True)
-        if (not snapshot.trusted or snapshot.prompt_tokens is None or not candidates
-                or not 0 <= now_ms - snapshot.observed_ms <= max_age_ms):
+        if (
+            not snapshot.trusted
+            or snapshot.prompt_tokens is None
+            or not candidates
+            or not 0 <= now_ms - snapshot.observed_ms <= max_age_ms
+        ):
             return None, ()
-        by_identity = {(c.instance_id, c.endpoint_id, c.generation): c for c in snapshot.coverage}
+        by_identity = {
+            (c.instance_id, c.endpoint_id, c.generation): c for c in snapshot.coverage
+        }
         costs = []
         for identity in candidates:
             c = by_identity.get(identity)
             if c is None:
                 return None, ()
-            uncached = snapshot.prompt_tokens - c.npu_tokens - c.cpu_tokens - c.disk_tokens
-            value = uncached + self.beta_cpu * c.cpu_tokens + self.beta_disk * c.disk_tokens
+            uncached = (
+                snapshot.prompt_tokens - c.npu_tokens - c.cpu_tokens - c.disk_tokens
+            )
+            value = (
+                uncached + self.beta_cpu * c.cpu_tokens + self.beta_disk * c.disk_tokens
+            )
             finite("estimated cost", value)
             costs.append(value)
         return min(costs), tuple(costs)

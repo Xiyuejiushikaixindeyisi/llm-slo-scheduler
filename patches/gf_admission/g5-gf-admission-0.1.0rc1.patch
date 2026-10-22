@@ -1,0 +1,335 @@
+--- a/src/motor_adapter/bindings.py
++++ b/src/motor_adapter/bindings.py
+@@ -2,6 +2,10 @@
+ import asyncio
+ import copy
+ import logging
++import json
++import os
++from functools import lru_cache
++from pathlib import Path
+ import time
+ import uuid
+ 
+@@ -12,14 +16,80 @@
+ BODY_MARKER = "_motor_fgjsq_observer"
+ 
+ 
++
++@lru_cache(maxsize=1)
++def admission_mode():
++    path = os.getenv("GF_ADMISSION_CONFIG")
++    if not path:
++        return "off"
++    with Path(path).open("rb") as stream:
++        raw = stream.read(65537)
++    if len(raw) > 65536:
++        raise ValueError("GF_ADMISSION_CONFIG exceeds 64KiB")
++    value = json.loads(raw)
++    if value.get("schema_version") != 1 or value.get("mode") not in ("off", "shadow", "enforce"):
++        raise ValueError("invalid admission schema/mode")
++    return value["mode"]
++
++
++def admission_client(client):
++    if admission_mode() == "off":
++        return None
++    if not enabled():
++        raise ValueError("admission requires enabled g5 FGJSQ")
++    plugin = getattr(client, "_gf_admission", None)
++    if plugin is None:
++        from gf_admission.compatibility import validate_runtime
++        validate_runtime()
++        from gf_admission.client import AdmissionClient, motor_sender
++        from gf_admission.provider import MotorFeatureProvider
++        from gf_admission.runtime_config import load_config
++        config = load_config(os.environ["GF_ADMISSION_CONFIG"])
++        plugin = AdmissionClient(motor_sender(client, config), config, rpc_attempts=get_config().rpc_attempts)
++        plugin.provider = MotorFeatureProvider(plugin)
++        client._gf_admission = plugin
++    return plugin
++
++
++async def start_admission_client(client):
++    plugin = admission_client(client)
++    if plugin is not None:
++        await plugin.hello()
++
++
++async def close_admission_client(client):
++    plugin = getattr(client, "_gf_admission", None)
++    if plugin is not None:
++        await plugin.close()
++
++
++async def close_admission_dispatcher(dispatcher):
++    broker = getattr(dispatcher, "_gf_admission", None)
++    if broker is not None:
++        result = await broker.close()
++        if result["states"].get("CLAIMED", 0) or result["states"].get("CLEANUP_PENDING", 0):
++            raise RuntimeError("admission shutdown has unresolved resources; drain/reconcile before SHM teardown")
++
++
+ def init_dispatcher(dispatcher) -> None:
+     dispatcher._fgjsq_service = None
++    dispatcher._gf_admission = None
++    if admission_mode() != "off" and not enabled():
++        raise ValueError("admission requires enabled g5 FGJSQ")
+     if enabled():
+         from motor_adapter.motor_backend import MotorBackend
+         from motor_adapter.service import FgjsqService
+         validate_motor(dispatcher._config)
+         dispatcher._fgjsq_service = FgjsqService(MotorBackend(dispatcher), get_config(),
+                                                 dispatcher._workload_commit_lock)
++        if admission_mode() != "off":
++            from gf_admission.compatibility import validate_runtime
++            validate_runtime()
++            from gf_admission.broker import AdmissionBroker
++            from gf_admission.runtime_config import load_config
++            config = load_config(os.environ["GF_ADMISSION_CONFIG"])
++            dispatcher._gf_admission = AdmissionBroker(dispatcher._fgjsq_service, config)
++            dispatcher._fgjsq_service.on_events = dispatcher._gf_admission.notify
+ 
+ 
+ async def dispatch(dispatcher, request):
+@@ -28,7 +98,22 @@
+         return SchedulerResponse(response_type=SchedulerResponseType.ERROR, request_id=request.request_id,
+                                  error="FGJSQ is disabled in Mgmt")
+     try:
+-        data = await dispatcher._fgjsq_service.command(request.data)
++        broker = getattr(dispatcher, "_gf_admission", None)
++        op = request.data.get("op", "")
++        if op.startswith("admission_"):
++            if broker is None:
++                raise ValueError("admission is disabled in Mgmt")
++            data = await broker.handle(request.data)
++        else:
++            if broker is not None and broker.config.mode == "enforce" and op == "reserve":
++                raise ValueError("enforce requires admission tickets; legacy worker refused")
++            data = await dispatcher._fgjsq_service.command(request.data)
++            if broker is not None:
++                if op == "hello":
++                    data.update(admission_schema=1, admission_mode=broker.config.mode,
++                                admission_digest=broker.config.digest)
++                else:
++                    broker.notify()
+         return SchedulerResponse(response_type=SchedulerResponseType.SUCCESS, request_id=request.request_id, data=data)
+     except Exception as error:
+         logger.error("FGJSQ command failed: %s", error)
+@@ -65,6 +150,20 @@
+ 
+     server.management_app.add_api_route("/fgjsq/v1/events", events, methods=["POST"])
+     server.management_app.add_api_route("/fgjsq/v1/loads", loads, methods=["GET"])
++    if admission_mode() != "off":
++        def admission():
++            broker = getattr(server._control_plane._dispatcher, "_gf_admission", None)
++            if broker is None:
++                raise HTTPException(503, "admission is not ready")
++            return broker
++        async def admission_state(request: Request):
++            server._verify_mgmt_api_key(request)
++            return await admission().snapshot()
++        async def admission_drain(request: Request):
++            server._verify_mgmt_api_key(request)
++            return await admission().drain()
++        server.management_app.add_api_route("/admission/v1/state", admission_state, methods=["GET"])
++        server.management_app.add_api_route("/admission/v1/drain", admission_drain, methods=["POST"])
+ 
+ 
+ def request_state(req_info) -> dict:
+@@ -109,6 +208,22 @@
+     state = request_state(req_info)
+     record = state["attempts"].setdefault(attempt_seq, {})
+     try:
++        plugin = admission_client(client)
++        if plugin is not None:
++            payload = {"req_id": req_info.req_id, "estimated_tokens": max(1, req_info.req_len // 4),
++                       "native_tokens": float(calculate_demand_workload(role, req_info).active_tokens),
++                       **constraints}
++            if plugin.config.mode == "enforce":
++                result = await plugin.allocate(state["nonce"], attempt_seq, payload, req_info)
++                if result is None:
++                    return None
++                record["command"], record["ack"] = result["reserve_command"], result["ack"]
++                ack = record["ack"]
++                if ack["native_released"] or ack["fg_released"]:
++                    raise RuntimeError("admission returned a released reservation")
++                return (Instance.model_validate(ack["instance"]), Endpoint.model_validate(ack["endpoint"]),
++                        Workload(active_tokens=ack["native_tokens"]))
++            plugin.shadow(state["nonce"], attempt_seq, payload, req_info)
+         if "command" not in record:
+             hello = await _rpc(client, {"op": "hello"})
+             command = {"op": "reserve", "coordinator_epoch": hello["coordinator_epoch"],
+@@ -220,6 +335,9 @@
+ 
+ 
+ async def finish_attempt(router, attempt) -> None:
++    plugin = getattr(router._scheduler, "_gf_admission", None)
++    if plugin is not None and plugin.config.mode == "enforce":
++        await plugin.cancel(request_state(router.req_info)["nonce"], attempt.attempt_seq)
+     if enabled():
+         await release_record(router._scheduler, record_for(router.req_info, attempt.attempt_seq), "abort", suppress=True)
+ 
+@@ -228,6 +346,12 @@
+     if not enabled():
+         return
+     state = request_state(router.req_info)
++    plugin = getattr(router._scheduler, "_gf_admission", None)
++    if plugin is not None:
++        try:
++            await plugin.finish(state["nonce"])
++        except Exception as error:
++            logger.error("Admission finish not confirmed: %s", type(error).__name__)
+     tasks = list(state["tasks"])
+     if tasks:
+         await asyncio.gather(*tasks, return_exceptions=True)
+--- a/src/motor_adapter/service.py
++++ b/src/motor_adapter/service.py
+@@ -22,6 +22,7 @@
+     closed_at: float | None = None
+     engine_epoch: str | None = None
+     batch_seq: int = -1
++    uncertain_native: bool = False
+ 
+ 
+ class FgjsqService:
+@@ -36,6 +37,7 @@
+         self.keys: dict[str, str] = {}
+         self.metrics = Counter()
+         self.cancelled: dict[str, float] = {}
++        self.on_events = None
+ 
+     def _prune(self) -> None:
+         self.cancelled = {key: expiry for key, expiry in self.cancelled.items() if expiry > self.clock()}
+@@ -55,39 +57,45 @@
+ 
+     async def command(self, data: dict) -> dict:
+         async with self.lock:
+-            self._prune()
+-            op = data.get("op")
+-            if op == "hello":
+-                return {"schema_version": 1, "coordinator_epoch": self.epoch}
+-            if data.get("coordinator_epoch") != self.epoch:
+-                raise ValueError("coordinator epoch changed; drain/reconcile before retry")
+-            if op == "reserve":
+-                return self._reserve(data)
+-            rid = data.get("reservation_id") or self.keys.get(data.get("key"))
+-            r = self.records.get(rid)
+-            if op == "query":
+-                return {"found": r is not None, "record": self._ack(r) if r else None}
+-            if r is None:
+-                if op == "abort" and data.get("key"):
+-                    self.cancelled[data["key"]] = self.clock() + self.config.tombstone_s
+-                    return {"ok": True, "reason": "cancelled_before_reserve"}
+-                # Never subtract native tokens from a caller-supplied delta.
+-                return {"ok": False, "reason": "unknown_reservation"}
+-            if op not in ("release_native", "release_fg", "abort"):
+-                raise ValueError("unknown operation")
+-            if op in ("release_native", "abort") and not r.native_released:
+-                if not self.backend.release(r.candidate, r.native_tokens):
+-                    return {"ok": False, "reason": "native_release_unconfirmed"}
+-                r.native_released = True
+-            if op in ("release_fg", "abort") and not r.fg_released:
+-                self.policy.release(r.reservation_id)
+-                r.fg_released = True
+-            if r.native_released and r.fg_released and r.closed_at is None:
+-                r.closed_at = self.clock()
+-            self.metrics[op] += 1
+-            return {"ok": True, "record": self._ack(r)}
+-
+-    def _reserve(self, data: dict) -> dict:
++            return self._command_locked(data)
++
++    def _command_locked(self, data: dict) -> dict:
++        """Caller owns self.lock; admission shares this exact release path."""
++        self._prune()
++        op = data.get("op")
++        if op == "hello":
++            return {"schema_version": 1, "coordinator_epoch": self.epoch}
++        if data.get("coordinator_epoch") != self.epoch:
++            raise ValueError("coordinator epoch changed; drain/reconcile before retry")
++        if op == "reserve":
++            return self._reserve(data)
++        rid = data.get("reservation_id") or self.keys.get(data.get("key"))
++        r = self.records.get(rid)
++        if op == "query":
++            return {"found": r is not None, "record": self._ack(r) if r else None}
++        if r is None:
++            if op == "abort" and data.get("key"):
++                self.cancelled[data["key"]] = self.clock() + self.config.tombstone_s
++                return {"ok": True, "reason": "cancelled_before_reserve"}
++            # Never subtract native tokens from a caller-supplied delta.
++            return {"ok": False, "reason": "unknown_reservation"}
++        if r.uncertain_native:
++            return {"ok": False, "reason": "native_outcome_requires_reconciliation"}
++        if op not in ("release_native", "release_fg", "abort"):
++            raise ValueError("unknown operation")
++        if op in ("release_native", "abort") and not r.native_released:
++            if not self.backend.release(r.candidate, r.native_tokens):
++                return {"ok": False, "reason": "native_release_unconfirmed"}
++            r.native_released = True
++        if op in ("release_fg", "abort") and not r.fg_released:
++            self.policy.release(r.reservation_id)
++            r.fg_released = True
++        if r.native_released and r.fg_released and r.closed_at is None:
++            r.closed_at = self.clock()
++        self.metrics[op] += 1
++        return {"ok": True, "record": self._ack(r)}
++
++    def _reserve(self, data: dict, candidate_guard=None, *, retain_failures=False) -> dict:
+         key = data["key"]
+         if key in self.cancelled:
+             raise ValueError("attempt cancelled before reserve")
+@@ -113,7 +121,21 @@
+             raise ValueError("FGJSQ v1 requires one endpoint per P instance")
+         for instance in self.policy.rank(list(by_instance)):
+             c = by_instance[instance]
+-            if not self.backend.reserve(c, native):
++            if candidate_guard is not None and not candidate_guard(c):
++                return {"deferred": True}
++            try:
++                accepted = self.backend.reserve(c, native)
++            except BaseException:
++                if retain_failures:
++                    # The native call may have committed before raising. Keep an
++                    # explicit reconciliation record; do not subtract a guessed delta.
++                    rid = uuid.uuid4().hex
++                    r = Record(key, rid, c, native, dict(data), fg_released=True,
++                               uncertain_native=True)
++                    self.records[rid] = r
++                    self.keys[key] = rid
++                raise
++            if not accepted:
+                 continue
+             rid = uuid.uuid4().hex
+             r = Record(key, rid, c, native, dict(data))
+@@ -122,10 +144,16 @@
+                 self.records[rid] = r
+                 self.keys[key] = rid
+             except BaseException:
+-                self.policy.release(rid)
+-                self.records.pop(rid, None)
+-                self.keys.pop(key, None)
+-                self.backend.release(c, native)
++                if retain_failures:
++                    self.records[rid] = r
++                    self.keys[key] = rid
++                    # Abort uses the normal idempotent release helper. A failed
++                    # rollback remains visible to the broker instead of disappearing.
++                else:
++                    self.policy.release(rid)
++                    self.records.pop(rid, None)
++                    self.keys.pop(key, None)
++                    self.backend.release(c, native)
+                 raise
+             self.metrics["reserved"] += 1
+             return self._ack(r)
+@@ -173,6 +201,8 @@
+                 self.policy.event(r.reservation_id, p)
+                 r.engine_epoch, r.batch_seq = epoch, seq
+                 counts["matched"] += 1
++                if self.on_events is not None:
++                    self.on_events((r.candidate["instance_id"],))
+             self.metrics.update(counts)
+             return dict(counts)
+ 

@@ -3,10 +3,11 @@
 There are no FG/native resources or transaction tombstones in this container.
 Removal means leaving the pending queue, never releasing an engine reservation.
 """
+
 from collections import OrderedDict
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from itertools import islice
-from typing import Callable
 
 from .config import QueueLimits, finite, integer
 
@@ -65,10 +66,16 @@ class DualQueueStore:
         self._cost_sum = total
 
     def check_capacity(self, key: str) -> None:
-        if not isinstance(key, str) or not key or len(key.encode("utf-8")) > self.limits.max_key_bytes:
+        if (
+            not isinstance(key, str)
+            or not key
+            or len(key.encode("utf-8")) > self.limits.max_key_bytes
+        ):
             raise ValueError("invalid or oversized queue key")
         if key in self.normal or key in self.tail:
-            raise ValueError("duplicate queue key; broker must resolve transaction retries")
+            raise ValueError(
+                "duplicate queue key; broker must resolve transaction retries"
+            )
         if len(self) >= self.limits.max_pending:
             raise CapacityError("pending capacity reached")
 
@@ -76,10 +83,15 @@ class DualQueueStore:
         if cost is None:
             return False
         finite("cost", cost)
-        return (cost > 0 and len(self.tail) < self.limits.max_tail_requests
-                and self.tail_cost + cost <= self.limits.max_tail_cost)
+        return (
+            cost > 0
+            and len(self.tail) < self.limits.max_tail_requests
+            and self.tail_cost + cost <= self.limits.max_tail_cost
+        )
 
-    def add(self, key: str, cost: float | None, *, tail: bool, protected: bool = False) -> Entry:
+    def add(
+        self, key: str, cost: float | None, *, tail: bool, protected: bool = False
+    ) -> Entry:
         self.check_capacity(key)
         if type(tail) is not bool or type(protected) is not bool:
             raise ValueError("tail and protected must be booleans")
@@ -135,7 +147,9 @@ class DualQueueStore:
         """
         if self.normal:
             return (next(iter(self.normal.values())),)
-        return tuple(self.tail[k] for k in islice(reversed(self.tail), self.limits.scan_limit))
+        return tuple(
+            self.tail[k] for k in islice(reversed(self.tail), self.limits.scan_limit)
+        )
 
     def next_promotion_ms(self) -> float | None:
         if not self.tail:

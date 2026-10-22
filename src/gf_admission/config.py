@@ -1,16 +1,23 @@
 """Validated policy parameters. No uncalibrated production defaults."""
+
 from dataclasses import dataclass
 from math import isfinite
 
 
 def finite(name: str, value: float, *, positive: bool = False) -> None:
     try:
-        valid = (not isinstance(value, bool) and isinstance(value, (int, float))
-                 and isfinite(value) and (value > 0 if positive else value >= 0))
+        valid = (
+            not isinstance(value, bool)
+            and isinstance(value, (int, float))
+            and isfinite(value)
+            and (value > 0 if positive else value >= 0)
+        )
     except OverflowError:
         valid = False
     if not valid:
-        raise ValueError(f"{name} must be finite and {'positive' if positive else 'nonnegative'}")
+        raise ValueError(
+            f"{name} must be finite and {'positive' if positive else 'nonnegative'}"
+        )
 
 
 def integer(name: str, value: int, *, minimum: int = 0) -> None:
@@ -35,7 +42,9 @@ class ClassifierConfig:
             raise ValueError("threshold_ratio must be <= 1")
         finite("long_request_ratio", self.long_request_ratio, positive=True)
         if self.long_request_ratio <= 1:
-            raise ValueError("long_request_ratio must be > 1 (homogeneous requests remain normal)")
+            raise ValueError(
+                "long_request_ratio must be > 1 (homogeneous requests remain normal)"
+            )
 
 
 @dataclass(frozen=True, slots=True)

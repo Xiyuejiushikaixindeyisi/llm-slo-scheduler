@@ -4,11 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gf-admission"
-version = "0.1.0.dev1"
-description = "Development-only GF admission policy core; no Motor activation yet"
+version = "0.1.0rc1"
+description = "Experimental GF admission broker and Motor g5 adapter contract"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["anyio>=4,<5"]
 
 [tool.setuptools]
 package-dir = {"" = "../../src"}
 packages = ["gf_admission"]
+
+[tool.setuptools.package-data]
+gf_admission = ["runtime_contract.json"]

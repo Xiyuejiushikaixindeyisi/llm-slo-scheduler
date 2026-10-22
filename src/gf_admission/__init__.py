@@ -1,6 +1,6 @@
-"""GF admission primitives; importing this package has no runtime side effects.
+"""GF admission; package import itself has no runtime side effects.
 
-This development release is a pure policy core, not a Motor activation plugin.
+Runtime activation requires the explicit, version-checked Motor g5 hooks.
 """
 
-__version__ = "0.1.0.dev1"
+__version__ = "0.1.0rc1"

@@ -1,0 +1,27 @@
+--- a/motor/coordinator/scheduler/runtime/scheduler_client.py
++++ b/motor/coordinator/scheduler/runtime/scheduler_client.py
+@@ -717,11 +717,13 @@
+             else:
+                 logger.debug("Instance push SUB disabled; cache will refresh on next request/shm")
+         if success:
++            await fgjsq_hooks.start_admission_client(self)
+             self._start_dp_stats_task()
+             logger.info("Async scheduler client connected to %s", self.scheduler_address)
+         return success
+ 
+     async def disconnect(self) -> None:
++        await fgjsq_hooks.close_admission_client(self)
+         await self._stop_dp_stats_task()
+         try:
+             if self._push_subscriber:
+--- a/motor/coordinator/scheduler/runtime/scheduler_server.py
++++ b/motor/coordinator/scheduler/runtime/scheduler_server.py
+@@ -755,6 +755,8 @@
+             await asyncio.gather(*self._active_tasks, return_exceptions=True)
+             self._active_tasks.clear()
+ 
++        if self._dispatcher is not None:
++            await fgjsq_hooks.close_admission_dispatcher(self._dispatcher)
+         if self._workload_writer:
+             try:
+                 self._workload_writer.release()

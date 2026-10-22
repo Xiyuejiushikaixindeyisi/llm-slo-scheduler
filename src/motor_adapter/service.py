@@ -22,6 +22,7 @@ class Record:
     closed_at: float | None = None
     engine_epoch: str | None = None
     batch_seq: int = -1
+    uncertain_native: bool = False
 
 
 class FgjsqService:
@@ -36,6 +37,7 @@ class FgjsqService:
         self.keys: dict[str, str] = {}
         self.metrics = Counter()
         self.cancelled: dict[str, float] = {}
+        self.on_events = None
 
     def _prune(self) -> None:
         self.cancelled = {key: expiry for key, expiry in self.cancelled.items() if expiry > self.clock()}
@@ -55,39 +57,45 @@ class FgjsqService:
 
     async def command(self, data: dict) -> dict:
         async with self.lock:
-            self._prune()
-            op = data.get("op")
-            if op == "hello":
-                return {"schema_version": 1, "coordinator_epoch": self.epoch}
-            if data.get("coordinator_epoch") != self.epoch:
-                raise ValueError("coordinator epoch changed; drain/reconcile before retry")
-            if op == "reserve":
-                return self._reserve(data)
-            rid = data.get("reservation_id") or self.keys.get(data.get("key"))
-            r = self.records.get(rid)
-            if op == "query":
-                return {"found": r is not None, "record": self._ack(r) if r else None}
-            if r is None:
-                if op == "abort" and data.get("key"):
-                    self.cancelled[data["key"]] = self.clock() + self.config.tombstone_s
-                    return {"ok": True, "reason": "cancelled_before_reserve"}
-                # Never subtract native tokens from a caller-supplied delta.
-                return {"ok": False, "reason": "unknown_reservation"}
-            if op not in ("release_native", "release_fg", "abort"):
-                raise ValueError("unknown operation")
-            if op in ("release_native", "abort") and not r.native_released:
-                if not self.backend.release(r.candidate, r.native_tokens):
-                    return {"ok": False, "reason": "native_release_unconfirmed"}
-                r.native_released = True
-            if op in ("release_fg", "abort") and not r.fg_released:
-                self.policy.release(r.reservation_id)
-                r.fg_released = True
-            if r.native_released and r.fg_released and r.closed_at is None:
-                r.closed_at = self.clock()
-            self.metrics[op] += 1
-            return {"ok": True, "record": self._ack(r)}
+            return self._command_locked(data)
 
-    def _reserve(self, data: dict) -> dict:
+    def _command_locked(self, data: dict) -> dict:
+        """Caller owns self.lock; admission shares this exact release path."""
+        self._prune()
+        op = data.get("op")
+        if op == "hello":
+            return {"schema_version": 1, "coordinator_epoch": self.epoch}
+        if data.get("coordinator_epoch") != self.epoch:
+            raise ValueError("coordinator epoch changed; drain/reconcile before retry")
+        if op == "reserve":
+            return self._reserve(data)
+        rid = data.get("reservation_id") or self.keys.get(data.get("key"))
+        r = self.records.get(rid)
+        if op == "query":
+            return {"found": r is not None, "record": self._ack(r) if r else None}
+        if r is None:
+            if op == "abort" and data.get("key"):
+                self.cancelled[data["key"]] = self.clock() + self.config.tombstone_s
+                return {"ok": True, "reason": "cancelled_before_reserve"}
+            # Never subtract native tokens from a caller-supplied delta.
+            return {"ok": False, "reason": "unknown_reservation"}
+        if r.uncertain_native:
+            return {"ok": False, "reason": "native_outcome_requires_reconciliation"}
+        if op not in ("release_native", "release_fg", "abort"):
+            raise ValueError("unknown operation")
+        if op in ("release_native", "abort") and not r.native_released:
+            if not self.backend.release(r.candidate, r.native_tokens):
+                return {"ok": False, "reason": "native_release_unconfirmed"}
+            r.native_released = True
+        if op in ("release_fg", "abort") and not r.fg_released:
+            self.policy.release(r.reservation_id)
+            r.fg_released = True
+        if r.native_released and r.fg_released and r.closed_at is None:
+            r.closed_at = self.clock()
+        self.metrics[op] += 1
+        return {"ok": True, "record": self._ack(r)}
+
+    def _reserve(self, data: dict, candidate_guard=None, *, retain_failures=False) -> dict:
         key = data["key"]
         if key in self.cancelled:
             raise ValueError("attempt cancelled before reserve")
@@ -113,7 +121,21 @@ class FgjsqService:
             raise ValueError("FGJSQ v1 requires one endpoint per P instance")
         for instance in self.policy.rank(list(by_instance)):
             c = by_instance[instance]
-            if not self.backend.reserve(c, native):
+            if candidate_guard is not None and not candidate_guard(c):
+                return {"deferred": True}
+            try:
+                accepted = self.backend.reserve(c, native)
+            except BaseException:
+                if retain_failures:
+                    # The native call may have committed before raising. Keep an
+                    # explicit reconciliation record; do not subtract a guessed delta.
+                    rid = uuid.uuid4().hex
+                    r = Record(key, rid, c, native, dict(data), fg_released=True,
+                               uncertain_native=True)
+                    self.records[rid] = r
+                    self.keys[key] = rid
+                raise
+            if not accepted:
                 continue
             rid = uuid.uuid4().hex
             r = Record(key, rid, c, native, dict(data))
@@ -122,10 +144,16 @@ class FgjsqService:
                 self.records[rid] = r
                 self.keys[key] = rid
             except BaseException:
-                self.policy.release(rid)
-                self.records.pop(rid, None)
-                self.keys.pop(key, None)
-                self.backend.release(c, native)
+                if retain_failures:
+                    self.records[rid] = r
+                    self.keys[key] = rid
+                    # Abort uses the normal idempotent release helper. A failed
+                    # rollback remains visible to the broker instead of disappearing.
+                else:
+                    self.policy.release(rid)
+                    self.records.pop(rid, None)
+                    self.keys.pop(key, None)
+                    self.backend.release(c, native)
                 raise
             self.metrics["reserved"] += 1
             return self._ack(r)
@@ -173,6 +201,8 @@ class FgjsqService:
                 self.policy.event(r.reservation_id, p)
                 r.engine_epoch, r.batch_seq = epoch, seq
                 counts["matched"] += 1
+                if self.on_events is not None:
+                    self.on_events((r.candidate["instance_id"],))
             self.metrics.update(counts)
             return dict(counts)
 

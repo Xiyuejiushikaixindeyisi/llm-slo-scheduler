@@ -3,6 +3,7 @@
 The owner calls decide exactly once per logical nonce, after capacity and identity
 validation. Transport retries and new attempts reuse the owner's saved decision.
 """
+
 from dataclasses import dataclass
 from enum import Enum
 
@@ -39,9 +40,15 @@ class Classifier:
         self.minimum: float | None = None
         self.maximum: float | None = None
 
-    def decide(self, cost: float | None, *, budget_allows: bool,
-               pressure_valid: bool, protected: bool = False,
-               supported: bool = True) -> Decision:
+    def decide(
+        self,
+        cost: float | None,
+        *,
+        budget_allows: bool,
+        pressure_valid: bool,
+        protected: bool = False,
+        supported: bool = True,
+    ) -> Decision:
         # Validate before changing any accounting, including arrival credit.
         if cost is not None:
             finite("cost", cost)
@@ -61,7 +68,9 @@ class Classifier:
             self.consumed += 1
         return Decision(reason is Reason.TAIL, reason, cost)
 
-    def _reason(self, cost, budget_allows, pressure_valid, protected, supported) -> Reason:
+    def _reason(
+        self, cost, budget_allows, pressure_valid, protected, supported
+    ) -> Reason:
         if not supported:
             return Reason.UNSUPPORTED
         if protected:
@@ -72,8 +81,10 @@ class Classifier:
             return Reason.ZERO
         if not pressure_valid:
             return Reason.PRESSURE_UNKNOWN
-        if (cost < self.config.threshold_ratio * self.maximum
-                or cost < self.config.long_request_ratio * self.minimum):
+        if (
+            cost < self.config.threshold_ratio * self.maximum
+            or cost < self.config.long_request_ratio * self.minimum
+        ):
             return Reason.NOT_LONG
         if self.credit == 0:
             return Reason.NO_CREDIT

@@ -2,6 +2,10 @@
 import asyncio
 import copy
 import logging
+import json
+import os
+from functools import lru_cache
+from pathlib import Path
 import time
 import uuid
 
@@ -12,14 +16,80 @@ WIRE_TYPE = "fgjsq_v1"
 BODY_MARKER = "_motor_fgjsq_observer"
 
 
+
+@lru_cache(maxsize=1)
+def admission_mode():
+    path = os.getenv("GF_ADMISSION_CONFIG")
+    if not path:
+        return "off"
+    with Path(path).open("rb") as stream:
+        raw = stream.read(65537)
+    if len(raw) > 65536:
+        raise ValueError("GF_ADMISSION_CONFIG exceeds 64KiB")
+    value = json.loads(raw)
+    if value.get("schema_version") != 1 or value.get("mode") not in ("off", "shadow", "enforce"):
+        raise ValueError("invalid admission schema/mode")
+    return value["mode"]
+
+
+def admission_client(client):
+    if admission_mode() == "off":
+        return None
+    if not enabled():
+        raise ValueError("admission requires enabled g5 FGJSQ")
+    plugin = getattr(client, "_gf_admission", None)
+    if plugin is None:
+        from gf_admission.compatibility import validate_runtime
+        validate_runtime()
+        from gf_admission.client import AdmissionClient, motor_sender
+        from gf_admission.provider import MotorFeatureProvider
+        from gf_admission.runtime_config import load_config
+        config = load_config(os.environ["GF_ADMISSION_CONFIG"])
+        plugin = AdmissionClient(motor_sender(client, config), config, rpc_attempts=get_config().rpc_attempts)
+        plugin.provider = MotorFeatureProvider(plugin)
+        client._gf_admission = plugin
+    return plugin
+
+
+async def start_admission_client(client):
+    plugin = admission_client(client)
+    if plugin is not None:
+        await plugin.hello()
+
+
+async def close_admission_client(client):
+    plugin = getattr(client, "_gf_admission", None)
+    if plugin is not None:
+        await plugin.close()
+
+
+async def close_admission_dispatcher(dispatcher):
+    broker = getattr(dispatcher, "_gf_admission", None)
+    if broker is not None:
+        result = await broker.close()
+        if result["states"].get("CLAIMED", 0) or result["states"].get("CLEANUP_PENDING", 0):
+            raise RuntimeError("admission shutdown has unresolved resources; drain/reconcile before SHM teardown")
+
+
 def init_dispatcher(dispatcher) -> None:
     dispatcher._fgjsq_service = None
+    dispatcher._gf_admission = None
+    if admission_mode() != "off" and not enabled():
+        raise ValueError("admission requires enabled g5 FGJSQ")
     if enabled():
         from motor_adapter.motor_backend import MotorBackend
         from motor_adapter.service import FgjsqService
         validate_motor(dispatcher._config)
         dispatcher._fgjsq_service = FgjsqService(MotorBackend(dispatcher), get_config(),
                                                 dispatcher._workload_commit_lock)
+        if admission_mode() != "off":
+            from gf_admission.compatibility import validate_runtime
+            validate_runtime()
+            from gf_admission.broker import AdmissionBroker
+            from gf_admission.runtime_config import load_config
+            config = load_config(os.environ["GF_ADMISSION_CONFIG"])
+            dispatcher._gf_admission = AdmissionBroker(dispatcher._fgjsq_service, config)
+            dispatcher._fgjsq_service.on_events = dispatcher._gf_admission.notify
 
 
 async def dispatch(dispatcher, request):
@@ -28,7 +98,22 @@ async def dispatch(dispatcher, request):
         return SchedulerResponse(response_type=SchedulerResponseType.ERROR, request_id=request.request_id,
                                  error="FGJSQ is disabled in Mgmt")
     try:
-        data = await dispatcher._fgjsq_service.command(request.data)
+        broker = getattr(dispatcher, "_gf_admission", None)
+        op = request.data.get("op", "")
+        if op.startswith("admission_"):
+            if broker is None:
+                raise ValueError("admission is disabled in Mgmt")
+            data = await broker.handle(request.data)
+        else:
+            if broker is not None and broker.config.mode == "enforce" and op == "reserve":
+                raise ValueError("enforce requires admission tickets; legacy worker refused")
+            data = await dispatcher._fgjsq_service.command(request.data)
+            if broker is not None:
+                if op == "hello":
+                    data.update(admission_schema=1, admission_mode=broker.config.mode,
+                                admission_digest=broker.config.digest)
+                else:
+                    broker.notify()
         return SchedulerResponse(response_type=SchedulerResponseType.SUCCESS, request_id=request.request_id, data=data)
     except Exception as error:
         logger.error("FGJSQ command failed: %s", error)
@@ -65,6 +150,20 @@ def register_routes(server) -> None:
 
     server.management_app.add_api_route("/fgjsq/v1/events", events, methods=["POST"])
     server.management_app.add_api_route("/fgjsq/v1/loads", loads, methods=["GET"])
+    if admission_mode() != "off":
+        def admission():
+            broker = getattr(server._control_plane._dispatcher, "_gf_admission", None)
+            if broker is None:
+                raise HTTPException(503, "admission is not ready")
+            return broker
+        async def admission_state(request: Request):
+            server._verify_mgmt_api_key(request)
+            return await admission().snapshot()
+        async def admission_drain(request: Request):
+            server._verify_mgmt_api_key(request)
+            return await admission().drain()
+        server.management_app.add_api_route("/admission/v1/state", admission_state, methods=["GET"])
+        server.management_app.add_api_route("/admission/v1/drain", admission_drain, methods=["POST"])
 
 
 def request_state(req_info) -> dict:
@@ -109,6 +208,22 @@ async def allocate(client, role, req_info, attempt_seq, **constraints):
     state = request_state(req_info)
     record = state["attempts"].setdefault(attempt_seq, {})
     try:
+        plugin = admission_client(client)
+        if plugin is not None:
+            payload = {"req_id": req_info.req_id, "estimated_tokens": max(1, req_info.req_len // 4),
+                       "native_tokens": float(calculate_demand_workload(role, req_info).active_tokens),
+                       **constraints}
+            if plugin.config.mode == "enforce":
+                result = await plugin.allocate(state["nonce"], attempt_seq, payload, req_info)
+                if result is None:
+                    return None
+                record["command"], record["ack"] = result["reserve_command"], result["ack"]
+                ack = record["ack"]
+                if ack["native_released"] or ack["fg_released"]:
+                    raise RuntimeError("admission returned a released reservation")
+                return (Instance.model_validate(ack["instance"]), Endpoint.model_validate(ack["endpoint"]),
+                        Workload(active_tokens=ack["native_tokens"]))
+            plugin.shadow(state["nonce"], attempt_seq, payload, req_info)
         if "command" not in record:
             hello = await _rpc(client, {"op": "hello"})
             command = {"op": "reserve", "coordinator_epoch": hello["coordinator_epoch"],
@@ -220,6 +335,9 @@ def prepare_forward(router, body: dict):
 
 
 async def finish_attempt(router, attempt) -> None:
+    plugin = getattr(router._scheduler, "_gf_admission", None)
+    if plugin is not None and plugin.config.mode == "enforce":
+        await plugin.cancel(request_state(router.req_info)["nonce"], attempt.attempt_seq)
     if enabled():
         await release_record(router._scheduler, record_for(router.req_info, attempt.attempt_seq), "abort", suppress=True)
 
@@ -228,6 +346,12 @@ async def finish_request(router) -> None:
     if not enabled():
         return
     state = request_state(router.req_info)
+    plugin = getattr(router._scheduler, "_gf_admission", None)
+    if plugin is not None:
+        try:
+            await plugin.finish(state["nonce"])
+        except Exception as error:
+            logger.error("Admission finish not confirmed: %s", type(error).__name__)
     tasks = list(state["tasks"])
     if tasks:
         await asyncio.gather(*tasks, return_exceptions=True)

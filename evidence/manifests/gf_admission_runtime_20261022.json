@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "version": "0.1.0rc1",
+  "baseline_commit": "3b63b00546e7a6ffb2526dafc341969cebe22359",
+  "test_python": "3.13.11",
+  "suites": {
+    "project": {
+      "total": 79,
+      "passed": 79,
+      "skipped": []
+    },
+    "motor": {
+      "total": 317,
+      "passed": 309,
+      "skipped": [
+        {
+          "name": "test_on_instance_change_notify_calls_refresh_callback",
+          "reason": "Endpoint status resolution in model_validate needs investigation"
+        },
+        {
+          "name": "test_select_and_allocate_cas_commits_lowest_load",
+          "reason": "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found"
+        },
+        {
+          "name": "test_select_and_allocate_fast_path_refreshes_once",
+          "reason": "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found"
+        },
+        {
+          "name": "test_select_and_allocate_changed_reloads_and_rescores",
+          "reason": "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found"
+        },
+        {
+          "name": "test_select_and_allocate_blocked_excludes_pair_and_switches_candidate",
+          "reason": "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found"
+        },
+        {
+          "name": "test_update_workload_cas_sub_floor0",
+          "reason": "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found"
+        },
+        {
+          "name": "test_update_workload_cas_success_survives_cache_patch_failure",
+          "reason": "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found"
+        },
+        {
+          "name": "test_update_workload_rejects_non_release_action",
+          "reason": "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found"
+        }
+      ]
+    }
+  },
+  "baseline_unchanged_matches": 29,
+  "intentional_four_file_delta": {
+    "src/motor_adapter/bindings.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/motor_adapter/bindings.py",
+      "sha256": "dba8c084a1f1ae4e1ad6fd9a4dc73d0cca695ff812a465f7b6c391b8b160f7e0",
+      "expected": "053652d6f8e1b9e69df553cb5077c881a029cec8e38a3699f5d3d4c7bb494a0b",
+      "status": "mismatch"
+    },
+    "src/motor_adapter/service.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/src/motor_adapter/service.py",
+      "sha256": "9f4e7604fb6d23919849877e46569d49bdd9921ffc021990e0f04c376637f390",
+      "expected": "10cca5403ae916d6044d781a60a30c8a095575888e624b84a0f74d4b5d6a2027",
+      "status": "mismatch"
+    },
+    "motor/coordinator/scheduler/runtime/scheduler_client.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/scheduler/runtime/scheduler_client.py",
+      "sha256": "25f9c29e4b32e962c463259152dceedc35d257573d913559d9c17839a71e308b",
+      "expected": "73b65adfa9c528e462ebf0c9d96ec2a79ff8513db6db114ed865e6617dfbfceb",
+      "status": "mismatch"
+    },
+    "motor/coordinator/scheduler/runtime/scheduler_server.py": {
+      "path": "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-g5/motor/coordinator/scheduler/runtime/scheduler_server.py",
+      "sha256": "41a5324e9989a38d0161e50d20f90b441607a8ca581872789f40cb79243dd8f7",
+      "expected": "5e48389a6045393c36d8b3dd5fc9af99d7ad3e670c8e3eee1099f5e1aabc8232",
+      "status": "mismatch"
+    }
+  },
+  "source_hashes": {
+    "src/gf_admission/__init__.py": "7f339374a3486cf41b57d5a76b21f2edba46912d39d9a70bb761f2e71a59317f",
+    "src/gf_admission/broker.py": "b22c5498a7bfc3218ba73d3197f1950d42cc017b38b7b5e924e9e27022ca239a",
+    "src/gf_admission/classifier.py": "817e7b0a7303bd1aa4e2b8d02561bcb7577d8567246dfa7af2a6aa544ee474a9",
+    "src/gf_admission/client.py": "1bafe2dd39317bed3d92bdf5fdf6760db4402fc896e4170d22bb017bf42bb12f",
+    "src/gf_admission/compatibility.py": "ed71863aec5cf0b1a338233bd4ab55924a2b45413a437f1dac790026b74ba57c",
+    "src/gf_admission/config.py": "7709652b34a0b0bc3bae036488caa12a92178131c84b166670151e5a868a498c",
+    "src/gf_admission/features.py": "0f56901d8fa7b0f35d7d8d5de35d7235dfe118dc9dea1e7f12a659627586615b",
+    "src/gf_admission/pressure.py": "ba72aa671021bf73090f15c0c40f1cdb3105ea92249cd6c74c0c99d960a19dea",
+    "src/gf_admission/provider.py": "3f6a08685444e3230921b8b9a5e121774a09bb25a57d5b5b49f76f7936e2ae13",
+    "src/gf_admission/queue.py": "5275f41c1687a906b20aa95a126576628ab18c0fcec22aa196449a62ec067c43",
+    "src/gf_admission/runtime_config.py": "e16174f2ca9af7994a3f8671414d12b36014be897656f43bb660e3b6f37456d1",
+    "src/gf_admission/runtime_contract.json": "2ba15736ce48fe69a313d478318399247edc421496135d34873be36e210c7e02",
+    "src/motor_adapter/bindings.py": "dba8c084a1f1ae4e1ad6fd9a4dc73d0cca695ff812a465f7b6c391b8b160f7e0",
+    "src/motor_adapter/service.py": "9f4e7604fb6d23919849877e46569d49bdd9921ffc021990e0f04c376637f390"
+  },
+  "tests_entry": "Motor tests/run_tests.sh --serial; exact selected cases in JUnit XML",
+  "limits": [
+    "No NPU or AISBench execution",
+    "FakeNative SHM; actual ZMQ transport including a separate worker process",
+    "Python 3.12 not tested",
+    "Session 2 review pending",
+    "Full Motor pre-commit not green: original g5 formatting and missing gitleaks binary"
+  ],
+  "source_ref": "fixed super-p95 dd9c0895 oracle; no FGJSQ/predictor changes",
+  "extracted_bundle_tests": {
+    "passed": 58,
+    "interpreter": "3.13.11",
+    "log": "artifacts/gf-admission/extracted-tests.log"
+  },
+  "wheel_checks": [
+    "isolated installed path version and runtime contract passed",
+    "Python 3.10.12 standalone broker/config import passed; not Motor/NPU"
+  ]
+}
