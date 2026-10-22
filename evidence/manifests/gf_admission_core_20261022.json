@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-22",
+  "phase": "policy_core_only",
+  "base_commit": "3b63b00546e7a6ffb2526dafc341969cebe22359",
+  "branch": "backup/20261022-init",
+  "baseline": [
+    {
+      "path": "artifacts/gf-admission/baseline/project.xml",
+      "sha256": "eeed6f3c13b1bbe6a6f5879fc749869e2347dd165bd081e6072c388ec3861279",
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "artifacts/gf-admission/baseline/motor.xml",
+      "sha256": "586751e3b5fd3f9d122ed07b75009aac025b9bd9752a8bdaf84385a1a80be386",
+      "tests": 170,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "final": [
+    {
+      "path": "artifacts/local-validation/project.xml",
+      "sha256": "e8631ad3cc7b5c7254ae110987b3ccd707f38478a6a03d6d7583da293e3aed83",
+      "tests": 59,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "path": "artifacts/local-validation/motor.xml",
+      "sha256": "0af4932b6377cee5cb1296dffee63208e0fca291fdee5efbc85887513a0b4f25",
+      "tests": 170,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "fingerprints": {
+    "passed": true,
+    "matched": 33
+  },
+  "source_sha256": {
+    "packages/gf_admission/README.md": "366c076c50ee58d585c0b7a94bef426bbc9461fe96359818e999df56f4dc5b9f",
+    "packages/gf_admission/pyproject.toml": "794ec15dcd1eb15b71935dea83a9890d6015b6831cacae395a927d214ac04009",
+    "scripts/package/build_gf_admission_core.py": "59b29e3112c979f8ffad30292fb3c6fadabc4a9df8ef49951ca7877dbc0f0b32",
+    "scripts/validate/benchmark_admission_containers.py": "109007ec6eedc1b364c37aa13ff7b3835004c7bc470fc8dff1de590d0f52331a",
+    "src/gf_admission/__init__.py": "8463165232f57d6400ae4ad5954156e779e53e8add54849ad61a2be4b59755cf",
+    "src/gf_admission/classifier.py": "543c50b11e1830494283e29872176fd194e10e77e4202c43876de63585a95036",
+    "src/gf_admission/config.py": "5a535484562b8e3b13f4662d66d5c8e448922c268fc71129793d5c9032d5bae9",
+    "src/gf_admission/features.py": "32d5dc511f989ebd845ca422ae50dc8a82d440db6c7b58c36097942d305f6203",
+    "src/gf_admission/pressure.py": "4fb6441a3ee5236519300b883cbb71725eb3100d031e493a37466531cb102c11",
+    "src/gf_admission/queue.py": "b300a9b3433f9f4b7b334338b9ab25993c978d25458ae6c6dcf8f1b544a69baf",
+    "tests/fixtures/admission/arrival.py.txt": "496b30efb9e3afa33c71ab7051b1583520544ee2c1034690237e6da50769fbeb",
+    "tests/fixtures/admission/predicate.py.txt": "97afc78684f92ce35033d9679039204d64946fa6f8b6c246e88694049fec953d",
+    "tests/fixtures/admission/provenance.json": "c5e6f19d1ca6c33f20f8e39e0e03eb7eea38a900ae20db76535419440ba6a9a0",
+    "tests/unit/test_admission_core.py": "bcc3b89232ce7e920254cacecb017855002e680db765ac6cf8e804c88673bd4f"
+  },
+  "python310_smoke": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0] core smoke passed\n",
+  "python312": "not_run",
+  "container_benchmark": {
+    "python": "3.13.11",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.35",
+    "seed": 20261022,
+    "repeats": 100,
+    "results": [
+      {
+        "container": "Ordered",
+        "initial_items": 16,
+        "batch_p50_us": 3.8114999999999997,
+        "batch_p99_us": 5.428,
+        "peak_python_bytes": 2448
+      },
+      {
+        "container": "Deque",
+        "initial_items": 16,
+        "batch_p50_us": 3.0620000000000003,
+        "batch_p99_us": 5.434,
+        "peak_python_bytes": 2888
+      },
+      {
+        "container": "Heap",
+        "initial_items": 16,
+        "batch_p50_us": 5.250500000000001,
+        "batch_p99_us": 9.837,
+        "peak_python_bytes": 1312
+      },
+      {
+        "container": "Ordered",
+        "initial_items": 256,
+        "batch_p50_us": 48.969,
+        "batch_p99_us": 99.417,
+        "peak_python_bytes": 33072
+      },
+      {
+        "container": "Deque",
+        "initial_items": 256,
+        "batch_p50_us": 115.1725,
+        "batch_p99_us": 151.411,
+        "peak_python_bytes": 17112
+      },
+      {
+        "container": "Heap",
+        "initial_items": 256,
+        "batch_p50_us": 123.2345,
+        "batch_p99_us": 197.575,
+        "peak_python_bytes": 22176
+      },
+      {
+        "container": "Ordered",
+        "initial_items": 4096,
+        "batch_p50_us": 1076.7635,
+        "batch_p99_us": 1523.41,
+        "peak_python_bytes": 614824
+      },
+      {
+        "container": "Deque",
+        "initial_items": 4096,
+        "batch_p50_us": 19477.3085,
+        "batch_p99_us": 20660.137,
+        "peak_python_bytes": 324760
+      },
+      {
+        "container": "Heap",
+        "initial_items": 4096,
+        "batch_p50_us": 2798.569,
+        "batch_p99_us": 3208.683,
+        "peak_python_bytes": 798624
+      }
+    ],
+    "scope": "container-only CPU batches; not whole policy/IPC/NPU performance"
+  },
+  "build": {
+    "schema_version": 1,
+    "kind": "development_core_only",
+    "source_base_commit": "3b63b00546e7a6ffb2526dafc341969cebe22359",
+    "source_identity": "file SHA256 (includes uncommitted source)",
+    "files": {
+      "source/README.md": "366c076c50ee58d585c0b7a94bef426bbc9461fe96359818e999df56f4dc5b9f",
+      "source/pyproject.toml": "3b4d375d141fa224cfad39518f6c503a7aa3eb1ae432dec15095db9376f6d7f5",
+      "source/src/gf_admission/__init__.py": "8463165232f57d6400ae4ad5954156e779e53e8add54849ad61a2be4b59755cf",
+      "source/src/gf_admission/classifier.py": "543c50b11e1830494283e29872176fd194e10e77e4202c43876de63585a95036",
+      "source/src/gf_admission/config.py": "5a535484562b8e3b13f4662d66d5c8e448922c268fc71129793d5c9032d5bae9",
+      "source/src/gf_admission/features.py": "32d5dc511f989ebd845ca422ae50dc8a82d440db6c7b58c36097942d305f6203",
+      "source/src/gf_admission/pressure.py": "4fb6441a3ee5236519300b883cbb71725eb3100d031e493a37466531cb102c11",
+      "source/src/gf_admission/queue.py": "b300a9b3433f9f4b7b334338b9ab25993c978d25458ae6c6dcf8f1b544a69baf",
+      "wheels/gf_admission-0.1.0.dev1-py3-none-any.whl": "12656c5f1c08d65f04fb4caf0d264203e0975b138a43306d7696e25404d16dc1"
+    },
+    "runtime_activation": false,
+    "npu_tested": false
+  },
+  "onsite": "not_run",
+  "runtime_integration": "not_implemented",
+  "performance_benefit": "not_established"
+}

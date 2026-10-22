@@ -1,0 +1,25 @@
+            self.arrival_counter += 1
+            credits_before = self.credits
+            quota_added = 0
+            if self.arrival_counter % self.quota_every == 0:
+                self.credits += self.quota_amount
+                quota_added = self.quota_amount
+                self.quota_refills += 1
+                self.quota_credits_added += self.quota_amount
+
+            if self.global_min_service_s is None:
+                self.global_min_service_s = estimated_service_s
+            else:
+                self.global_min_service_s = min(self.global_min_service_s, estimated_service_s)
+            self.global_max_service_s = max(self.global_max_service_s, estimated_service_s)
+            is_sacrificial = (
+                self.credits > 0
+                and self._is_sacrificial_candidate(estimated_service_s)
+            )
+            if is_sacrificial:
+                self.credits -= 1
+                self.tail_admitted_count += 1
+                self.sacrificial_dispatches += 1
+                self.quota_credits_consumed += 1
+            else:
+                self.normal_dispatches += 1

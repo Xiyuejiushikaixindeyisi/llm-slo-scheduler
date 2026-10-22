@@ -49,3 +49,5 @@ id_ed25519
 /artifacts/*.xml
 # New repeatable test outputs; reviewed G5 evidence stays versioned
 /artifacts/local-validation/
+/artifacts/gf-admission/
+/packages/gf_admission/build/

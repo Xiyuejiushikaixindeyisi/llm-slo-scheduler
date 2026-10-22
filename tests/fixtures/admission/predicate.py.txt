@@ -1,0 +1,8 @@
+    def _is_sacrificial_candidate(self, estimated_service_s: float) -> bool:
+        if self.global_max_service_s <= 0.0:
+            return False
+        if estimated_service_s < self.threshold_ratio * self.global_max_service_s:
+            return False
+        if self.global_min_service_s is None or self.global_min_service_s <= 0.0:
+            return False
+        return estimated_service_s >= self.long_request_ratio * self.global_min_service_s

@@ -1,0 +1,20 @@
+{
+  "commit": "dd9c0895d98a73c760e9ca930d87e03198713ff7",
+  "source": "upstream/vllm-omni-super-p95/benchmarks/diffusion/super_p95_dispatcher.py",
+  "source_sha256": "f0e23f6527054b4ec80468d19328d6b7bbf8cd434836985f57d7e889a9ec3102",
+  "license": "Apache-2.0; Copyright contributors to the vLLM project",
+  "excerpts": [
+    {
+      "file": "arrival.py.txt",
+      "start": 577,
+      "end": 601,
+      "sha256": "496b30efb9e3afa33c71ab7051b1583520544ee2c1034690237e6da50769fbeb"
+    },
+    {
+      "file": "predicate.py.txt",
+      "start": 690,
+      "end": 697,
+      "sha256": "97afc78684f92ce35033d9679039204d64946fa6f8b6c246e88694049fec953d"
+    }
+  ]
+}
