@@ -1,5 +1,7 @@
 # LLM 尾延迟与吞吐优化研究指导文档
 
+> 2026-10-29 数学线更新：chunk 当前路线、文档状态与 fork 交接统一见[研究入口](modeling/README.md)及[分工计划](modeling/CHUNK_RESEARCH_WORKSTREAMS_20261029.md)。以 DeepInfer/Ascend 运行时机制为工程起点，研究多项式低成本求解与累计 TTFT 时间约束；旧静态优先排序已被覆盖。以下按日期保留历史讨论，不能据旧段落判定当前完成状态；本次未修改入场线设计。
+
 版本：v0.7，2026-10-20。状态：g5 现场链路/冒烟已由报告确认，A 线进入 super-p95 机制、入场分类和预算讨论；尚未实现新策略。最终目标是现网开环流量下的尾延迟与 SLO 内承载能力，AISBench 闭环为并发承载与压力验证。机制讨论见第 17 节，MaaS 背景见第 18 节；当前边界、AISBench计时及单实例UUID集群采集范围以第 19 节为准；第20节完整字段字典已降为备查，最新第21节采用9字段最小方案；本机交付离线脚本＋prompt，内网运行并仅回传总结Markdown，现场事实与勘误见 [g5 上下文](engineering/FGJSQ_REPRODUCTION_PLAN.md)；此前基线表与阶段叙述保留为历史，不能覆盖 g5。B 线数学文档维持独立。
 
 适用环境：用户提供的 3P3D、vLLM + vLLM-Ascend v0.23.0、910B2、FGJSQ + P 侧 predictor 基线。本文承接 [super-p95 调研与 LLM 对比](references/SUPER_P95_RESEARCH_AND_LLM_COMPARISON.md)。Diffusion 源码锚点为 v0.18.0-super-p95-rewrite-dev / dd9c0895d98a73c760e9ca930d87e03198713ff7。

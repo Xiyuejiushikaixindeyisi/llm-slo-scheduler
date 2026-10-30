@@ -1,0 +1,10 @@
+{
+  "checked_date": "2026-10-28",
+  "provenance": "Transcribed from successful GitHub REST API responses in this research turn. A later repeat request failed with transport EOF; no failed response was used as evidence.",
+  "scope": "Selected PRs only; equivalent implementations may exist in other PRs.",
+  "pull_requests": [
+    {"id":20359,"title":"[PP][V1]: Integrate Token Throttling into vLLM","state":"closed","merged_at":null,"url":"https://github.com/vllm-project/vllm/pull/20359"},
+    {"id":23545,"title":"[Feature] DCCP supported","state":"closed","merged_at":null,"url":"https://github.com/vllm-project/vllm/pull/23545"},
+    {"id":31561,"title":"[Feat][PP] support async send for PP","state":"closed","merged_at":null,"url":"https://github.com/vllm-project/vllm/pull/31561"}
+  ]
+}

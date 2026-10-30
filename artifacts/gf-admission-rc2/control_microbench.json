@@ -1,0 +1,12 @@
+{
+  "python": "3.13.11",
+  "n": 1000,
+  "unit": "microseconds per enqueue+finish pair",
+  "p50": 426.244,
+  "p95": 993.93,
+  "p99": 1502.238,
+  "maximum": 2852.969,
+  "native_adds": 1000,
+  "native_residual": 0.0,
+  "scope": "in-process broker and fake ledger; includes growing tombstones; no IPC/NPU/production throughput claim"
+}

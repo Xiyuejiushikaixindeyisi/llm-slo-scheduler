@@ -1,0 +1,22 @@
+{
+  "sections": 35,
+  "embedded_svg": 5,
+  "links": 146,
+  "unique_ids": 339,
+  "external_runtime_assets": 0,
+  "sample_count": 285,
+  "html_bytes": 147404,
+  "html_sha256": "98c5b45edb73700810d2913606a2a2fb925eadcd167cd63ffb76cae382fd7770",
+  "checks": [
+    "unique ids",
+    "internal anchors",
+    "all local source links exist",
+    "no external runtime dependencies",
+    "UTF-8",
+    "CSV count and SHA checked by builder"
+  ],
+  "notes": [
+    "Browser interaction/visual checks recorded separately.",
+    "No runtime source, deployment or benchmark changes."
+  ]
+}

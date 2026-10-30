@@ -1,25 +1,33 @@
 # 项目工作约定
 
+## 2026-10-30 研发基线整理授权（覆盖旧合并限制）
+
+用户在总工程师会话明确批准“进行一次版本整理和提交，并且 push 到 github，作为下一次优化的起点”。本次允许将已完成的 gf_admission rc2 开发提交、评审证据、建模与技术汇报整理，按 `backup/20261022-init → main → origin/main` 合并推送，并用 `baseline-20261030` 标记研发起点；覆盖历史“无现场结果不合入 main”的本次阶段性限制。现场短验证、阈值标定和性能验收仍未完成，不因 Git 合并改写其状态。后续提交/推送仍以当轮授权为准。
+
+版本与验证入口：[docs/engineering/DEVELOPMENT_BASELINE_20261030.md](docs/engineering/DEVELOPMENT_BASELINE_20261030.md)。当前本地 CPU 回归使用 `scripts/validate/run_rc2_local_tests.sh`，在独立 Motor 副本检查 rc2 contract；原 g5-only 入口保留为历史。10 月 29 日 chunk 运行时方向继续有效，HTML 汇报保留 10 月 28 日快照。
+
+
 ## 工作范围
 
 - 统一根目录：/home/zhangxiyue/llm-slo-scheduler。此项目之后的新代码、文档、数据、模型、运行日志和交付包均在根目录下准备；最终交付文件按下述桌面交付约定处理。
 - 2026-10-22 用户已批准 g5 对齐 A–D，且明确算法优先、配置/环境只同步。已完成本机对齐与199项CPU测试，入口 docs/engineering/G5_LOCAL_BASELINE_ALIGNMENT_RESULT.md；不复刻NPU环境。未经后续方案确认，不提前实现 waiting 重排、running/KV 抢占或动态 chunk。
-- 研究边界为一个实例UUID对应的GF＋XPYD（当前3P3D）集群；GB只作背景，不采集/研究GB。2026-10-21用户提出以GF普通FIFO＋让行LIFO为主候选；P保持FCFS、running-first和共享token预算。2026-10-22 用户已批准独立 gf_admission 包＋少量 g5 显式钩子；待 Session 1 完成 g5 修复、对齐、版本整理和 GitHub 推送后可基于设计编码。参数仍待细化/标定，本轮仅记忆与分工。
+- 研究边界为一个实例UUID对应的GF＋XPYD（当前3P3D）集群；GB只作背景，不采集/研究GB。2026-10-21用户提出以GF普通FIFO＋让行LIFO为主候选；P保持FCFS、running-first和共享token预算。2026-10-22 用户已批准独立 gf_admission 包＋少量 g5 显式钩子；g5 已于 2026-10-22 完成交接并推送 main，基准 commit 为 3b63b00546e7a6ffb2526dafc341969cebe22359。用户选择新增独立编码 session，启动 prompt 为 docs/engineering/GF_ADMISSION_CODING_SESSION_PROMPT.md；参数仍待细化/标定，不把示例当生产最优值。
 - 正式TTFT/TPOT统一AISBench口径：客户端HTTP POST前起点、首记录流式时间点计算TTFT，TPOT沿用同一汇总器；GF/P分段耗时仅作解释。
 - D 引擎和 D 路由保持现场基线。主指标为全体请求 P90 TTFT，吞吐提升或不下降，并满足分档 P90 TPOT SLO；P95 为补充。
 - 不能假设当前平均吞吐接近硬件容量。不能把本地逻辑验证、模拟器结果或公开源码版本等同于 910B2 现场性能或现场镜像。
 
-## 三个会话（2026-10-22 用户确认）
+## 会话分工（2026-10-22，三个原会话＋用户将新建的编码会话）
 
 - Session 1（Motor 适配/基线）负责跟进华为机，对齐本机 g5 源码、配置、安装/核验与交付契约，并完成基线修复、版本整理和 GitHub 推送。
-- Session 2（入场与让行）负责 GF 双队列设计及后续实现/迭代：normal pending FIFO、sacrificial pending LIFO；接收 Session 1 修复、对齐及 GitHub 版本交接后推进。是否继续本会话编码、fork 或新建 session 留到下一轮讨论，本轮不决定或创建。
+- Session 2（设计主会话）负责 GF 双队列算法、分类/让行预算、设计变更、代码评审与实验解释：normal pending FIFO、sacrificial pending LIFO。用户已选择新增编码 session，Session 2 维护设计而不与其同时修改实现文件。
 - Session 3（数学建模）负责 chunk size 目标函数、batch predictor 成本映射与 KV 宏观微分模型；当前维护 docs/modeling，不修改运行代码，工程接口需求另行协调。用户报告已完成模型 1.0/权重优化；微分方程联合求解仍是研究方向，不当成已验证成果；保留公式 d_k 与 d_2 的明确区别。
-- 三个会话属于同一 work tree，共享工作区。src/motor_adapter、slo_patch 及补丁等共享文件变更先核对最新状态，不覆盖其它会话的改动。
+- 新编码 session 由用户创建，负责 gf_admission 实现、单元/集成测试、版本化代码包及华为 prompt、吸收现场修复、整理实验结果与设计建议，完成后按既定条件合入 main；本轮设计会话仅交付启动 prompt，未创建会话或编写算法。
+- 各会话沿用同一 work tree，共享工作区。src/motor_adapter、slo_patch 及补丁等共享文件变更先核对最新状态，不覆盖其它会话的改动。
 - 工作闭环：本机设计/编码/单元测试 → 华为机 debug/NPU 验证/完整压测 → 单份自包含 Markdown 回传 → 本机核对与迭代。关键源码、diff、配置、实验结果和证据必须直接嵌入正文，内网路径只作来源索引；不要求完整内网目录外传。
 - docs/LLM_TAIL_LATENCY_RESEARCH_GUIDE.md 和 docs/decisions 为共同结论入口。编辑共享文件前读取最新内容，保留另一会话的修改；不要同时重写整个共享文档。
 - 详细分工与每轮现场回传契约：docs/architecture/RESEARCH_COLLABORATION_AND_HANDOFF.md。本机主导设计、编码、逻辑测试与迭代；华为机部署/debug/完整压测，必须将现场修改及关键源码、证据嵌入报告正文。本机不可直接看到完整内网结果，不要求全目录外传；现场修复经本机核对吸收后进入下一版。
 - 总目标为现网提升单卡吞吐、优化尾延迟；高并发 AISBench 为极端验证场景。入场线决定谁执行，数学线研究每批执行量，两线分开归因和版本化。
-- 不因本文件自动创建、fork 或向其他会话发送消息；本轮架构批准不自动批准 Session 1 独立的基线修复审批项，也不执行其 GitHub 推送。
+- 不因本文件自动创建、fork 或向其他会话发送消息。编码会话以用户实际下达的启动任务和后续授权为准；本轮设计会话不提交/推送代码或代替现场执行实验。
 
 ## 源码与材料
 
@@ -146,6 +154,27 @@
 - QUEUED无资源，后台READY_RESERVED有短交付租约且需claim；CLAIMED不能由该租约自动释放。普通fast path一个RPC直接reserve/CLAIMED，失联复用原key查询/清理。结果未知不得fallback重复分配。
 - 保留现场NodeManager fix1和engine_files.json，不全量重装slo-patch。off/shadow/enforce分开；压力、beta、队列上限与时限待标定。源码hash清单evidence/manifests/gf_dual_queue_design_sources_20261021.json仅作设计来源，不是部署allowlist。
 
+## 新编码会话启动交接（2026-10-22）
+
+- 基线 commit 3b63b00546e7a6ffb2526dafc341969cebe22359 已用 ls-remote 核实为远端 main；当时本地 main/origin/main/backup/20261022-init 同点，工作区 clean。当前文档更新尚未提交，不可由后续会话 reset 丢弃。
+- 首次版本说明 docs/engineering/INITIAL_VERSION_20261022.md 记录 207 项 CPU 测试、33/33 指纹；199 为前一阶段结果。本次只读取证据，不声称重新运行测试。
+- 新 session 从 P0 规则/对齐结果/版本、P1 完整工程设计和当前接入源码、P2 原型及按需历史阅读开始，详见启动 prompt。
+- 尽量不写启发式指不堆砌无依据特判、魔数和自动调参；原型中有来源的分类/预算规则必须可配置、可解释、可消融。未标定参数不伪装为最优，未知 KV 不当零命中。
+- 合并主分支属于后续编码任务，在正确性/回退/现场结果等约定完成条件满足后执行；未达收益目标或只完成基础设施时如实报告，由用户决定是否阶段性合入。个人仓库无需 PR，保持已有直接合并流程。
+
+
+## gf_admission rc1 评审记忆（2026-10-22，覆盖旧“待编码/待评审”时态）
+
+- 编码 session 已交付 runtime 候选 0.1.0rc1，开发提交 546bc7d349c1ed24fdb4acd868ad28e409eb0c11；当前 HEAD 0bb3e40 仅追加交付记录，未合并 main。Session 2 评审入口 docs/engineering/GF_ADMISSION_0.1.0rc1_REVIEW_20261022.md。
+- 当前结论：暂不批准原 rc1 包现场安装/enforce 实验；架构与原型规则方向保留，先由编码 session 关闭 R1/R2 两个 P1 和 R3/R4 两个 P2，再交新版本复评。原包 SHA256 3e97e3ebdbd930f9ec0c5892870d07f04e415a1cf96865ff309c67588d3b14e3 保留为历史证据，不覆盖同名归档。
+- R1：Motor 在 P allocate 成功后才递增 session attempt；第一次无资源时下一次业务重试仍用同 attempt_seq。broker 的 UNAVAILABLE 墓碑锁住重试，不能沿用 GUIDE 的“失败就一定是新 attempt”解释。需区分提交重试与业务再次提交，不重复分类/credit，不删墓碑绕过未知预留。
+- R2：worker lease 过期后 query/cancel/finish 同样被拒绝；即使旧 g5 abort 已使 native/FG 两账为零，admission CLAIMED 仍无法正常收尾，阻塞 drain/shutdown。须允许受约束的幂等清理或明确 reconcile，不按 lease 自动释放执行中的 CLAIMED。
+- R3：feature_timeout 只限制 executor future，不覆盖 admission_features RPC；feature_max_inflight 也只统计 future。需总准备 deadline 与分阶段容量约束，超时 unknown 且后台线程许可不能提前归还。R4：residual_sample 先截前32再筛状态会漏真实残留，应先筛再限量。
+- 本轮核验包642文件、wheel/src及桌面prompt/guide一致；重跑58项通过。5个定向观察用例确认上述缺陷（包含off/enforce对照），不是5项修复通过。证据 artifacts/gf-admission-review-20261022；报告正文嵌入复现结果。
+- 参数仍未标定：score=0 不等于物理P空闲；1s到龄或全局事件陈旧会转普通，可能有tail入队而没有LIFO调序。下一候选至少区分 tail派发、age/stale/drain晋升及known/unknown，才能归因；不盲目加quota制造效果。
+- Python3.12/真实镜像、native SHM、完整P/D、有效事件、真实取消/故障和回退仍是华为短验证项，本地mock/ZMQ通过不代替这些。P两账为零不单独证明D/E2E结束。流量调研仍已闭合，不新增该前置任务。
+- 本轮只审查、写复现用例与评审/索引/记忆；没有修改运行实现、配置、桌面归档，没有merge/push或启动华为实验，也未向其他session发消息。
+
 
 ## 2026-10-22 用户批准：rc2 修复与统一高压让行
 
@@ -165,3 +194,37 @@
 覆盖前文“仅上下文同步/开始修复”的进度：R1–R4及统一高压让行实现已完成，代码提交75c5e519195b55ce314fc00bf81b068f382e9cb1；项目96通过、Motor309通过/8跳过，最终独立解包75通过、685文件SHA校验。新rc2包、prompt、指南、修复报告已从WSL移动到Windows桌面并核对hash；归档SHA b23cee6b81d6f4f8b87b1e6cfd6fc28e7e8ed4bab3512c4ab6a4a7cecd1b0121。交付凭据见docs/engineering/GF_ADMISSION_0.1.0rc2_DELIVERY_20261022.md。
 
 下一步是Session2复评完整包、华为短验证/已有结果或必要短探测选择静态H/L/实际通知演练、冻结后跑六格AISBench。无需用户重建环境或增加GB流量采集。暂无NPU或性能证据，未合并main；共享未提交文档继续保留。
+
+
+## rc2 Session 2 复评通过（2026-10-22，最新放行状态）
+
+- 最新评审 docs/engineering/GF_ADMISSION_0.1.0rc2_REVIEW_20261022.md：本地交付通过，可交华为启动现场流程，无新阻断项。适用实现75c5e519195b55ce314fc00bf81b068f382e9cb1、交付8171c2d；包SHA b23cee6b81d6f4f8b87b1e6cfd6fc28e7e8ed4bab3512c4ab6a4a7cecd1b0121。旧rc1拒绝记录仅保留历史，不应继续阻塞rc2。
+- 本轮重新核对685文件、wheel/源码和3份桌面文档；独立新目录清除外部PYTHONPATH后75 passed，另有2项评审补充通过（新submission丢ACK仍单预留、target压力范围及stale晋升）；证据artifacts/gf-admission-rc2-review-20261022。开发96和Motor309/8skip本轮未全量重复，不混加。
+- R1–R4关闭：确认UNAVAILABLE后才换submission round、逻辑额度一次；过期owner清理不续租且有证据收敛；metadata+线程总准备deadline与permit；残留先筛后截断。真实IPC已有两条tail越序/claim/取消测试，native仍为FakeNative。
+- 已按用户在编码会话批准的统一高压规则复评：known positive/fresh下long_cost OR min_eligible_score>=H，共同credit/S/V；tail仅实际P score<=L，每次CAS重验；0<L<H。首轮quota1/20、tail2、驻留5s为候选，H/L和freshness由现场证据选择并冻结；不回退成rc1 score0/1s假设。
+- 放行流程：off/shadow兼容验证→已有证据/必要短探测形成有效H/L→enforce真实SHM/P/D、取消清账/回退短验证→冻结参数与真实通知演练→正式六格配对。步骤可合理交错；null模板不可直接enforce。不因本地评审通过声称镜像Python3.12、NPU、性能已验证。
+- GF限制实际入场与LIFO越序均是允许研究的机制，分开归因；freshness全局保守屏障、事件环缺口、older_eligible非实际CAS成功证明、两本P账零不代表D/E2E结束，边界继续保留。少量残留sample没有游标是非阻断运维限制，truncated时不可假装完整核对。
+- 现场六格仍为cache目标50%×实际66K/128K×整个集群B16/18/20，同长度固定同组参数，优先B16配对重复；全体TTFT/失败/吞吐保留，吞吐下降无自动容忍值。现场只回传自包含Markdown，关键diff/代码/证据嵌入正文。
+- 本轮仅评审/补充验证/文档，运行代码及原包不变；未merge/push、未启动华为。放行记录已作为单独Markdown随件放到Windows桌面，供用户与包及原prompt一并投递；无现场结果不合入main。
+
+## 总工程师会话入口与业务口径更新（2026-10-28）
+
+- 用户新增总工程师职责：统筹模块进度、证据分析、协同及汇报，目标为吞吐与P90 TTFT共同优化。本轮仅补充上下文和入口文档，不改运行代码、不启动实验或周期监控、不向其他会话发消息。入口：[docs/architecture/CHIEF_ENGINEER_SESSION_ENTRY.md](docs/architecture/CHIEF_ENGINEER_SESSION_ENTRY.md)。
+- 用户于2026-10-28最终澄清：**B=16为整个GF＋3P3D集群合计16个在飞请求（含P/D），每个P分配多少由路由算法决定**。此前“每P16、合计48”已撤回，不存在固定每P额度，不按P数倍增。这与历史g5及rc2六格总B16/18/20一致，无需修改既有实验配置或重标结果；分开记录集群额度、客户端总并发上限和各P实际在途。
+- 用户修正本次AISBench口述：沿用g5滚动闭环，完成一条补一条、无整轮barrier；1s发送间隔需对应具体限速配置，不能直接作为稳态到达率。正式TTFT/TPOT口径不变。
+- 当前状态以rc2复评放行记录为准，旧实施/交付说明中的“待复评”已过时；本轮未见GF现场性能回传。共享开发分支HEAD8171c2d，main及本地origin/main引用3b63b00；未查询远端、未合并或推送。
+- Session3的10月28日现场分析入口为docs/modeling/MAAS_TOKEN_LIMIT_PRACTICES_AND_G5_EXPERIMENT.md（当前研究入口见下方10月29日记录）：用户确认仅P侧预算8K/16K/32K/64K，B1、66K/128K、目标cache50%；8个run合计285条。128K32K相对8K的P90下降4.72%、QPS上升2.03%；66K64K的P90上升52.44%、QPS下降16.08%。原CSV归档于evidence/huawei/2026-10-28-g5-p-token-budget，不能外推高并发收益，单位仍为推定、各档单r01。
+- 10月28日曾提出静态C/U、少档/查表后再考虑在线寻优；该研究排序已被用户纠正，由下方10月29日方向覆盖。历史实测与数学依据保留，动态运行实现及KV联合模型未完成。总工程师负责贯通与报告，不取代原设计/编码/数学/基线会话职责，集中流量调研仍不重开。
+
+## Chunk研究方向与fork交接（2026-10-29，覆盖旧静态优先排序）
+
+- 用户确认：从DeepInfer、Ascend等有工程支撑的运行时机制出发，研究多项式如何获得时间预算，并以剩余TTFT余量、候选后剩余完成时间与可得实例压力低成本约束累计TTFT。不是先做大规模静态扫参再决定是否研究动态；原B1结果仍作基线与反例。
+- 当前统一入口为[docs/modeling/README.md](docs/modeling/README.md)；方向与公式边界见RUNTIME_CHUNK_TIME_CONSTRAINT_CORRECTION.md；分工、共享接口、相似研究与三份可复制启动提示见CHUNK_RESEARCH_WORKSTREAMS_20261029.md（均在docs/modeling）。本轮只整理文档与记忆；用户下一轮fork，未创建或向其他会话发送消息。
+- 建议M由当前数学会话继续，E由用户fork调研工程机制，I由用户后续新建，独立审阅两份交接后形成最终设计并按启动任务编写demo。M/E/I只是chunk工作标签，不替代原Session1/2/3、GF编码或总工程师职责；M/E当前不改运行代码。
+- M维护CHUNK_TIME_BUDGET_MODEL_V1.md与CHUNK_MODEL_HANDOFF.md；E维护engineering/下DeepInfer、Ascend专题与交接；I维护integration/CHUNK_OPTIMIZER_V1_DESIGN.md及后续实现。上述均为拟新增产物，本轮未创建空壳；完整文件名与完成条件见分工计划。共享入口局部更新，保留其他会话未提交修改。
+- 控制量c是P整个batch的总token预算，实际执行量Q=Σu_i≤c，局部效率Q/预测时间；保留结构约束与自由拟合模型。原FCFS/running-first与资源约束不变，不借chunk研究加入waiting重排、running/KV抢占或D/FG公式修改；旧分式d_k与d_2的区别继续保留。
+- g5现有LightGBM标签是batch主机观察间隔，不能当纯设备时长或请求剩余TTFT；predict有计数/日志副作用。computed提前推进与物理完成分开，候选求解不反复真实schedule/分配KV；旧数据不能自动还原新二阶特征。已观测8K批精度不代表反事实预算精度，现场完整warm权重未取得。
+- FG压力是账本估计，不是秒或精确剩余服务量；P→GF事件链不证明P本地可读新鲜FG压力。E核查可得字段/时序/通信开销，M明确单位映射、滞后与去重；不默认每批同步RPC，不预设压力越大时间预算必然越小。
+- 单step时限不等于完整TTFT保护；剩余P服务/等待、后续成本、保护集合和不可行处理待定义。P90不等于每请求硬deadline，不让一条已过期请求使全局停摆。不能用D TPOT30/40ms充当P-only批时限；完整KV微分方程非首版前置条件。
+- E重点分别核查DeepInfer生产披露与公开源码、Ascend Dynamic Batch与Dynamic CPP，输出类图/时序图/活动图/组件与效果证据。CPP要求PP>1，Dynamic Batch依赖decode且会调整顺序，不称g5 TP4 P-only即插即用；QoServe等作机制对照，论文整体收益不算chunk单项证据。
+- 已完成初版模型/来源调研/B1分析/分工计划，未完成新专题交接、最终集成设计、demo或动态算法NPU验证。多项式开销低不等于完整决策几十ns已测得；已有FG与predictor是潜在优势，未证明优于DeepInfer。后续验证分开固定预算、固定step时限、累计TTFT约束与FG压力贡献，不重开GB/全链路采集，不自动提交/推送。

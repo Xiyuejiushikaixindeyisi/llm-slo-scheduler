@@ -51,3 +51,7 @@ id_ed25519
 /artifacts/local-validation/
 /artifacts/gf-admission/
 /packages/gf_admission/build/
+
+# Reproducible review extraction and generated HTML script; keep original evidence
+/artifacts/gf-admission-rc2-review-20261022/independent/
+/artifacts/technical-brief-20261028/report-script.js

@@ -1,0 +1,1454 @@
+Checking test dependencies...
+Installing pytest-xdist...
+Requirement already satisfied: pytest-xdist in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (3.8.0)
+Requirement already satisfied: execnet>=2.1 in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (from pytest-xdist) (2.1.2)
+Requirement already satisfied: pytest>=7.0.0 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest-xdist) (8.4.2)
+Requirement already satisfied: iniconfig>=1 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.3.0)
+Requirement already satisfied: packaging>=20 in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (26.3)
+Requirement already satisfied: pluggy<2,>=1.5 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (1.5.0)
+Requirement already satisfied: pygments>=2.7.2 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.19.2)
+Checking project core dependencies...
+Checking HTTP client dependencies...
+Dependency check completed
+Checking and generating protobuf files...
+Generating code from ./motor/common/etcd/proto/rpc.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/rpc.proto
+  Fixed import paths in rpc_pb2_grpc.py
+  Fixed import paths in rpc_pb2.py
+Generating code from ./motor/common/etcd/proto/auth.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/auth.proto
+  Fixed import paths in auth_pb2_grpc.py
+  Fixed import paths in auth_pb2.py
+Generating code from ./motor/common/etcd/proto/kv.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/kv.proto
+  Fixed import paths in kv_pb2_grpc.py
+  Fixed import paths in kv_pb2.py
+All protobuf files generated successfully.
+Executing command: pytest  tests/node_manager/test_config.py tests/config tests/node_manager/core/services/native_engine/backends/test_config_contract.py tests/node_manager/core/services/native_engine/backends/vllm/test_config.py tests/coordinator/scheduler/test_scheduler_client.py tests/coordinator/scheduler/test_scheduler_server_main.py tests/coordinator/router/test_unified_pd_router.py --color=no --junitxml=/home/zhangxiyue/llm-slo-scheduler/artifacts/version-baseline-20261030/motor.xml
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-8.4.2, pluggy-1.5.0 -- /home/zhangxiyue/llm-slo-scheduler/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-rc2-validation
+configfile: pytest.ini
+plugins: xdist-3.8.0, asyncio-1.4.0, anyio-4.13.0, cov-7.1.0, jaxtyping-0.3.6
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... 
+----------------------------- live log collection ------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:config_utils.py:484 No configuration file specified, using default configuration
+INFO     config:config_utils.py:485 Configuration loading completed
+collected 317 items
+
+tests/node_manager/test_config.py::test_init_success 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 2, service_ports: ['10000', '10002'].
+PASSED                                                                   [  0%]
+tests/node_manager/test_config.py::test_config_validation_errors[invalid_config0-Missing required config field-both] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+PASSED                                                                   [  0%]
+tests/node_manager/test_config.py::test_config_validation_errors[invalid_config1-Invalid role value-invalid] PASSED [  0%]
+tests/node_manager/test_config.py::test_logging_config_defaults 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+PASSED                                                                   [  1%]
+tests/node_manager/test_config.py::test_native_sglang_bootstrap_port_from_engine_config PASSED [  1%]
+tests/node_manager/test_config.py::test_native_bootstrap_port_rejects_invalid_range PASSED [  1%]
+tests/node_manager/test_config.py::test_logging_config_validation_errors[invalid_config0-log_level must be one of] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - log_level must be one of: DEBUG, INFO, WARNING, ERROR
+PASSED                                                                   [  2%]
+tests/node_manager/test_config.py::test_logging_config_validation_errors[invalid_config1-log_level must be one of] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - log_level must be one of: DEBUG, INFO, WARNING, ERROR
+PASSED                                                                   [  2%]
+tests/node_manager/test_config.py::test_logging_config_validation_errors[invalid_config2-log_file must be a string or null] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+PASSED                                                                   [  2%]
+tests/node_manager/test_config.py::test_logging_config_validation_errors[invalid_config3-log_format must be a string] 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+PASSED                                                                   [  3%]
+tests/node_manager/test_config.py::test_generate_endpoint_ports 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 2, service_ports: ['10000', '10002'].
+PASSED                                                                   [  3%]
+tests/node_manager/test_config.py::test_non_singleton_behavior PASSED    [  3%]
+tests/node_manager/test_config.py::test_reload_success 
+-------------------------------- live log call ---------------------------------
+INFO     config:config_utils.py:531 Configuration file change detected, reloading...
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/user_config.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/user_config.json
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+WARNING  config:node_manager.py:703 No motor_deploy_config found, using default device configuration
+INFO     config:node_manager.py:452 Configuration loading completed
+INFO     config:config_utils.py:536 NodeManager configuration reload successful
+PASSED                                                                   [  4%]
+tests/node_manager/test_config.py::test_reload_config_file_not_found 
+-------------------------------- live log call ---------------------------------
+WARNING  config:config_utils.py:522 Configuration file path does not exist, cannot reload
+PASSED                                                                   [  4%]
+tests/node_manager/test_config.py::test_reload_invalid_json 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:539 Failed to reload NodeManager configuration: [Errno 2] No such file or directory: '/tmp/test_node_manager_config.json'
+PASSED                                                                   [  4%]
+tests/node_manager/test_config.py::test_validate_config_success PASSED   [  5%]
+tests/node_manager/test_config.py::test_validate_config_errors[node_manager_port-0-node_manager_port must be in range 1-65535] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - node_manager_port must be in range 1-65535
+PASSED                                                                   [  5%]
+tests/node_manager/test_config.py::test_validate_config_errors[node_manager_port-65536-node_manager_port must be in range 1-65535] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - node_manager_port must be in range 1-65535
+PASSED                                                                   [  5%]
+tests/node_manager/test_config.py::test_validate_config_errors[base_port--1-base_port must be in range 0-65535] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - base_port must be in range 0-65535
+PASSED                                                                   [  5%]
+tests/node_manager/test_config.py::test_validate_config_errors[endpoint_num--1-endpoint_num cannot be negative] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - endpoint_num cannot be negative
+PASSED                                                                   [  6%]
+tests/node_manager/test_config.py::test_validate_config_errors[heartbeat_interval_seconds-0-heartbeat_interval_seconds must be greater than 0] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - heartbeat_interval_seconds must be greater than 0
+PASSED                                                                   [  6%]
+tests/node_manager/test_config.py::test_validate_config_errors[log_level-INVALID-log_level must be one of] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - log_level must be one of: DEBUG, INFO, WARNING, ERROR
+PASSED                                                                   [  6%]
+tests/node_manager/test_config.py::test_validate_config_errors[log_max_line_length-0-log_max_line_length must be greater than 0] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - log_max_line_length must be greater than 0
+PASSED                                                                   [  7%]
+tests/node_manager/test_config.py::test_to_dict PASSED                   [  7%]
+tests/node_manager/test_config.py::test_save_to_json_success 
+-------------------------------- live log call ---------------------------------
+INFO     config:config_utils.py:559 Configuration saved to: tmp_node_manager_save.json
+PASSED                                                                   [  7%]
+tests/node_manager/test_config.py::test_save_to_json_no_path 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:577 Save paths not specified
+PASSED                                                                   [  8%]
+tests/node_manager/test_config.py::test_get_config_summary PASSED        [  8%]
+tests/node_manager/test_config.py::test_from_json_success 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+PASSED                                                                   [  8%]
+tests/node_manager/test_config.py::test_generate_endpoint_ports_with_cp_prefill 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 2, service_ports: ['10000', '10002'].
+PASSED                                                                   [  9%]
+tests/node_manager/test_config.py::test_from_json_loads_union_config_for_hybrid 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=tmp_node_manager_union.json
+INFO     config:node_manager.py:429 Successfully loaded config file: tmp_node_manager_union.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:688 Role from environment: both
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_U
+INFO     config:node_manager.py:813 Using 4 devices from config for role both
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 2, service_ports: ['10000', '10002'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [  9%]
+tests/node_manager/test_config.py::test_native_vllm_runtime_accepts_snapshot_configuration PASSED [  9%]
+tests/node_manager/test_config.py::test_native_non_vllm_runtime_rejects_snapshot_configuration 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - Native Snapshot currently supports only the vllm engine type
+PASSED                                                                   [ 10%]
+tests/node_manager/test_config.py::test_from_json_loads_vllm_startup_acceleration_on_a2 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/pytest-of-zhangxiyue/pytest-1/test_from_json_loads_vllm_star0/user_config.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/pytest-of-zhangxiyue/pytest-1/test_from_json_loads_vllm_star0/user_config.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 1 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 10%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_defaults_allow_enabling_without_cache_root PASSED [ 10%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[enable_startup_plan-true-vllm-enable_startup_plan must be a boolean] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - enable_startup_plan must be a boolean
+PASSED                                                                   [ 11%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[enable_graph_reuse-true-vllm-enable_graph_reuse must be a boolean] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - enable_graph_reuse must be a boolean
+PASSED                                                                   [ 11%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[cache_root-relative/cache-vllm-cache_root must be an absolute path] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - cache_root must be an absolute path when specified
+PASSED                                                                   [ 11%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[enable_startup_plan-True-sglang-supports only the vllm engine type] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - vLLM startup acceleration supports only the vllm engine type
+PASSED                                                                   [ 11%]
+tests/node_manager/test_config.py::test_vllm_startup_acceleration_validation[cache_root-123-vllm-cache_root must be a string] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - cache_root must be a string
+PASSED                                                                   [ 12%]
+tests/node_manager/test_config.py::test_single_container_union_port_offsets_for_hybrid[0-0-0-9000] PASSED [ 12%]
+tests/node_manager/test_config.py::test_single_container_union_port_offsets_for_hybrid[1-1-2-9001] PASSED [ 12%]
+tests/node_manager/test_config.py::test_vllm_handoff_connector_infers_handoff_capability PASSED [ 13%]
+tests/node_manager/test_config.py::test_vllm_hybrid_connector_infers_handoff_capability PASSED [ 13%]
+tests/node_manager/test_config.py::test_vllm_nixl_connector_infers_handoff_capability PASSED [ 13%]
+tests/node_manager/test_config.py::test_vllm_multi_connector_infers_transport_connector_capability PASSED [ 14%]
+tests/node_manager/test_config.py::test_vllm_multi_connector_ignores_non_transport_connector_profiles PASSED [ 14%]
+tests/node_manager/test_config.py::test_vllm_multi_connector_requires_transport_and_store_connectors 
+-------------------------------- live log call ---------------------------------
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+PASSED                                                                   [ 14%]
+tests/node_manager/test_config.py::test_user_dispatch_capabilities_cannot_override_connector_semantics 
+-------------------------------- live log call ---------------------------------
+WARNING  config:node_manager.py:483 User-configured dispatch_capabilities is no longer supported and was ignored. Configure kv_transfer_config or dispatch_profile instead.
+PASSED                                                                   [ 15%]
+tests/node_manager/test_config.py::test_user_dispatch_capabilities_cannot_enable_unknown_connector 
+-------------------------------- live log call ---------------------------------
+WARNING  config:node_manager.py:483 User-configured dispatch_capabilities is no longer supported and was ignored. Configure kv_transfer_config or dispatch_profile instead.
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+PASSED                                                                   [ 15%]
+tests/node_manager/test_config.py::test_vllm_layerwise_connector_advertises_concurrent_capability PASSED [ 15%]
+tests/node_manager/test_config.py::test_sglang_infers_concurrent_capability PASSED [ 16%]
+tests/node_manager/test_config.py::test_cross_node_pcp_adjusts_local_world_size 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmpknseqytv.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmpknseqytv.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:546 Cross-node parallel detected (nnodes=2, pcp=2, pp=1): per-node local_world_size adjusted from 32 to 16
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 16 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 16%]
+tests/node_manager/test_config.py::test_cross_node_pcp_no_adjustment_when_nnodes_is_one 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmp0y62laff.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmp0y62laff.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 8 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 16%]
+tests/node_manager/test_config.py::test_cross_node_pcp_generate_endpoint_ports 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+PASSED                                                                   [ 17%]
+tests/node_manager/test_config.py::test_single_container_ucm_store_skips_lookup_rpc_port PASSED [ 17%]
+tests/node_manager/test_config.py::test_single_container_ascend_store_still_sets_lookup_rpc_port PASSED [ 17%]
+tests/node_manager/test_config.py::test_single_container_malformed_multi_connectors_rejected PASSED [ 17%]
+tests/node_manager/test_config.py::test_cross_node_pp_adjusts_local_world_size 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmpnkce8hll.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmpnkce8hll.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:546 Cross-node parallel detected (nnodes=2, pcp=1, pp=2): per-node local_world_size adjusted from 32 to 16
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 16 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 18%]
+tests/node_manager/test_config.py::test_cross_node_pp_and_pcp_both_adjusted 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmpusfvju6y.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmpusfvju6y.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+INFO     config:node_manager.py:546 Cross-node parallel detected (nnodes=2, pcp=2, pp=2): per-node local_world_size adjusted from 32 to 16
+INFO     config:node_manager.py:688 Role from environment: prefill
+INFO     config:node_manager.py:689 Role from config: PDRole.ROLE_P
+INFO     config:node_manager.py:813 Using 32 devices from config for role prefill
+INFO     config:node_manager.py:844 Generate endpoint ports successfully: endpoint_num: 1, service_ports: ['10000'].
+INFO     config:node_manager.py:452 Configuration loading completed
+PASSED                                                                   [ 18%]
+tests/node_manager/test_config.py::test_cross_node_pp_not_divisible_raises 
+-------------------------------- live log call ---------------------------------
+INFO     config:node_manager.py:419 Loading configuration files: config=/tmp/tmpk7qdtmyy.json
+INFO     config:node_manager.py:429 Successfully loaded config file: /tmp/tmpk7qdtmyy.json
+WARNING  config:node_manager.py:625 Unable to infer vLLM dispatch capability from kv_transfer_config. Configure a supported connector or set dispatch_profile explicitly.
+PASSED                                                                   [ 18%]
+tests/node_manager/test_config.py::test_config_engine_restart_freeze_defaults PASSED [ 19%]
+tests/node_manager/test_config.py::test_config_engine_restart_validation[engine_restart_wait_timeout_sec-30-engine_restart_wait_timeout_sec must be in range 60-3600] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - engine_restart_wait_timeout_sec must be in range 60-3600
+PASSED                                                                   [ 19%]
+tests/node_manager/test_config.py::test_config_engine_restart_validation[engine_restart_freeze_sec-60-engine_restart_freeze_sec must be in range 120-7200] 
+-------------------------------- live log call ---------------------------------
+ERROR    config:config_utils.py:491 Configuration validation failed:
+  - engine_restart_freeze_sec must be in range 120-7200
+PASSED                                                                   [ 19%]
+tests/node_manager/test_config.py::test_kv_config_mooncake_standalone_fields PASSED [ 20%]
+tests/node_manager/test_config.py::test_kv_config_mooncake_defaults PASSED [ 20%]
+tests/node_manager/test_config.py::test_kv_config_mooncake_invalid_store_mode_falls_back 
+-------------------------------- live log call ---------------------------------
+WARNING  config:node_manager.py:771 kv_cache_store_config.store_mode='bogus' is invalid, falling back to 'embedded'
+PASSED                                                                   [ 20%]
+tests/node_manager/test_config.py::test_kv_config_memcache_ignores_mooncake_fields PASSED [ 21%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields0-20-prefill-0] PASSED [ 21%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields0-20-decode-1] PASSED [ 21%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields1-7-prefill-0] PASSED [ 22%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields1-7-decode-1] PASSED [ 22%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields2-0-prefill-0] PASSED [ 22%]
+tests/node_manager/test_config.py::test_g5_lookup_compatibility_retains_role_offset[fields2-0-decode-1] PASSED [ 23%]
+tests/node_manager/test_config.py::test_g5_invalid_explicit_lookup_port_is_not_silently_defaulted PASSED [ 23%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_motor_coordinator_missing PASSED [ 23%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_motor_coordinator_not_dict PASSED [ 23%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_prefill_kv_event_config_missing PASSED [ 24%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_prefill_kv_event_config_not_dict PASSED [ 24%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_re_register_interval_missing PASSED [ 24%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_default_when_re_register_interval_is_none PASSED [ 25%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_returns_configured_value PASSED [ 25%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_accepts_string_value PASSED [ 25%]
+tests/config/test_config_utils.py::TestResolveReRegisterIntervalSec::test_accepts_zero PASSED [ 26%]
+tests/config/test_config_utils.py::TestHasMotorControllerConfig::test_returns_false_when_config_path_missing PASSED [ 26%]
+tests/config/test_config_utils.py::TestHasMotorControllerConfig::test_returns_true_when_motor_controller_config_present PASSED [ 26%]
+tests/config/test_config_utils.py::TestHasMotorControllerConfig::test_returns_false_for_standalone_coordinator_only_config PASSED [ 27%]
+tests/config/test_resolver.py::test_factory_returns_vllm_by_default 
+-------------------------------- live log call ---------------------------------
+WARNING  config:resolver.py:312 engine_type not specified, defaulting to vllm
+PASSED                                                                   [ 27%]
+tests/config/test_resolver.py::test_factory_returns_vllm_for_unknown 
+-------------------------------- live log call ---------------------------------
+WARNING  config:resolver.py:317 unknown engine_type 'unknown', falling back to vllm
+PASSED                                                                   [ 27%]
+tests/config/test_resolver.py::test_factory_returns_sglang PASSED        [ 28%]
+tests/config/test_resolver.py::test_vllm_cp_underscore PASSED            [ 28%]
+tests/config/test_resolver.py::test_vllm_cp_hyphen PASSED                [ 28%]
+tests/config/test_resolver.py::test_vllm_cp_both_forms_are_equivalent PASSED [ 29%]
+tests/config/test_resolver.py::test_sglang_cp_hyphen PASSED              [ 29%]
+tests/config/test_resolver.py::test_sglang_cp_underscore PASSED          [ 29%]
+tests/config/test_resolver.py::test_sglang_cp_not_enabled_without_flag PASSED [ 29%]
+tests/config/test_resolver.py::test_sglang_cp_not_enabled_when_flag_false PASSED [ 30%]
+tests/config/test_resolver.py::test_local_world_size_includes_pcp PASSED [ 30%]
+tests/config/test_resolver.py::test_local_world_size_pcp_defaults_to_1 PASSED [ 30%]
+tests/config/test_resolver.py::test_world_size_includes_pcp PASSED       [ 31%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key0-expected0] PASSED [ 31%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key1-expected1] PASSED [ 31%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key2-expected2] PASSED [ 32%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key3-expected3] PASSED [ 32%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key4-expected4] PASSED [ 32%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key5-expected5] PASSED [ 33%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key6-expected6] PASSED [ 33%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key7-expected7] PASSED [ 33%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key8-expected8] PASSED [ 34%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key9-expected9] PASSED [ 34%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key10-expected10] PASSED [ 34%]
+tests/config/test_resolver.py::test_vllm_parallel_key_variants[key11-expected11] PASSED [ 35%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key0-expected0] PASSED [ 35%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key1-expected1] PASSED [ 35%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key2-expected2] PASSED [ 35%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key3-expected3] PASSED [ 36%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key4-expected4] PASSED [ 36%]
+tests/config/test_resolver.py::test_sglang_parallel_key_variants[key5-expected5] PASSED [ 36%]
+tests/config/test_resolver.py::test_vllm_enable_multi_endpoints_default PASSED [ 37%]
+tests/config/test_resolver.py::test_vllm_enable_multi_endpoints_explicit PASSED [ 37%]
+tests/config/test_resolver.py::test_vllm_enable_multi_endpoints_true PASSED [ 37%]
+tests/config/test_resolver.py::test_sglang_enable_multi_endpoints_default PASSED [ 38%]
+tests/config/test_resolver.py::test_sglang_enable_multi_endpoints_explicit PASSED [ 38%]
+tests/config/test_resolver.py::test_vllm_model_name_both_variants PASSED [ 38%]
+tests/config/test_resolver.py::test_sglang_model_name_both_variants PASSED [ 39%]
+tests/config/test_resolver.py::test_vllm_npu_mem_utils_both_variants PASSED [ 39%]
+tests/config/test_resolver.py::test_sglang_npu_mem_utils_both_variants PASSED [ 39%]
+tests/config/test_resolver.py::test_get_engine_key_returns_first_match PASSED [ 40%]
+tests/config/test_resolver.py::test_get_engine_key_skips_missing PASSED  [ 40%]
+tests/config/test_resolver.py::test_get_engine_key_returns_none_when_all_missing PASSED [ 40%]
+tests/config/test_resolver.py::test_sglang_world_size_uses_local_when_dp_attention_enabled PASSED [ 41%]
+tests/config/test_resolver.py::test_sglang_world_size_keeps_legacy_when_dp_attention_unset PASSED [ 41%]
+tests/config/test_resolver.py::test_vllm_world_size_unaffected_by_enable_multi_endpoints_false PASSED [ 41%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_union_cli_golden_preserves_order_types_and_precedence 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 41%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_pd_cli_golden_injects_handoff_metadata[prefill-kv_producer] 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 42%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_pd_cli_golden_injects_handoff_metadata[decode-kv_consumer] 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 42%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_cross_node_pcp_headless_cli_golden 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=1, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=1, master_addr=10.0.0.1
+PASSED                                                                   [ 42%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_multi_connector_and_d2d_cli_contract 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:234 D2D peer SOURCE: [{'device_id': 0, 'sources': ['[2001:db8::1]:5000', '10.0.0.2:5000']}, {'device_id': 1, 'sources': ['[2001:db8::1]:5001', '10.0.0.2:5001']}]
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 43%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_builder_output_is_stable_across_repeated_initialization 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 43%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_union_cli_golden PASSED [ 43%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_pd_multinode_cli_golden[prefill-prefill] PASSED [ 44%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_pd_multinode_cli_golden[decode-decode] PASSED [ 44%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_multinode_accepts_string_nnodes_and_requires_master_address PASSED [ 44%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_rejects_invalid_nnodes[invalid] PASSED [ 45%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_sglang_rejects_invalid_nnodes[0] PASSED [ 45%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_native_cli_omits_none_values PASSED [ 45%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_factory_rejects_unknown_engine_type_before_importing_builder PASSED [ 46%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_invalid_pd_connector_contract[None-kv_transfer_config is None in engine_config] PASSED [ 46%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_invalid_pd_connector_contract[invalid_kv_config1-Failed to process kv_transfer_config] 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: KV connector extra config at least have 2 connectors
+PASSED                                                                   [ 46%]
+tests/node_manager/core/services/native_engine/backends/test_config_contract.py::test_vllm_invalid_pd_connector_contract[invalid_kv_config2-Failed to process kv_transfer_config] 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: UnsupportedStoreConnector is not supported
+PASSED                                                                   [ 47%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_no_pcp_params_when_nnodes_is_one 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 47%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_snapshot_config_enables_auto_checkpoint_for_vllm_cli 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 47%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_no_pcp_params_when_nnodes_gt_1_but_no_master_port 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=2, master_port=None
+PASSED                                                                   [ 47%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_added_for_master_node 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=0, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=10.0.0.1
+PASSED                                                                   [ 48%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_added_for_slave_node 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=1, master_dp_ip=10.0.0.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=1, master_addr=10.0.0.1
+PASSED                                                                   [ 48%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_engine_config_takes_precedence 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=3 (type=int), master_port=6001, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=192.168.1.1
+PASSED                                                                   [ 48%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_added_when_nnodes_is_string 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=str), master_port=7001, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=192.168.1.1
+PASSED                                                                   [ 49%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_master_dp_ip_none_handled_gracefully 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=0, master_dp_ip=None
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=None
+PASSED                                                                   [ 49%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_pcp_params_with_master_port_dash_variant 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7001, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=192.168.1.1
+PASSED                                                                   [ 49%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_ucm_store_keeps_kv_both_and_injects_no_port PASSED [ 50%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_ucm_store_inline_config_not_polluted PASSED [ 50%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_ascend_store_still_gets_lookup_rpc_port PASSED [ 50%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_unknown_store_connector_still_raises 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: NotARealStore is not supported
+PASSED                                                                   [ 51%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_standalone_ucm_connector_rejected_in_prefill 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: standalone UCMConnector is only supported in the union role or as connectors[1] of a MultiConnector; wrap it in a MultiConnector for prefill/decode roles
+PASSED                                                                   [ 51%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_ucm_as_transport_position_rejected 
+-------------------------------- live log call ---------------------------------
+ERROR    node_manager:config.py:111 Failed to process kv_transfer_config: UCMConnector must be connectors[1] (the store) of a MultiConnector; put the transport connector first
+PASSED                                                                   [ 51%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_cross_node_overrides_placeholder_master_addr_and_node_rank 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7060, node_rank=1, master_dp_ip=192.168.66.62
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=1, master_addr=192.168.66.62
+PASSED                                                                   [ 52%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_cross_node_rank0_clears_stale_headless 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=2 (type=int), master_port=7060, node_rank=0, master_dp_ip=192.168.66.62
+INFO     node_manager:config.py:311 Cross-node PCP active: node_rank=0, master_addr=192.168.66.62
+PASSED                                                                   [ 52%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_mooncake_connector_preserves_pp_layer_partition PASSED [ 52%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_access_log_endpoints_excluded_by_default 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+INFO     node_manager:config.py:254 Motor default: suppress vLLM uvicorn access logs for /health,/metrics,/snapshot/health to avoid health-probe / metrics-scraping log spam; override via engine_config disable_access_log_for_endpoints
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 52%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_access_log_endpoints_user_override_wins 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 53%]
+tests/node_manager/core/services/native_engine/backends/vllm/test_config.py::test_access_log_endpoints_dash_style_user_override_wins 
+-------------------------------- live log call ---------------------------------
+INFO     node_manager:config.py:296 Cross-node PCP detection: nnodes=1 (type=int), master_port=None, node_rank=0, master_dp_ip=192.168.1.1
+INFO     node_manager:config.py:323 Cross-node PCP NOT active: nnodes_int=1, master_port=None
+PASSED                                                                   [ 53%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestCollectActiveEndpoints::test_collect_active_endpoints_returns_normal_endpoints PASSED [ 53%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestCollectActiveEndpoints::test_collect_active_endpoints_skips_non_normal PASSED [ 54%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestCollectActiveEndpoints::test_collect_active_endpoints_skips_empty_instances PASSED [ 54%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSchedulerInstanceCache::test_replace_all_and_get_instances PASSED [ 54%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSchedulerInstanceCache::test_patch_workload_from_shm PASSED [ 55%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSchedulerInstanceCache::test_patch_workload_from_shm_unknown_instance_noop PASSED [ 55%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSchedulerInstanceCache::test_patch_workload_from_shm_unknown_endpoint_noop PASSED [ 55%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSchedulerInstanceCache::test_patch_workload_from_shm_wrong_role_noop PASSED [ 56%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_claim_sample_sends_per_decode_admission_request PASSED [ 56%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_connect_success 
+-------------------------------- live log call ---------------------------------
+INFO     scheduler:scheduler_client.py:722 Async scheduler client connected to ipc:///tmp/test_sock
+PASSED                                                                   [ 56%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_connect_failure PASSED [ 57%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_disconnect 
+-------------------------------- live log call ---------------------------------
+INFO     scheduler:scheduler_client.py:722 Async scheduler client connected to ipc:///tmp/test_sock
+PASSED                                                                   [ 57%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_select_endpoint_candidates_returns_empty_on_transport_failure PASSED [ 57%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_select_endpoint_candidates_filters_required_engine_type PASSED [ 58%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_select_endpoint_candidates_filters_required_dispatch_capability PASSED [ 58%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_get_available_instances PASSED [ 58%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_get_available_instances_empty PASSED [ 58%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_get_available_instances_empty_all_roles_clears_topology_cache PASSED [ 59%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_get_available_instances_transport_failure PASSED [ 59%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_get_available_instances_error_response 
+-------------------------------- live log call ---------------------------------
+ERROR    scheduler:scheduler_client.py:1555 Failed to get available instances: No available instances
+PASSED                                                                   [ 59%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_get_available_instance_roles_uses_cache_without_transport PASSED [ 60%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_get_local_instances_uses_cache_without_transport PASSED [ 60%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_get_local_instances_warms_up_when_cache_empty PASSED [ 60%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_has_required_instances_met PASSED [ 61%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_has_required_instances_only_prefill PASSED [ 61%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_has_required_instances_union_wins_over_partial_roles PASSED [ 61%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_has_required_instances_none PASSED [ 62%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_get_all_instances PASSED [ 62%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_on_instance_change_notify PASSED [ 62%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_on_instance_change_notify_dedup PASSED [ 63%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_on_instance_change_notify_calls_refresh_callback SKIPPED [ 63%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_select_endpoint_candidates_by_load_balance PASSED [ 63%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_transport_timeout_in_get_available_instances PASSED [ 64%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_client_not_connected_get_available_instances PASSED [ 64%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestAsyncSchedulerClient::test_update_workload_rejects_allocation_without_cas 
+-------------------------------- live log call ---------------------------------
+ERROR    scheduler:scheduler_client.py:1425 update_workload refused: action=Allocation is not RELEASE_TOKENS instance_id=1 endpoint_id=10 req_id=req-alloc
+PASSED                                                                   [ 64%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestDpStatsSnapshot::test_snapshot_skips_invalid_slots_and_missing_reader PASSED [ 64%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestDpStatsSnapshot::test_snapshot_read_failure_returns_empty PASSED [ 65%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestDpStatsSnapshot::test_loop_emits_after_each_window PASSED [ 65%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestDpStatsSnapshot::test_connect_starts_task_only_when_enabled 
+-------------------------------- live log call ---------------------------------
+INFO     scheduler:scheduler_client.py:722 Async scheduler client connected to ipc:///tmp/scheduler_frontend
+INFO     scheduler:scheduler_client.py:722 Async scheduler client connected to ipc:///tmp/scheduler_frontend
+INFO     scheduler:scheduler_client.py:722 Async scheduler client connected to ipc:///tmp/scheduler_frontend
+PASSED                                                                   [ 65%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSelectAndAllocateCas::test_dp_stats_window_follows_config PASSED [ 66%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSelectAndAllocateCas::test_select_and_allocate_cas_commits_lowest_load SKIPPED [ 66%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSelectAndAllocateCas::test_select_and_allocate_fast_path_refreshes_once SKIPPED [ 66%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSelectAndAllocateCas::test_select_and_allocate_changed_reloads_and_rescores SKIPPED [ 67%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSelectAndAllocateCas::test_select_and_allocate_blocked_excludes_pair_and_switches_candidate SKIPPED [ 67%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSelectAndAllocateCas::test_select_and_allocate_without_shm_returns_none 
+-------------------------------- live log call ---------------------------------
+ERROR    scheduler:scheduler_client.py:992 select_and_allocate refused: native workload shm not attached role=prefill req_id=req-none
+PASSED                                                                   [ 67%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSelectAndAllocateCas::test_update_workload_cas_sub_floor0 SKIPPED [ 68%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSelectAndAllocateCas::test_update_workload_cas_success_survives_cache_patch_failure SKIPPED [ 68%]
+tests/coordinator/scheduler/test_scheduler_client.py::TestSelectAndAllocateCas::test_update_workload_rejects_non_release_action SKIPPED [ 68%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestInstanceFromDict::test_invalid_data_returns_none 
+-------------------------------- live log call ---------------------------------
+ERROR    scheduler:scheduler_server.py:85 Failed to deserialize instance: 4 validation errors for Instance
+job_name
+  Field required [type=missing, input_value={'completely': 'wrong', 'data': 42}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+model_name
+  Field required [type=missing, input_value={'completely': 'wrong', 'data': 42}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+id
+  Field required [type=missing, input_value={'completely': 'wrong', 'data': 42}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+role
+  Field required [type=missing, input_value={'completely': 'wrong', 'data': 42}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+Traceback (most recent call last):
+  File "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-rc2-validation/motor/coordinator/scheduler/runtime/scheduler_server.py", line 83, in _instance_from_dict
+    return Instance.model_validate(data)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/zhangxiyue/miniconda3/lib/python3.13/site-packages/pydantic/main.py", line 716, in model_validate
+    return cls.__pydantic_validator__.validate_python(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        obj,
+        ^^^^
+    ...<5 lines>...
+        by_name=by_name,
+        ^^^^^^^^^^^^^^^^
+    )
+    ^
+pydantic_core._pydantic_core.ValidationError: 4 validation errors for Instance
+job_name
+  Field required [type=missing, input_value={'completely': 'wrong', 'data': 42}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+model_name
+  Field required [type=missing, input_value={'completely': 'wrong', 'data': 42}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+id
+  Field required [type=missing, input_value={'completely': 'wrong', 'data': 42}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+role
+  Field required [type=missing, input_value={'completely': 'wrong', 'data': 42}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.12/v/missing
+PASSED                                                                   [ 69%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestInstanceFromDict::test_valid_dict_returns_instance 
+-------------------------------- live log call ---------------------------------
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-5, added endpoints number is 1, total endpoint number is 1/1
+PASSED                                                                   [ 69%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestControlPlaneProtocol::test_hot_path_rpcs_removed_from_protocol PASSED [ 69%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestDispatchUnknownType::test_returns_error_for_unknown_request_type 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+PASSED                                                                   [ 70%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestHandleGetAvailableInstances::test_returns_instances_without_shm_name 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-1, added endpoints number is 1, total endpoint number is 1/1
+INFO     domain:instance_manager.py:408 Refresh instances: event_type=EventType.ADD, count=1, instance_ids=[(1, 'prefill')]
+INFO     domain:instance_manager.py:559 Added instance ID 1 (role: prefill, job_name: prefill-1) with 1 endpoints to available pool successfully
+INFO     domain:instance_manager.py:430 Refresh instances done: E=0, P=1, D=0, U=0
+PASSED                                                                   [ 70%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestHandleGetAvailableInstances::test_returns_shm_name_when_writer_present 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-1, added endpoints number is 1, total endpoint number is 1/1
+INFO     domain:instance_manager.py:408 Refresh instances: event_type=EventType.ADD, count=1, instance_ids=[(1, 'prefill')]
+INFO     domain:instance_manager.py:559 Added instance ID 1 (role: prefill, job_name: prefill-1) with 1 endpoints to available pool successfully
+INFO     domain:instance_manager.py:430 Refresh instances done: E=0, P=1, D=0, U=0
+PASSED                                                                   [ 70%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestHandleGetAvailableInstances::test_role_filter_limits_returned_instances 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-1, added endpoints number is 1, total endpoint number is 1/1
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-2, added endpoints number is 1, total endpoint number is 1/1
+INFO     domain:instance_manager.py:408 Refresh instances: event_type=EventType.ADD, count=2, instance_ids=[(1, 'prefill'), (2, 'decode')]
+INFO     domain:instance_manager.py:559 Added instance ID 1 (role: prefill, job_name: prefill-1) with 1 endpoints to available pool successfully
+INFO     domain:instance_manager.py:559 Added instance ID 2 (role: decode, job_name: decode-2) with 1 endpoints to available pool successfully
+INFO     domain:instance_manager.py:430 Refresh instances done: E=0, P=1, D=1, U=0
+PASSED                                                                   [ 70%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestHandleGetAvailableInstances::test_get_payload_keeps_dispatch_capabilities 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-8, added endpoints number is 1, total endpoint number is 1/1
+INFO     domain:instance_manager.py:408 Refresh instances: event_type=EventType.ADD, count=1, instance_ids=[(8, 'decode')]
+INFO     domain:instance_manager.py:559 Added instance ID 8 (role: decode, job_name: decode-8) with 1 endpoints to available pool successfully
+INFO     domain:instance_manager.py:430 Refresh instances done: E=0, P=0, D=1, U=0
+PASSED                                                                   [ 71%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestApplyRefresh::test_no_change_skips_snapshot_and_callback 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+PASSED                                                                   [ 71%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestApplyRefresh::test_changed_writes_snapshot_and_publishes 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-1, added endpoints number is 1, total endpoint number is 1/1
+INFO     domain:instance_manager.py:408 Refresh instances: event_type=EventType.ADD, count=1, instance_ids=[(1, 'prefill')]
+INFO     domain:instance_manager.py:559 Added instance ID 1 (role: prefill, job_name: prefill-1) with 1 endpoints to available pool successfully
+INFO     domain:instance_manager.py:430 Refresh instances done: E=0, P=1, D=0, U=0
+PASSED                                                                   [ 71%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestApplyRefresh::test_add_delta_applies_to_worker_cache 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-7, added endpoints number is 1, total endpoint number is 1/1
+INFO     domain:instance_manager.py:408 Refresh instances: event_type=EventType.ADD, count=1, instance_ids=[(7, 'prefill')]
+INFO     domain:instance_manager.py:559 Added instance ID 7 (role: prefill, job_name: prefill-7) with 1 endpoints to available pool successfully
+INFO     domain:instance_manager.py:430 Refresh instances done: E=0, P=1, D=0, U=0
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+PASSED                                                                   [ 72%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestApplyRefresh::test_del_clears_blocked_flag 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-4, added endpoints number is 1, total endpoint number is 1/1
+INFO     domain:instance_manager.py:408 Refresh instances: event_type=EventType.ADD, count=1, instance_ids=[(4, 'prefill')]
+INFO     domain:instance_manager.py:559 Added instance ID 4 (role: prefill, job_name: prefill-4) with 1 endpoints to available pool successfully
+INFO     domain:instance_manager.py:430 Refresh instances done: E=0, P=1, D=0, U=0
+INFO     domain:instance_manager.py:408 Refresh instances: event_type=EventType.DEL, count=1, instance_ids=[(4, 'prefill')]
+INFO     domain:instance_manager.py:611 Deleted instance ID 4 (role: prefill, job_name: prefill-4) from available pool successfully
+INFO     domain:instance_manager.py:430 Refresh instances done: E=0, P=0, D=0, U=0
+PASSED                                                                   [ 72%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestApplyRefresh::test_dirty_snapshot_is_retried_even_when_next_refresh_is_a_noop 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-1, added endpoints number is 1, total endpoint number is 1/1
+INFO     domain:instance_manager.py:408 Refresh instances: event_type=EventType.ADD, count=1, instance_ids=[(1, 'prefill')]
+INFO     domain:instance_manager.py:559 Added instance ID 1 (role: prefill, job_name: prefill-1) with 1 endpoints to available pool successfully
+INFO     domain:instance_manager.py:430 Refresh instances done: E=0, P=1, D=0, U=0
+PASSED                                                                   [ 72%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestApplyRefresh::test_retry_dirty_snapshot_converges_from_heartbeat_loop 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+PASSED                                                                   [ 73%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestSchedulerFrontendTransport::test_recv_returns_none_when_no_socket PASSED [ 73%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestSchedulerFrontendTransport::test_recv_valid_message PASSED [ 73%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestSchedulerFrontendTransport::test_recv_too_few_parts_returns_none 
+-------------------------------- live log call ---------------------------------
+WARNING  scheduler:scheduler_server.py:642 Invalid frontend message format: 2 parts
+PASSED                                                                   [ 74%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestSchedulerFrontendTransport::test_send_noop_when_no_socket PASSED [ 74%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestSchedulerFrontendTransport::test_send_calls_socket_send_multipart PASSED [ 74%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestSchedulerFrontendTransport::test_bind_creates_router_socket_and_binds PASSED [ 75%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestSchedulerFrontendTransport::test_disconnect_closes_socket_and_sets_none PASSED [ 75%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestSchedulerFrontendTransport::test_disconnect_handles_close_exception 
+-------------------------------- live log call ---------------------------------
+WARNING  scheduler:scheduler_server.py:660 Error closing frontend socket: zmq close error
+PASSED                                                                   [ 75%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerStop::test_stop_releases_all_resources 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     scheduler:scheduler_server.py:727 Stopping control plane...
+INFO     scheduler:scheduler_server.py:790 Control plane stopped
+PASSED                                                                   [ 76%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerStop::test_stop_with_empty_state_does_not_raise 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     scheduler:scheduler_server.py:727 Stopping control plane...
+INFO     scheduler:scheduler_server.py:790 Control plane stopped
+PASSED                                                                   [ 76%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerStop::test_stop_cancels_active_tasks 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     scheduler:scheduler_server.py:727 Stopping control plane...
+INFO     scheduler:scheduler_server.py:748 Waiting for 1 active request tasks to complete...
+INFO     scheduler:scheduler_server.py:790 Control plane stopped
+PASSED                                                                   [ 76%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerStop::test_stop_handles_heartbeat_task_cancellation 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     scheduler:scheduler_server.py:727 Stopping control plane...
+INFO     scheduler:scheduler_server.py:790 Control plane stopped
+PASSED                                                                   [ 76%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerStop::test_stop_swallows_writer_release_error 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     scheduler:scheduler_server.py:727 Stopping control plane...
+WARNING  scheduler:scheduler_server.py:764 Error releasing workload writer: release error
+INFO     scheduler:scheduler_server.py:790 Control plane stopped
+PASSED                                                                   [ 77%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerPublishInstanceChanged::test_noop_when_no_pub_socket 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+PASSED                                                                   [ 77%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerPublishInstanceChanged::test_sends_topic_and_version 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+PASSED                                                                   [ 77%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerPublishInstanceChanged::test_send_exception_is_swallowed 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+WARNING  scheduler:scheduler_server.py:864 Failed to publish instance change: zmq send error
+PASSED                                                                   [ 78%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerPublishInstanceChanged::test_add_event_appends_delta_frame 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-7, added endpoints number is 1, total endpoint number is 1/1
+PASSED                                                                   [ 78%]
+tests/coordinator/scheduler/test_scheduler_server_main.py::TestAsyncSchedulerServerPublishInstanceChanged::test_set_event_sends_version_only 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:instance_manager.py:150 InstanceManager started.
+INFO     scheduler:load_balance.py:45 LoadBalancePolicy started.
+INFO     scheduler:scheduler.py:74 Scheduler started.
+INFO     resources:instance.py:226 Add endpoints for pod_ip:pod-7, added endpoints number is 1, total endpoint number is 1/1
+PASSED                                                                   [ 78%]
+tests/coordinator/router/test_unified_pd_router.py::test_collect_logprobs_removes_null_field_when_client_did_not_request_it 
+-------------------------------- live log call ---------------------------------
+WARNING  router:response.py:281 PrecisionSample: chunk missing logprobs: token_ids_in_chunk=1 (engine returned logprobs=null; sampling will fail-open at submit)
+PASSED                                                                   [ 79%]
+tests/coordinator/router/test_unified_pd_router.py::test_collect_logprobs_skips_parse_for_plain_content_chunk PASSED [ 79%]
+tests/coordinator/router/test_unified_pd_router.py::test_collect_logprobs_keeps_original_bytes_when_only_token_ids_present 
+-------------------------------- live log call ---------------------------------
+WARNING  router:response.py:281 PrecisionSample: chunk missing logprobs: token_ids_in_chunk=3 (engine returned logprobs=null; sampling will fail-open at submit)
+PASSED                                                                   [ 79%]
+tests/coordinator/router/test_unified_pd_router.py::test_collect_logprobs_caches_internal_width_before_trimming_stream_for_client PASSED [ 80%]
+tests/coordinator/router/test_unified_pd_router.py::test_precision_sample_claim_injects_only_after_decode_admission 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     router:request.py:99 PrecisionSample: inject_logprobs overridden/expanded api=completion req_id=req-1 client_logprobs=None effective_logprobs=3 client_top_logprobs=None effective_top_logprobs=None return_token_ids=true return_tokens_as_token_ids=true
+PASSED                                                                   [ 80%]
+tests/coordinator/router/test_unified_pd_router.py::test_precision_sample_claim_tokenized_preserves_client_width 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+PASSED                                                                   [ 80%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_cancel_stop_reason_mapping[Node fault: http://127.0.0.1:8102-peer_failed] PASSED [ 81%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_cancel_stop_reason_mapping[Client disconnected-client_disconnect] PASSED [ 81%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_cancel_stop_reason_mapping[Infer timeout-timeout] PASSED [ 81%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_cancel_stop_reason_mapping[Cancelled by dispatch-other] PASSED [ 82%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_cancel_stop_reason_mapping[Cancelled via cancel scope-other] PASSED [ 82%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_process_response_error_wraps_cancelled_as_request_cancelled_error 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-cancel-wrap] Unified PD cancelled 0/1: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of Client disconnected, retry=False
+PASSED                                                                   [ 82%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_vllm_uses_native_handoff_before_selecting_decode 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     tracer:tracing.py:71 TracerManager init.(enable:False,endpoint:,protocol:)
+INFO     router:unified_pd.py:1817 [root-cpcd] Scheduling latency stage=late_select_d elapsed_ms=0.04 instance_id=2 endpoint_id=2 req_id=root-cpcd
+INFO     router:unified_pd.py:2432 [root-cpcd] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-cpcd] Release workload succeeded stage=release_d_tokens elapsed_ms=0.02 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 82%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_render_uses_token_only_handoff_prefill[v1/chat/completions-messages] 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2054 [root-token-only-prefill] token-only prefill success request_id=root-token-only-prefill prompt_length=3
+INFO     router:unified_pd.py:1817 [root-token-only-prefill] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-token-only-prefill
+INFO     router:unified_pd.py:2432 [root-token-only-prefill] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-token-only-prefill] Release workload succeeded stage=release_d_tokens elapsed_ms=0.03 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-token-only-prefill] Tracer: TTFT: 1ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 83%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_render_uses_token_only_handoff_prefill[v1/completions-prompt] 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2054 [root-token-only-prefill] token-only prefill success request_id=root-token-only-prefill prompt_length=3
+INFO     router:unified_pd.py:1817 [root-token-only-prefill] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-token-only-prefill
+INFO     router:unified_pd.py:2432 [root-token-only-prefill] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-token-only-prefill] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-token-only-prefill] Tracer: TTFT: 0ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 83%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_completion_batch_keeps_native_handoff 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-stream-completion-batch] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-stream-completion-batch
+INFO     router:unified_pd.py:2432 [root-stream-completion-batch] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-stream-completion-batch] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-stream-completion-batch] Tracer: TTFT: 0ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 83%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_decode_falls_back_when_token_only_is_unsupported 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2054 [root-token-only-fallback] token-only prefill success request_id=root-token-only-fallback prompt_length=2
+INFO     router:unified_pd.py:1817 [root-token-only-fallback] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-token-only-fallback
+INFO     router:unified_pd.py:2432 [root-token-only-fallback] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:1460 [root-token-only-fallback] vLLM token-only Decode is unsupported; fallback to native OpenAI Decode req_id=root-token-only-fallback status_code=404
+INFO     router:unified_pd.py:2432 [root-token-only-fallback] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 84%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_vllm_render_completes_token_only_round_trip 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2054 [root-token-round-trip] token-only prefill success request_id=root-token-round-trip prompt_length=3
+INFO     router:unified_pd.py:1817 [root-token-round-trip] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-token-round-trip
+INFO     router:unified_pd.py:2432 [root-token-round-trip] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:token_only.py:243 token-only generate and derender success request_id=root-token-round-trip prompt_count=1 output_count=1
+INFO     router:unified_pd.py:2432 [root-token-round-trip] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 84%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_handoff_single_completion_uses_single_request_lifecycle 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2054 [root-single-completion] token-only prefill success request_id=root-single-completion prompt_length=2
+INFO     router:unified_pd.py:1817 [root-single-completion] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-single-completion
+INFO     router:unified_pd.py:2432 [root-single-completion] Release workload succeeded stage=release_p_tokens elapsed_ms=0.03 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:token_only.py:243 token-only generate and derender success request_id=root-single-completion prompt_count=1 output_count=1
+INFO     router:unified_pd.py:2432 [root-single-completion] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 84%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_handoff_completion_batch_fans_out_and_derenders_once 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-completion-batch] Scheduling latency stage=late_select_d elapsed_ms=0.01 instance_id=2 endpoint_id=2 req_id=root-completion-batch
+INFO     router:unified_pd.py:2432 [root-completion-batch] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:token_only.py:243 token-only generate and derender success request_id=root-completion-batch prompt_count=2 output_count=2
+INFO     router:unified_pd.py:2432 [root-completion-batch] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 85%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_handoff_completion_batch_sampling_claims_and_injects_bodies 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-batch-sampling] Scheduling latency stage=late_select_d elapsed_ms=0.01 instance_id=2 endpoint_id=2 req_id=root-batch-sampling
+INFO     router:unified_pd.py:2432 [root-batch-sampling] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:token_only.py:243 token-only generate and derender success request_id=root-batch-sampling prompt_count=2 output_count=2
+INFO     router:unified_pd.py:2432 [root-batch-sampling] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 85%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_handoff_completion_batch_no_admission_no_injection 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-batch-no-admission] Scheduling latency stage=late_select_d elapsed_ms=0.01 instance_id=2 endpoint_id=2 req_id=root-batch-no-admission
+INFO     router:unified_pd.py:2432 [root-batch-no-admission] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:token_only.py:243 token-only generate and derender success request_id=root-batch-no-admission prompt_count=2 output_count=2
+INFO     router:unified_pd.py:2432 [root-batch-no-admission] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 85%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_derender_timeout_does_not_repeat_decode 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2054 [root-derender-timeout] token-only prefill success request_id=root-derender-timeout prompt_length=2
+INFO     router:unified_pd.py:1817 [root-derender-timeout] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-derender-timeout
+INFO     router:unified_pd.py:2432 [root-derender-timeout] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-derender-timeout] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:1551 [root-derender-timeout] Unified PD non-stream decode failed req_id=root-derender-timeout attempt=1: 504: Derender request timed out
+WARNING  router:unified_pd.py:653 [root-derender-timeout] Unified PD exception 0/1: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of 504: Derender request timed out, retry=False
+PASSED                                                                   [ 86%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_vllm_rejects_missing_native_ticket_without_decode_or_peer_stop 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-missing-ticket] Unified PD exception 0/1: P=[127.0.0.1 job-1] D=[pending] because of Upstream prefill request failed with HTTP 502: vllm prefill protocol error: Missing kv_transfer_params, retry=False
+INFO     router:unified_pd.py:2432 [root-missing-ticket] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+PASSED                                                                   [ 86%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_vllm_strips_native_internal_fields_from_nonstream_response 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-native-strip] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-native-strip
+INFO     router:unified_pd.py:2432 [root-native-strip] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-native-strip] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 86%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_vllm_native_handoff_preserves_chat_output_budget_and_shape 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-native-chat] Scheduling latency stage=late_select_d elapsed_ms=0.01 instance_id=2 endpoint_id=2 req_id=root-native-chat
+INFO     router:unified_pd.py:2432 [root-native-chat] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-native-chat] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 87%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_vllm_strips_native_internal_fields_from_stream_response 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-native-stream-strip] Scheduling latency stage=late_select_d elapsed_ms=0.01 instance_id=2 endpoint_id=2 req_id=root-native-stream-strip
+INFO     router:unified_pd.py:2432 [root-native-stream-strip] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-native-stream-strip] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-native-stream-strip] Tracer: TTFT: 0ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 87%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_handoff_registers_decode_canceller_after_client_open 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-handoff-canceller-order] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-handoff-canceller-order
+INFO     router:unified_pd.py:2432 [root-handoff-canceller-order] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-handoff-canceller-order] Release workload succeeded stage=release_d_tokens elapsed_ms=0.02 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 87%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_nonretryable_upstream_error_is_not_retried 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:1551 [root-reject] Unified PD non-stream decode failed req_id=root-reject attempt=1: Upstream non-stream request failed with HTTP 400: {"error":{"message":"prompt exceeds maximum context length","code":400}}
+INFO     router:unified_pd.py:2432 [root-reject] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-reject] Release workload succeeded stage=release_d_tokens elapsed_ms=0.03 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:653 [root-reject] Unified PD exception 0/3: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of Upstream non-stream request failed with HTTP 400: {"error":{"message":"prompt exceeds maximum context length","code":400}}, retry=False
+PASSED                                                                   [ 88%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_prefill_rejection_is_returned_before_first_decode_token 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-stream-reject] Unified PD exception 0/3: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of Upstream non-stream request failed with HTTP 400: {"error":{"message":"prompt exceeds maximum context length","code":400}}, retry=False
+INFO     router:unified_pd.py:2432 [root-stream-reject] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-stream-reject] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 88%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_sglang_uses_native_bootstrap_concurrently 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-cpcd-sglang] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-cpcd-sglang] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 88%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_sglang_rejects_missing_bootstrap_port_before_dispatch 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-sglang-no-port] Unified PD exception 0/1: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of sglang prefill protocol error: Missing or invalid prefill bootstrap port, retry=False
+INFO     router:unified_pd.py:2432 [root-sglang-no-port] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-sglang-no-port] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 88%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_sglang_rejects_mixed_engine_pair_without_dispatch 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:709 [root-sglang-mixed] Unified PD D allocation failed after P allocated req_id=root-sglang-mixed attempt=1: HTTPException(status_code=503, detail='No instance available for role PDRole.ROLE_D with engine_type=sglang')
+INFO     router:unified_pd.py:2432 [root-sglang-mixed] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:658 [root-sglang-mixed] Unified PD exception 0/1, because of 503: No instance available for role PDRole.ROLE_D with engine_type=sglang, retry=False
+PASSED                                                                   [ 89%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_sglang_decode_failure_cancels_prefill_without_peer_stop 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:dispatch_session.py:118 Cancelling prefill task: 127.0.0.1 job-1 because ConnectError('decode down')
+INFO     router:unified_pd.py:2432 [root-sglang-cancel] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-sglang-cancel] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:1551 [root-sglang-cancel] Unified PD non-stream decode failed req_id=root-sglang-cancel attempt=1: decode down
+WARNING  router:unified_pd.py:653 [root-sglang-cancel] Unified PD exception 0/1: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of decode down, retry=False
+PASSED                                                                   [ 89%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_sglang_retry_uses_new_matched_bootstrap_room 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-sglang-retry] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-sglang-retry] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:1551 [root-sglang-retry] Unified PD non-stream decode failed req_id=root-sglang-retry attempt=1: retry decode
+WARNING  router:unified_pd.py:653 [root-sglang-retry] Unified PD exception 0/2: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of retry decode, retry=True
+WARNING  router:unified_pd.py:585 [root-sglang-retry] Rescheduling 1/2: P=[127.0.0.1 job-1], D=[127.0.0.1 job-2]
+INFO     router:unified_pd.py:2432 [root-sglang-retry] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-sglang-retry] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 89%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_sglang_chat_stream_uses_native_fields_and_strips_them 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-sglang-chat-stream] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-sglang-chat-stream] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-sglang-chat-stream] Tracer: TTFT: 0ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 90%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_release_rpc_survives_waiter_cancellation 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-release-shield] Release workload succeeded stage=release_p_tokens elapsed_ms=0.09 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-shield key=('root-release-shield', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 90%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_release_inflight_deduplicates_same_action 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-release-dedupe] Release workload succeeded stage=release_p_tokens elapsed_ms=0.05 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-dedupe key=('root-release-dedupe', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 90%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_release_finalize_failure_still_marks_released_and_is_not_resent 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-release-finalize-failure] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:2312 [root-release-finalize-failure] finalize_release failed after scheduler ACK req_id=root-release-finalize-failure attempt_seq=1 action=Release_Tokens: finalize boom
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-finalize-failure key=('root-release-finalize-failure', 1, 'prefill') active_tokens=1.0 owner=(1, 1)
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-finalize-failure key=('root-release-finalize-failure', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 91%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_release_carries_stable_operation_id 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-op-id key=('root-op-id', 1, 'prefill') active_tokens=1.0 owner=(1, 1)
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-op-id key=('root-op-id', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 91%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_release_retry_reuses_same_operation_id 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-op-id-retry] Release workload succeeded stage=release_p_tokens elapsed_ms=50.64 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=1
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-op-id-retry key=('root-op-id-retry', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 91%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_background_release_uses_single_tracked_task 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-release-background-single-task] Release workload succeeded stage=release_p_tokens elapsed_ms=0.07 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-background-single-task key=('root-release-background-single-task', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 92%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_release_failure_keeps_local_release_and_is_drained 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+ERROR    router:unified_pd.py:2446 [root-release-failure] Release workload failed stage=release_p_tokens elapsed_ms=150.89 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens req_id=root-release-failure
+ERROR    router:unified_pd.py:2550 [root-release-failure] Release workload background task failed stage=release_p_tokens req_id=root-release-failure attempt_seq=1 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens error=None
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-failure key=('root-release-failure', 1, 'prefill') active_tokens=1.0 owner=(1, 1)
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-failure key=('root-release-failure', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 92%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_release_cancel_propagates_and_cleans_tracking 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:2407 [root-release-cancel-propagates] Release workload task cancelled stage=release_p_tokens req_id=root-release-cancel-propagates role=prefill action=Release_Tokens retry=0
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-cancel-propagates key=('root-release-cancel-propagates', 1, 'prefill') active_tokens=1.0 owner=(1, 1)
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-cancel-propagates key=('root-release-cancel-propagates', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 92%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_background_release_cancel_is_logged_and_drained 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:2407 [root-release-background-cancel] Release workload task cancelled stage=release_p_tokens req_id=root-release-background-cancel role=prefill action=Release_Tokens retry=0
+ERROR    router:unified_pd.py:2550 [root-release-background-cancel] Release workload background task cancelled stage=release_p_tokens req_id=root-release-background-cancel attempt_seq=1 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens error=
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-background-cancel key=('root-release-background-cancel', 1, 'prefill') active_tokens=1.0 owner=(1, 1)
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-background-cancel key=('root-release-background-cancel', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 93%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_drain_double_cancel_keeps_release_cleanup 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-release-drain-double-cancel] Release workload succeeded stage=release_p_tokens elapsed_ms=0.24 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-release-drain-double-cancel key=('root-release-drain-double-cancel', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 93%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_bootstrap_stream_tail_release_survives_iterator_cancellation 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-stream-tail-cancel] Release workload succeeded stage=release_d_tokens elapsed_ms=0.03 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:525 [root-stream-tail-cancel] Unified PD stream cancelled while draining release tasks req_id=root-stream-tail-cancel attempt=1
+INFO     router:unified_pd.py:531 [root-stream-tail-cancel] Tracer: TTFT: 0ms, TTOT: N/Ams, count_token: 0
+INFO     router:unified_pd.py:2432 [root-stream-tail-cancel] Release workload succeeded stage=release_p_tokens elapsed_ms=2.13 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+PASSED                                                                   [ 93%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_handoff_stream_yields_before_prefill_token_release_finishes 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-handoff-token-background] Scheduling latency stage=late_select_d elapsed_ms=0.12 instance_id=2 endpoint_id=2 req_id=root-handoff-token-background
+INFO     router:unified_pd.py:2432 [root-handoff-token-background] Release workload succeeded stage=release_p_tokens elapsed_ms=0.22 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-handoff-token-background] Release workload succeeded stage=release_d_tokens elapsed_ms=0.05 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+ERROR    opentelemetry.context:__init__.py:145 Failed to detach context
+Traceback (most recent call last):
+  File "/home/zhangxiyue/miniconda3/lib/python3.13/site-packages/opentelemetry/trace/__init__.py", line 608, in use_span
+    yield span
+  File "/home/zhangxiyue/miniconda3/lib/python3.13/site-packages/opentelemetry/trace/__init__.py", line 508, in start_as_current_span
+    yield span
+  File "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-rc2-validation/motor/coordinator/router/strategies/base.py", line 239, in _trace_span
+    yield span
+  File "/home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-rc2-validation/motor/coordinator/router/strategies/unified_pd.py", line 520, in _generate_stream_response
+    yield chunk
+GeneratorExit
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/zhangxiyue/miniconda3/lib/python3.13/site-packages/opentelemetry/context/__init__.py", line 143, in detach
+    _RUNTIME_CONTEXT.detach(token)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/home/zhangxiyue/miniconda3/lib/python3.13/site-packages/opentelemetry/context/contextvars_context.py", line 42, in detach
+    self._current_context.reset(token)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+ValueError: <Token var=<ContextVar name='current_context' default={} at 0x73edb2377b50> at 0x73edb0d92380> was created in a different Context
+PASSED                                                                   [ 94%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_dispatches_context_and_yields_visible_chunk 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-stream] Release workload succeeded stage=release_p_tokens elapsed_ms=0.07 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-stream] Release workload succeeded stage=release_d_tokens elapsed_ms=0.04 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-stream] Tracer: TTFT: 0ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 94%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_bootstrap_stream_prefill_release_does_not_block_first_chunk 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-bootstrap-prefill-release-background] Release workload succeeded stage=release_p_tokens elapsed_ms=0.08 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-bootstrap-prefill-release-background] Release workload succeeded stage=release_d_tokens elapsed_ms=0.05 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 94%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_bootstrap_nonstream_holds_prefill_tokens_until_decode_finishes 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-bootstrap-nonstream-prefill-release] Release workload succeeded stage=release_d_tokens elapsed_ms=0.06 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-bootstrap-nonstream-prefill-release] Release workload succeeded stage=release_p_tokens elapsed_ms=0.04 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+PASSED                                                                   [ 94%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_client_disconnect_cancels_tasks_and_releases_resources 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-stream-disconnect] Unified PD cancelled 0/3: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of Client disconnected, retry=False
+INFO     router:dispatch_session.py:132 Cancelling decode task: 127.0.0.1 job-2 because client_disconnect
+INFO     router:unified_pd.py:2432 [root-stream-disconnect] Release workload succeeded stage=release_p_tokens elapsed_ms=0.12 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-stream-disconnect] Release workload succeeded stage=release_d_tokens elapsed_ms=0.02 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 95%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stop_attempt_drains_release_failures 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+ERROR    router:unified_pd.py:2446 [root-stop-drain-release-failure] Release workload failed stage=release_p_tokens elapsed_ms=151.14 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens req_id=root-stop-drain-release-failure
+ERROR    router:unified_pd.py:2446 [root-stop-drain-release-failure] Release workload failed stage=release_d_tokens elapsed_ms=151.71 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens req_id=root-stop-drain-release-failure
+ERROR    router:unified_pd.py:2550 [root-stop-drain-release-failure] Release workload background task failed stage=release_p_tokens req_id=root-stop-drain-release-failure attempt_seq=1 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens error=None
+ERROR    router:unified_pd.py:2550 [root-stop-drain-release-failure] Release workload background task failed stage=release_d_tokens req_id=root-stop-drain-release-failure attempt_seq=1 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens error=None
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-stop-drain-release-failure key=('root-stop-drain-release-failure', 1, 'prefill') active_tokens=1.0 owner=(1, 1)
+ERROR    domain:request_manager.py:100 Orphan workload record dropped at request deletion; ledger tokens are leaked: req_id=root-stop-drain-release-failure key=('root-stop-drain-release-failure', 1, 'decode') active_tokens=1.0 owner=(2, 2)
+PASSED                                                                   [ 95%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_send_failure_closes_decode_and_releases_resources 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-stream-send-failure] Release workload succeeded stage=release_p_tokens elapsed_ms=0.05 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:dispatch_session.py:132 Cancelling decode task: 127.0.0.1 job-2 because client_disconnect
+INFO     router:unified_pd.py:2432 [root-stream-send-failure] Release workload succeeded stage=release_d_tokens elapsed_ms=0.04 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 95%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_error_after_visible_chunk_reschedules_with_token_replay 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:2432 [root-stream-reschedule] Release workload succeeded stage=release_p_tokens elapsed_ms=0.05 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:653 [root-stream-reschedule] Unified PD exception 0/2: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of after chunk, retry=True
+INFO     router:unified_pd.py:2432 [root-stream-reschedule] Release workload succeeded stage=release_d_tokens elapsed_ms=0.04 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:rescheduler.py:246 [root-stream-reschedule] Prepared token replay for request root-stream-reschedule: retry=1 all_len=3 prompt_len=2 cumulative_completion=1 api=v1/completions
+WARNING  router:unified_pd.py:509 [root-stream-reschedule] Rescheduling 1/2: P=[127.0.0.1 job-1], D=[127.0.0.1 job-2]
+INFO     router:unified_pd.py:2432 [root-stream-reschedule] Release workload succeeded stage=release_p_tokens elapsed_ms=0.04 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-stream-reschedule] Release workload succeeded stage=release_d_tokens elapsed_ms=0.04 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-stream-reschedule] Tracer: TTFT: 5ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 96%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_retry_plan_validation_fails_before_new_attempt_allocation 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-stream-invalid-replay] Unified PD exception 0/3: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of after token cache, retry=True
+INFO     router:unified_pd.py:2432 [root-stream-invalid-replay] Release workload succeeded stage=release_p_tokens elapsed_ms=0.03 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-stream-invalid-replay] Release workload succeeded stage=release_d_tokens elapsed_ms=0.02 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+ERROR    router:rescheduler.py:206 [root-stream-invalid-replay] Rescheduling aborted for request root-stream-invalid-replay: parallel sampling n=2 not supported
+WARNING  router:unified_pd.py:658 [root-stream-invalid-replay] Unified PD exception 1/3, because of 502: Rescheduling does not support parallel sampling (n>1)., retry=False
+PASSED                                                                   [ 96%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_handoff_stream_retry_replays_same_prompt_through_prefill 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-handoff-reschedule] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-handoff-reschedule
+INFO     router:unified_pd.py:2432 [root-handoff-reschedule] Release workload succeeded stage=release_p_tokens elapsed_ms=0.03 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:653 [root-handoff-reschedule] Unified PD exception 0/2: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of after chunk, retry=True
+INFO     router:unified_pd.py:2432 [root-handoff-reschedule] Release workload succeeded stage=release_d_tokens elapsed_ms=0.02 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:rescheduler.py:246 [root-handoff-reschedule] Prepared token replay for request root-handoff-reschedule: retry=1 all_len=3 prompt_len=2 cumulative_completion=1 api=v1/completions
+WARNING  router:unified_pd.py:509 [root-handoff-reschedule] Rescheduling 1/2: P=[127.0.0.1 job-1], D=[pending]
+INFO     router:unified_pd.py:1817 [root-handoff-reschedule] Scheduling latency stage=late_select_d elapsed_ms=0.02 instance_id=2 endpoint_id=2 req_id=root-handoff-reschedule
+INFO     router:unified_pd.py:2432 [root-handoff-reschedule] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-handoff-reschedule] Release workload succeeded stage=release_d_tokens elapsed_ms=0.02 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-handoff-reschedule] Tracer: TTFT: 2ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 96%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_pool_node_fault_reschedules_without_peer_stop 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     http:http_client.py:360 HTTPClientPool new client created. pool_key=127.0.0.1:8101:20ffb6a5, address=127.0.0.1:8101, tls=False
+INFO     http:http_client.py:360 HTTPClientPool new client created. pool_key=127.0.0.1:8102:20ffb6a5, address=127.0.0.1:8102, tls=False
+INFO     router:dispatch_session.py:132 Cancelling decode task: 127.0.0.1 job-2 because Node fault: http://127.0.0.1:8102
+INFO     router:unified_pd.py:2432 [root-pool-node-fault] Release workload succeeded stage=release_p_tokens elapsed_ms=0.04 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:653 [root-pool-node-fault] Unified PD cancelled 0/2: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of Node fault: http://127.0.0.1:8102, retry=True
+WARNING  router:unified_pd.py:2645 [root-pool-node-fault] Native abort failed engine=sglang instance_id=2 endpoint_id=2 error=All connection attempts failed
+INFO     router:unified_pd.py:2432 [root-pool-node-fault] Release workload succeeded stage=release_d_tokens elapsed_ms=0.05 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:rescheduler.py:246 [root-pool-node-fault] Prepared token replay for request root-pool-node-fault: retry=1 all_len=3 prompt_len=2 cumulative_completion=1 api=v1/completions
+WARNING  router:unified_pd.py:509 [root-pool-node-fault] Rescheduling 1/2: P=[127.0.0.1 job-1], D=[127.0.0.1 job-2]
+INFO     router:unified_pd.py:2432 [root-pool-node-fault] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-pool-node-fault] Release workload succeeded stage=release_d_tokens elapsed_ms=0.02 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-pool-node-fault] Tracer: TTFT: N/Ams, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 97%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_error_after_visible_chunk_without_replay_does_not_retry 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:base.py:723 [root-stream-error] Scheduling latency stage=forward_to_engine elapsed_ms=0.09 api=v1/completions
+INFO     router:base.py:594 [root-stream-error] Scheduling latency stage=forward_to_engine_connect elapsed_ms=0.01 api=v1/completions
+INFO     router:base.py:621 [root-stream-error] Scheduling latency stage=forward_to_engine_first_chunk elapsed_ms=0.09 api=v1/completions
+WARNING  router:unified_pd.py:653 [root-stream-error] Unified PD exception 0/3: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of after chunk, retry=False
+INFO     router:unified_pd.py:2432 [root-stream-error] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-stream-error] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+PASSED                                                                   [ 97%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_error_before_first_body_retries_without_token_replay 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-stream-prebody-retry] Unified PD exception 0/2: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of before first body, retry=True
+INFO     router:unified_pd.py:2432 [root-stream-prebody-retry] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-stream-prebody-retry] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:509 [root-stream-prebody-retry] Rescheduling 1/2: P=[127.0.0.1 job-1], D=[127.0.0.1 job-2]
+INFO     router:unified_pd.py:2432 [root-stream-prebody-retry] Release workload succeeded stage=release_p_tokens elapsed_ms=0.01 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+INFO     router:unified_pd.py:2432 [root-stream-prebody-retry] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:unified_pd.py:531 [root-stream-prebody-retry] Tracer: TTFT: 1ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 97%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_nonstream_falls_back_to_hybrid_when_decode_pool_exhausted 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-nonstream-fallback] Unified PD exception 0/1: P=[127.0.0.1 job-1] D=[pending] because of 503: No instance available for role PDRole.ROLE_D with engine_type=vllm, retry=False
+INFO     router:unified_pd.py:2432 [root-nonstream-fallback] Release workload succeeded stage=release_p_tokens elapsed_ms=0.08 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:399 [root-nonstream-fallback] UnifiedPD fallback to PDHybrid for non-stream request: decode unavailable
+PASSED                                                                   [ 98%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_runtime_fallback_respects_disabled_switch 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-fallback-disabled] Unified PD exception 0/1: P=[127.0.0.1 job-1] D=[pending] because of 503: No instance available for role PDRole.ROLE_D with engine_type=vllm, retry=False
+INFO     router:unified_pd.py:2432 [root-fallback-disabled] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+PASSED                                                                   [ 98%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_restarts_on_hybrid_before_commit_when_decode_pool_exhausted 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:653 [root-stream-fallback-restart] Unified PD exception 0/1: P=[127.0.0.1 job-1] D=[pending] because of 503: No instance available for role PDRole.ROLE_D with engine_type=vllm, retry=False
+INFO     router:unified_pd.py:2432 [root-stream-fallback-restart] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:419 [root-stream-fallback-restart] UnifiedPD stream fallback to PDHybrid before commit, fallback_attempt=2
+PASSED                                                                   [ 98%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_stream_resumes_on_hybrid_with_token_replay_after_commit 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+INFO     router:unified_pd.py:1817 [root-stream-fallback-resume] Scheduling latency stage=late_select_d elapsed_ms=0.01 instance_id=2 endpoint_id=2 req_id=root-stream-fallback-resume
+INFO     router:unified_pd.py:2432 [root-stream-fallback-resume] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+WARNING  router:unified_pd.py:653 [root-stream-fallback-resume] Unified PD exception 0/2: P=[127.0.0.1 job-1] D=[127.0.0.1 job-2] because of decode disappeared, retry=True
+INFO     router:unified_pd.py:2432 [root-stream-fallback-resume] Release workload succeeded stage=release_d_tokens elapsed_ms=0.01 instance_id=2 endpoint_id=2 role=decode action=Release_Tokens retry=0
+INFO     router:rescheduler.py:246 [root-stream-fallback-resume] Prepared token replay for request root-stream-fallback-resume: retry=1 all_len=3 prompt_len=2 cumulative_completion=1 api=v1/completions
+WARNING  router:unified_pd.py:463 [root-stream-fallback-resume] UnifiedPD stream fallback to PDHybrid after commit (token replay), fallback_attempt=2 replay_len=3 api=v1/completions
+INFO     router:unified_pd.py:556 [root-stream-fallback-resume] Tracer: TTFT: 0ms, TTOT: N/Ams, count_token: 0
+PASSED                                                                   [ 99%]
+tests/coordinator/router/test_unified_pd_router.py::test_retry_plan_preserves_max_completion_tokens_precedence_for_completion_replay PASSED [ 99%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_create_attempt_releases_p_when_d_allocation_cancelled 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+WARNING  router:unified_pd.py:709 [req-w1-cancel] Unified PD D allocation failed after P allocated req_id=req-w1-cancel attempt=1: CancelledError()
+INFO     router:unified_pd.py:2432 [req-w1-cancel] Release workload succeeded stage=release_p_tokens elapsed_ms=0.02 instance_id=1 endpoint_id=1 role=prefill action=Release_Tokens retry=0
+PASSED                                                                   [ 99%]
+tests/coordinator/router/test_unified_pd_router.py::test_unified_pd_prepare_attempt_resource_rolls_back_when_bookkeeping_cancelled 
+-------------------------------- live log call ---------------------------------
+INFO     config:coordinator.py:541 Using encryption algorithm: PBKDF2_SHA256
+INFO     domain:request_manager.py:47 RequestManager initialized
+ERROR    router:unified_pd.py:2145 [req-w2-cancel] Workload bookkeeping interrupted after allocation; rolling back req_id=req-w2-cancel attempt_seq=1 role=PDRole.ROLE_P instance_id=1 endpoint_id=1 error=CancelledError()
+PASSED                                                                   [100%]
+
+- generated xml file: /home/zhangxiyue/llm-slo-scheduler/artifacts/version-baseline-20261030/motor.xml -
+======================== 309 passed, 8 skipped in 1.55s ========================
+
+==========================================
+Test Result Summary
+==========================================
+Test Status:
+  ✓ Passed: 309
+  ⊘ Skipped: 8
+
+Overall Status:
+  ✓ All tests passed
+==========================================
+
+
+✓ All tests passed

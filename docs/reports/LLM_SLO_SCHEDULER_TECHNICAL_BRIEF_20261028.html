@@ -1,0 +1,1305 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="面向 AI infra 工程师的技术汇报：生产证据、FGJSQ、GF super_p90 和 P 批 token 预算。">
+<title>llm-slo-scheduler · 吞吐与 P90 TTFT 技术设计汇报</title><style>
+:root{--ink:#173244;--muted:#5b6f7f;--blue:#2367a2;--green:#147565;--gold:#b6762e;--line:#dbe4eb;--paper:#fff;--bg:#eef2f5;--nav:#122b3c}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:86px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;font-size:16px;line-height:1.65}
+a{color:var(--blue);text-underline-offset:3px}button,select{font:inherit}button{cursor:pointer}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #dfac5a;outline-offset:3px}
+#sidebar{position:fixed;inset:0 auto 0 0;width:238px;background:var(--nav);color:#e0eaf0;z-index:12;display:flex;flex-direction:column;padding:25px 18px}
+.brand{font-size:17px;line-height:1.4;letter-spacing:.3px;color:#fff;font-weight:700}.brand small{display:block;font-size:11px;color:#91b2c7;letter-spacing:2px;margin-top:9px}
+#toc{overflow:auto;flex:1;margin:28px -5px 15px;padding-right:5px}.nav-group{font-size:11px;color:#91b2c7;letter-spacing:1.5px;margin:20px 9px 6px}
+#toc a{display:flex;gap:9px;font-size:12px;line-height:1.5;color:#c4d5df;text-decoration:none;padding:7px 9px;border-radius:5px;margin:2px 0}#toc a:hover,#toc a.current{background:#24485f;color:#fff}#toc .num{color:#8babc0;min-width:20px}
+.sidefoot{font-size:11px;color:#a8bfcd;border-top:1px solid #365061;padding-top:14px}
+header.topbar{position:sticky;top:0;z-index:10;margin-left:238px;min-height:64px;background:#fffffff5;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 32px;backdrop-filter:blur(12px)}
+.toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.toolbar button,.toolbar select{border:1px solid var(--line);border-radius:5px;background:white;padding:6px 10px;font-size:12px;color:var(--ink)}.toolbar button.active{background:var(--ink);color:white;border-color:var(--ink)}
+#progressLabel{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+main{margin-left:238px;padding:28px 32px 80px;max-width:1600px}
+.slide{background:var(--paper);padding:36px 42px 26px;margin:0 0 28px;border:1px solid var(--line);border-radius:9px;box-shadow:0 4px 18px #18374c05;scroll-margin-top:86px}
+.kicker{display:flex;justify-content:space-between;color:var(--blue);font-size:11px;letter-spacing:1.5px;font-weight:700;margin-bottom:9px}
+h1,h2,h3,p{margin-top:0}h2{font-size:29px;line-height:1.4;letter-spacing:-.5px;margin-bottom:12px;font-weight:700}h3{font-size:17px;line-height:1.4;margin-bottom:12px}p{margin-bottom:15px}p.lead{font-size:17px;color:var(--muted);margin-bottom:25px}
+.small,small{font-size:12px;line-height:1.7;color:var(--muted)}.two,.three{display:grid;gap:25px;margin:22px 0}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}
+.three>div{border-top:3px solid var(--blue);padding:18px 0}.three b{font-size:21px;display:block;margin-bottom:10px}.three span{font-size:14px;color:var(--muted);display:block}
+.callout{background:#edf5f7;border-left:3px solid var(--green);padding:16px 20px;margin:22px 0;font-size:15px}
+.hero{background:var(--nav);color:#f5f9fc;padding:28px 32px;border-radius:6px;margin:20px 0 24px}.eyebrow{font-size:11px;letter-spacing:2px;color:#98becf}.hero-line{font-size:35px;line-height:1.5;font-weight:600;margin:20px 0}.hero .three{margin-bottom:0;gap:24px}.hero .three>div{border-color:#5f9ac1;padding:12px 0 0}.hero .three span{color:#bed1df}.hero .three b{font-size:19px}
+.tablewrap{overflow-x:auto;margin:20px 0}table{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.6}th{text-align:left;color:var(--blue);background:#f2f6f9;font-weight:600;padding:11px 12px;border-bottom:2px solid #c8d8e3}td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:0}td:first-child{font-weight:600}table td{font-variant-numeric:tabular-nums}
+figure{margin:24px 0 16px}figure svg{display:block;max-width:100%;height:auto;width:100%}figcaption{font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px}.sequence{font-family:"Segoe UI","Microsoft YaHei",sans-serif}.sequence text{fill:var(--ink)}
+.formula{background:#f5f7fa;border:1px solid var(--line);font-family:"Cambria Math","Cambria","Microsoft YaHei",serif;font-size:25px;text-align:center;padding:21px 15px;margin:21px 0;overflow-x:auto}.formula.compact{font-size:20px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#142e3f;color:#edf6fc;padding:22px 25px;border-radius:6px;line-height:1.75;font-size:13px}code{font-family:"Cascadia Code",Consolas,monospace}
+.flow{display:flex;align-items:center;gap:14px;margin:25px 0;flex-wrap:wrap}.flow>div{flex:1;min-width:130px;padding:17px;background:#f0f4f7;font-weight:600}.flow small{display:block;font-weight:400;margin-top:8px}.flow .accent{background:#e5f2f1}
+.timeline{display:flex;gap:8px;align-items:stretch;margin:25px 0;font-size:12px}.timeline>*{flex:1;padding:14px 9px;background:#eef4f7;text-align:center;font-style:normal}.timeline span{background:#e2eff0}
+.barrow{display:grid;grid-template-columns:150px 1fr 64px;gap:12px;align-items:center;margin:18px 0;font-size:14px}.track{height:13px;background:#e9eff3;border-radius:2px}.track i{display:block;height:100%;background:var(--blue);border-radius:2px}.barrow b{text-align:right;font-size:14px;font-variant-numeric:tabular-nums}
+.queue-diagram{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin:24px 0}.queue{padding:18px;background:#eaf2f8;border-left:3px solid var(--blue)}.queue.tail{grid-column:1;background:#f6efe6;border-color:var(--gold)}.queue-result{grid-column:2;grid-row:1/3;align-content:center;padding:25px;background:#edf5f2}.queue>div{display:flex;gap:9px;margin:15px 0;align-items:center;flex-wrap:wrap}.queue span{background:white;padding:7px 11px;font-family:monospace}.queue em{font-size:12px;font-style:normal}.queue-result p{font-size:14px;margin-top:14px}
+ol{padding-left:25px}li{padding:5px 0;margin-bottom:8px}.sources{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:25px 0}.sources article{background:#f4f7f9;padding:18px;font-size:13px;scroll-margin-top:95px}.sources p{margin:9px 0}.sources code{display:block;font-size:10px;overflow-wrap:anywhere;color:var(--muted);margin-top:8px}.sources a{font-size:12px}
+.foot{display:flex;justify-content:space-between;gap:18px;font-size:11px;color:var(--muted);padding-top:17px;border-top:1px solid var(--line);margin-top:25px}.foot a{text-decoration:none}
+details.notes{border-top:1px dashed var(--line);padding-top:12px;margin-top:15px;font-size:13px;color:var(--muted)}summary{cursor:pointer}details.notes p{margin-top:12px}
+.closing{font-size:22px;line-height:1.75;border-left:4px solid var(--blue);padding-left:25px;margin:25px 0}
+.progress{position:fixed;top:0;left:238px;right:0;height:3px;z-index:30;background:#dbe5eb}.progress div{background:var(--green);height:100%;width:0;transition:width .15s}
+body.present main{max-width:none}body.present .slide{display:none;min-height:calc(100vh - 120px);margin-bottom:0}body.present .slide.current-slide{display:block}.short-hidden{display:none!important}
+#mobileMenu{display:none}
+@media(min-width:1700px){body{font-size:18px}h2{font-size:34px}table{font-size:15px}}
+@media(max-width:1150px){#sidebar{width:204px}main{margin-left:204px;padding:22px 20px}header.topbar{margin-left:204px;padding:10px 20px}.progress{left:204px}.slide{padding:28px}h2{font-size:25px}.barrow{grid-template-columns:130px 1fr 57px;font-size:12px}.two,.three{gap:18px}}
+@media(max-width:850px){#sidebar{transform:translateX(-100%);width:245px;transition:.15s}body.nav-open #sidebar{transform:translateX(0)}main{margin-left:0;padding:16px}header.topbar{margin-left:0;padding:10px 16px}.progress{left:0}#mobileMenu{display:inline-block}.slide{padding:24px}.two{grid-template-columns:1fr}.three{gap:14px}.timeline{flex-wrap:wrap}.timeline>*{min-width:90px}.sources{grid-template-columns:1fr}.barrow{grid-template-columns:150px 1fr 65px}#progressLabel{display:none}}
+@media(max-width:540px){body{font-size:15px}.slide{padding:21px 18px}h2{font-size:23px}.lead{font-size:15px!important}.hero{padding:22px}.hero-line{font-size:27px}.three{grid-template-columns:1fr}.three>div{padding:11px 0}.three b{font-size:19px}.queue-diagram{grid-template-columns:1fr}.queue-result{grid-column:1;grid-row:auto}.formula.compact{font-size:17px}.sequence{min-width:700px}figure:has(.sequence){overflow-x:auto}.foot{display:block}.foot span{display:block;margin-top:8px}.toolbar{gap:5px}.toolbar button,.toolbar select{padding:6px 7px}.barrow{grid-template-columns:130px 1fr 60px;gap:7px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+@media print{@page{size:A4 landscape;margin:12mm}body{background:white;font-size:11px}#sidebar,header.topbar,.progress,details.notes{display:none!important}main{margin:0;padding:0;max-width:none!important}.slide,body.present .slide{display:block!important;border:0;box-shadow:none;border-radius:0;break-before:page;min-height:0!important;padding:0;margin:0}.slide.short-hidden{display:block!important}.slide:first-child{break-before:auto}h2{font-size:22px}.lead{font-size:13px!important}.two,.three{gap:18px;margin:15px 0}table{font-size:10px}td,th{padding:7px}.callout{font-size:11px;padding:10px;margin:14px 0}.formula{font-size:18px;padding:12px;margin:12px 0}.formula.compact{font-size:15px}.hero{padding:15px 25px;print-color-adjust:exact}.hero-line{font-size:27px}figure{margin:12px 0}figure svg{max-height:100mm;width:100%}.sources{grid-template-columns:1fr 1fr}.sources article{break-inside:avoid;font-size:10px}.foot{margin-top:14px;padding-top:10px;font-size:9px}.sequence{min-width:0}pre{font-size:10px;padding:14px;print-color-adjust:exact}}
+</style></head>
+<body><aside id="sidebar"><div class="brand">llm-slo-scheduler<small>ENGINEERING BRIEFING</small></div><nav id="toc" aria-label="汇报目录"><div class="nav-group">开场</div><a href="#opening"><span class="num">01</span><span>在吞吐约束下，把 P90 TTFT 降下来</span></a><div class="nav-group">目标与边界</div><a href="#goals"><span class="num">02</span><span>验收的是全体请求的联合指标</span></a><a href="#boundary"><span class="num">03</span><span>研究单个 GF + 3P3D 集群</span></a><a href="#measurement"><span class="num">04</span><span>先锁定计时口径，再解释分段</span></a><div class="nav-group">生产数据</div><a href="#workload"><span class="num">05</span><span>同一逻辑规格内，工作量仍高度异质</span></a><a href="#arrivals"><span class="num">06</span><span>负载画像给出异质性，尚不提供排队反事实</span></a><a href="#replay"><span class="num">07</span><span>生产重放支持 FGJSQ 改善等待尾部</span></a><a href="#waiting"><span class="num">08</span><span>首次入场等待存在，但并非所有尾部都在入场前</span></a><div class="nav-group">FGJSQ</div><a href="#fg-score"><span class="num">09</span><span>用事件修正剩余工作量，再选择最低压力 P</span></a><a href="#fg-example"><span class="num">10</span><span>一个数值例子：路由看到的是预计剩余工作</span></a><a href="#fg-sequence"><span class="num">11</span><span>g5 请求生命周期与批事件反馈</span></a><a href="#predictor"><span class="num">12</span><span>预测器的训练标签必须按源码解释</span></a><a href="#fg-benchmark"><span class="num">13</span><span>压测中 TTFT 有改善，TPOT 与吞吐尚未全面对齐</span></a><a href="#g5-results"><span class="num">14</span><span>g5 恢复了工程基线，128K 业务 TTFT 仍未达标</span></a><a href="#fg-fit"><span class="num">15</span><span>FGJSQ 的价值取决于跨 P 工作差异是否可被利用</span></a><a href="#tpot"><span class="num">16</span><span>下一步：分别关闭两层 TPOT 回归</span></a><div class="nav-group">super_p90</div><a href="#omni"><span class="num">17</span><span>借鉴 super-p95 的“有限让行”，拆开各项机制</span></a><a href="#admission-idea"><span class="num">18</span><span>把一部分等待留在 GF，保留对派发顺序的控制</span></a><a href="#admission-rules"><span class="num">19</span><span>rc2：长成本或统一高压力触发，共用有限预算</span></a><a href="#admission-budgets"><span class="num">20</span><span>四种预算分别约束不同风险</span></a><a href="#admission-sequence"><span class="num">21</span><span>异步排队必须同时解决预留、claim 与取消</span></a><a href="#admission-status"><span class="num">22</span><span>本地交付已通过，下一步是现场机制与收益验证</span></a><div class="nav-group">Chunk size</div><a href="#chunk-control"><span class="num">23</span><span>先区分四种“token 上限”</span></a><a href="#chunk-data"><span class="num">24</span><span>已有扫描：128K 温和改善，66K 的 64K 预算明显变差</span></a><a href="#chunk-table"><span class="num">25</span><span>八格原始读数与解释边界</span></a><a href="#chunk-research"><span class="num">26</span><span>业界的共同做法：按负载选择预算，先建立强静态基线</span></a><a href="#model"><span class="num">27</span><span>把“新增 token”与“读取的历史”分开建模</span></a><a href="#model-decision"><span class="num">28</span><span>单批效率优化有解析直觉，也有全局盲点</span></a><a href="#chunk-sequence"><span class="num">29</span><span>拟议的在线路径：纯候选计划 → 成本评分 → 一次真实提交</span></a><a href="#chunk-next"><span class="num">30</span><span>下一步先回答：动态策略能否胜过按规格固定 C？</span></a><div class="nav-group">联合验证</div><a href="#joint"><span class="num">31</span><span>先分开归因，再寻找吞吐—P90 的 Pareto 方案</span></a><a href="#discussion"><span class="num">32</span><span>讨论：下一轮先验证哪些假设？</span></a><div class="nav-group">附录</div><a href="#appendix-math"><span class="num">33</span><span>原始效用与 KV 宏观模型：保留推导，也保留假设</span></a><a href="#appendix-compat"><span class="num">34</span><span>Ascend 动态机制与 g5 的兼容性不是一个开关</span></a><div class="nav-group">来源</div><a href="#sources"><span class="num">35</span><span>可追溯来源与版本说明</span></a></nav><div class="sidefoot"><span id="routeNote">主线 + 按需详解 · 45 分钟</span><br>本地证据快照 · 2026.10.28<br>全体 P90 TTFT / 吞吐 / P90 TPOT</div></aside>
+<div class="progress" aria-hidden="true"><div id="progress"></div></div>
+<header class="topbar"><div class="toolbar"><button id="mobileMenu" type="button" aria-label="打开目录">目录</button><button id="mode" type="button" aria-pressed="false">进入演示</button><select id="duration" aria-label="汇报时长"><option value="30">30 min · 主线</option><option value="45" selected>45 min · 标准</option><option value="60">60 min · 深入</option></select><button id="prev" type="button" aria-label="上一页">←</button><button id="next" type="button" aria-label="下一页">→</button><button id="print" type="button">打印 / PDF</button></div><div id="progressLabel" aria-live="polite"></div></header>
+<main><section class="slide " id="opening" aria-labelledby="title-opening">
+    <div class="kicker"><span>开场</span><span>01 / 35</span></div>
+    <h2 id="title-opening">在吞吐约束下，把 P90 TTFT 降下来</h2><p class="lead">llm-slo-scheduler · GF 路由、有限让行与 P 侧批预算的联合设计</p>
+    <div class="hero"><div class="eyebrow">TECHNICAL DESIGN REVIEW · 2026.10.28</div>
+    <p class="hero-line">谁进入哪个 P？<br>谁先进入 P？<br>每一批推进多少 token？</p>
+    <div class="three"><div><b>FGJSQ</b><span>批事件驱动的负载均衡<br>已适配 g5</span></div><div><b>super_p90</b><span>GF FIFO + 有限 LIFO<br>rc2 本地评审通过</span></div><div><b>Chunk tuning</b><span>分规格静态基线 → 状态自适应<br>已有 B1 扫描 / 模型设计</span></div></div></div>
+    <p>面向 AI infra 工程师的技术汇报。默认 45 分钟：目标 4′、生产证据 7′、FGJSQ 10′、super_p90 10′、chunk 10′、讨论 4′。30 分钟模式保留主线；60 分钟可展开附录和讲者备注。</p>
+    <p class="small">材料截止：本地可读记录截至 2026-10-28。super_p90 是本项目 GF 入场策略的名称，借鉴 vllm-omni super-p95；并非已有 P90 最优性证明。</p><details class="notes"><summary>讲者备注</summary><p>先给出三层决策的地图；整个汇报围绕证据、机制与下一步验证展开。界面“演示”切换逐页，“阅读”可连续浏览；左右键翻页，Esc 返回阅读。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-entry">[entry]</a> · <a href="#ref-rc2">[rc2]</a> · <a href="#ref-chunk">[chunk]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="goals" aria-labelledby="title-goals">
+    <div class="kicker"><span>目标与边界</span><span>02 / 35</span></div>
+    <h2 id="title-goals">验收的是全体请求的联合指标</h2><p class="lead">主目标：提高 SLO 下可承载吞吐，并降低全体请求 P90 TTFT；P90 TPOT 是独立约束。</p>
+    <div class="tablewrap"><table><thead><tr><th>逻辑规格</th><th>P90 TTFT</th><th>P90 TPOT</th><th>解释</th></tr></thead><tbody><tr><td>32K</td><td>< 12 s</td><td>< 32 ms</td><td>按上下文规格分别评价</td></tr><tr><td>64K</td><td>< 27 s</td><td>< 30 ms</td><td>不能用跨规格平均掩盖违约</td></tr><tr><td>128K</td><td>< 30 s</td><td>< 40 ms</td><td>当前 g5 B16 TTFT 仍未达到此业务线</td></tr></tbody></table></div>
+    <div class="two"><div><h3>同负载比较</h3><p>保持请求集合、到达或并发、输出长度、缓存流程与执行栈一致；比较全体 P90 TTFT、完成 QPS、输出 token/s、P90 TPOT、失败与取消。</p></div><div><h3>容量比较</h3><p>逐级增加负载，寻找同时满足 TTFT / TPOT SLO 的可承载边界；相同到达率下 QPS 接近，不等于最大容量相同。</p></div></div>
+    <div class="callout">固定 24 卡配置时，集群吞吐的相对提升可映射为单卡效率提升；当前平均吞吐是否接近硬件容量，不能预先假设。不得删去慢请求或只汇报 normal 子集。</div><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-entry">[entry]</a> · <a href="#ref-alignment">[alignment]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="boundary" aria-labelledby="title-boundary">
+    <div class="kicker"><span>目标与边界</span><span>03 / 35</span></div>
+    <h2 id="title-boundary">研究单个 GF + 3P3D 集群</h2><p class="lead">研究假设：GB 已完成规格分流与集群级亲和路由；本项目主要优化 GF 负载均衡、入场顺序与 P 批预算。</p>
+    <div class="flow"><div>AI 网关<small>鉴权</small></div><b>→</b><div>多个 GB<small>租户限流 / 规格队列 / 集群路由</small></div><b>→</b><div class="accent">单个 GF<small>协议转换 / P 实例路由</small></div><b>→</b><div class="accent">3P → KV → 3D<small>每引擎 TP4，共 24×910B2</small></div></div>
+    <div class="two"><div><h3>并发与负载</h3><p><strong>B=16 是整个集群总在途上限</strong>，包含 prefill、交接和 decode；三个 P 各自获得多少请求由路由决定。B、max_num_seqs、实际 batch 请求数是三个不同量。</p><p>AISBench 为滚动闭环：完成一条补一条，无整轮 barrier。request_rate=1 不能直接当作稳态到达率 λ。</p></div><div><h3>g5 固定执行面</h3><p>P：async predictor scheduler、SLO=0、FCFS / running-first、共享 8192 token、max_num_seqs=24。D：原生 async，主模型 FULL_DECODE_ONLY，MTP3 speculative eager。</p><p>当前研究不改变 D 引擎和 D 路由；GF 无法暂停已经派发的 P 请求。</p></div></div>
+    <p class="small">生产画像批次是原生 proxy、max_num_seqs=16；它与 g5 不是同一部署身份。模型记录为 Qwen3.6-27B W8A8。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-entry">[entry]</a> · <a href="#ref-frozen">[frozen]</a> · <a href="#ref-alignment">[alignment]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="measurement" aria-labelledby="title-measurement">
+    <div class="kicker"><span>目标与边界</span><span>04 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-measurement">先锁定计时口径，再解释分段</h2><p class="lead">正式指标沿用 AISBench 客户端汇总器；GF/P 内部指标用于解释机制。</p>
+    <div class="timeline"><span>HTTP POST 前<br><b>TTFT 起点</b></span><i>GF 等待与路由</i><i>P 首次等待</i><i>P 执行 / chunk 间隔</i><i>KV + D 首次执行</i><span>首记录流式时间点<br><b>TTFT 终点</b></span></div>
+    <div class="two"><div><h3>逐请求可分解</h3><p>只有对齐同一请求的时间点，才能分解阶段。queue_time 通常是入队到首次调度；首次调度后的区间仍包含计算、异步等待等，不等于纯设备耗时。</p></div><div><h3>分位数不可直接相加减</h3><p>P90(A+B) ≠ P90(A)+P90(B)。TTFT − uncached / 常量速率的 waitproxy 只是残差估计；不能作为精确排队时间或有保证的等待下界。</p></div></div>
+    <p>历史实验使用不同窗口或客户端墙钟补丁时，在对应图表旁单独说明。新实验不以“首个有效 content”重新定义正式 TTFT。</p><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-waiting">[waiting]</a> · <a href="#ref-historical">[historical]</a> · <a href="#ref-frozen">[frozen]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="workload" aria-labelledby="title-workload">
+    <div class="kicker"><span>生产数据</span><span>05 / 35</span></div>
+    <h2 id="title-workload">同一逻辑规格内，工作量仍高度异质</h2><p class="lead">单 UUID、5,549 条生产记录：输入长度与 prefix 命中都不能被一个“64K 请求”标签概括。</p>
+    <div class="two"><div><h3>输入长度</h3><div class="bars"><div class="barrow"><span>输入 &lt; 8K</span><div class="track"><i style="width:20.33%"></i></div><b>20.33%</b></div><div class="barrow"><span>输入 ≥ 32K</span><div class="track"><i style="width:72.91%"></i></div><b>72.91%</b></div><div class="barrow"><span>输入 &gt; 64K</span><div class="track"><i style="width:2.23%"></i></div><b>2.23%</b></div><small>这些比例存在包含关系，不能相加。</small></div></div><div><h3>Prefix 命中</h3><div class="bars"><div class="barrow"><span>零命中</span><div class="track"><i style="width:45.5%"></i></div><b>45.50%</b></div><div class="barrow"><span>命中 ≥ 90%</span><div class="track"><i style="width:12.58%"></i></div><b>12.58%</b></div><div class="barrow"><span>≥ 32K 且零命中</span><div class="track"><i style="width:22.85%"></i></div><b>22.85%</b></div><small>请求平均命中率 31.65%；token 加权命中率 40.30%。</small></div></div></div>
+    <div class="callout"><strong>≥32K 且零命中：1,268 条 / 22.85%，贡献约 47.7% 的 uncached token。</strong>这说明成本分类有信息基础；不能直接据此把整组请求划入让行队列，也不能证明同 P 上同时存在长短竞争。</div>
+    <p class="small">数据：2026-09-24 约两小时 UTC 的 model_handle_start_time；原生 proxy 生产配置。旧原文 1,235 条只含 32–64K 子集，不能与 1,268 混用。真实输入最大约 103.6K。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-flow">[flow]</a> · <a href="#ref-flow-review">[flow-review]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="arrivals" aria-labelledby="title-arrivals">
+    <div class="kicker"><span>生产数据</span><span>06 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-arrivals">负载画像给出异质性，尚不提供排队反事实</h2><p class="lead">处理起点分布、后验缓存命中和逐请求等待是不同层面的信息。</p>
+    <div class="tablewrap"><table><thead><tr><th>已观察</th><th>工程含义</th><th>不能推出</th></tr></thead><tbody><tr><td>处理起点 0.7712 次/s；uncached 约 17.2K token/s</td><td>用于描述这批记录的强度</td><td>不是执行吞吐或设备利用率</td></tr><tr><td>Fano：1s=1.218；10s=1.281；60s=3.122</td><td>波动随观测尺度变化</td><td>不能证明泊松到达或 ρ≈1</td></tr><tr><td>前两大 appid 合计 84.59%</td><td>成本分布可能集中于少数业务</td><td>不能固定让某租户承担牺牲</td></tr><tr><td>同长度成本代理差异明显</td><td>prompt 长度不足以表征工作量</td><td>cached_tokens 后验值不自动在线可知</td></tr><tr><td>延迟有效样本 0；5,548 条 completion < prompt</td><td>字段单位/语义冲突已保留</td><td>不能从此表算 SLO 达标率或输出量</td></tr></tbody></table></div>
+    <p>9 列画像不包含完整 P 候选与逐批轨迹，因此不精确复原路由收益。既有集中流量调研已结束，这些限制作为设计边界保留。</p><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-flow-review">[flow-review]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="replay" aria-labelledby="title-replay">
+    <div class="kicker"><span>生产数据</span><span>07 / 35</span></div>
+    <h2 id="title-replay">生产重放支持 FGJSQ 改善等待尾部</h2><p class="lead">EXP_10.9：同栈 g2 的 N_heap / F_fgjsq 对照；原速开环，约 0.77 req/s。</p>
+    <figure><svg class="plot" role="img" aria-label="EXP_10.9 / g2：同源 trace 原速开环；数值采用最终等待报告精确口径。" xmlns:xlink="http://www.w3.org/1999/xlink"  viewBox="0 0 782.613125 224.281812" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figb8635819-figure_1">
+  <g id="figb8635819-patch_1">
+   <path d="M 0 224.281812 
+L 782.613125 224.281812 
+L 782.613125 0 
+L 0 0 
+L 0 224.281812 
+z
+" style="fill: none"/>
+  </g>
+  <g id="figb8635819-axes_1">
+   <g id="figb8635819-patch_2">
+    <path d="M 60.613125 184.789937 
+L 364.872046 184.789937 
+L 364.872046 23.229938 
+L 60.613125 23.229938 
+L 60.613125 184.789937 
+z
+" style="fill: none"/>
+   </g>
+   <g id="figb8635819-matplotlib.axis_1">
+    <g id="figb8635819-xtick_1">
+     <g id="figb8635819-line2d_1">
+      <path d="M 60.613125 184.789937 
+L 60.613125 23.229938 
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_2">
+      <defs>
+       <path id="figb8635819-m7a76a304eb" d="M 0 0 
+L 0 3.5 
+" style="stroke: #526776; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="60.613125" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_1">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="60.613125" y="200.148219" transform="rotate(-0 60.613125 200.148219)">0.0</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_2">
+     <g id="figb8635819-line2d_3">
+      <path d="M 100.647194 184.789937 
+L 100.647194 23.229938 
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_4">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="100.647194" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_2">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="100.647194" y="200.148219" transform="rotate(-0 100.647194 200.148219)">2.5</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_3">
+     <g id="figb8635819-line2d_5">
+      <path d="M 140.681262 184.789937 
+L 140.681262 23.229938 
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_6">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="140.681262" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_3">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="140.681262" y="200.148219" transform="rotate(-0 140.681262 200.148219)">5.0</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_4">
+     <g id="figb8635819-line2d_7">
+      <path d="M 180.715331 184.789937 
+L 180.715331 23.229938 
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_8">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="180.715331" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_4">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="180.715331" y="200.148219" transform="rotate(-0 180.715331 200.148219)">7.5</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_5">
+     <g id="figb8635819-line2d_9">
+      <path d="M 220.749399 184.789937 
+L 220.749399 23.229938 
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_10">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="220.749399" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_5">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="220.749399" y="200.148219" transform="rotate(-0 220.749399 200.148219)">10.0</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_6">
+     <g id="figb8635819-line2d_11">
+      <path d="M 260.783468 184.789937 
+L 260.783468 23.229938 
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_12">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="260.783468" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_6">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="260.783468" y="200.148219" transform="rotate(-0 260.783468 200.148219)">12.5</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_7">
+     <g id="figb8635819-line2d_13">
+      <path d="M 300.817536 184.789937 
+L 300.817536 23.229938 
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_14">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="300.817536" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_7">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="300.817536" y="200.148219" transform="rotate(-0 300.817536 200.148219)">15.0</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_8">
+     <g id="figb8635819-line2d_15">
+      <path d="M 340.851605 184.789937 
+L 340.851605 23.229938 
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_16">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="340.851605" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_8">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="340.851605" y="200.148219" transform="rotate(-0 340.851605 200.148219)">17.5</text>
+     </g>
+    </g>
+    <g id="figb8635819-text_9">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203444" x="212.742586" y="214.794156" transform="rotate(-0 212.742586 214.794156)">Seconds</text>
+    </g>
+   </g>
+   <g id="figb8635819-matplotlib.axis_2">
+    <g id="figb8635819-ytick_1">
+     <g id="figb8635819-line2d_17">
+      <defs>
+       <path id="figb8635819-me0d2767505" d="M 0 0 
+L -3.5 0 
+" style="stroke: #526776; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#figb8635819-me0d2767505" x="60.613125" y="53.364169" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_10">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="53.613125" y="57.54331" transform="rotate(-0 53.613125 57.54331)">N: heap</text>
+     </g>
+    </g>
+    <g id="figb8635819-ytick_2">
+     <g id="figb8635819-line2d_18">
+      <g>
+       <use xlink:href="#figb8635819-me0d2767505" x="60.613125" y="154.655706" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_11">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="53.613125" y="158.834846" transform="rotate(-0 53.613125 158.834846)">F: FGJSQ</text>
+     </g>
+    </g>
+   </g>
+   <g id="figb8635819-patch_3">
+    <path d="M 60.613125 76.154765 
+L 330.58687 76.154765 
+L 330.58687 30.573574 
+L 60.613125 30.573574 
+z
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: #2367a2"/>
+   </g>
+   <g id="figb8635819-patch_4">
+    <path d="M 60.613125 177.446301 
+L 307.927587 177.446301 
+L 307.927587 131.86511 
+L 60.613125 131.86511 
+z
+" clip-path="url(#figb8635819-p31b6085cdf)" style="fill: #147565"/>
+   </g>
+   <g id="figb8635819-patch_5">
+    <path d="M 60.613125 184.789937 
+L 60.613125 23.229937 
+" style="fill: none; stroke: #b5c2cc; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="figb8635819-patch_6">
+    <path d="M 60.613125 184.789937 
+L 364.872046 184.789937 
+" style="fill: none; stroke: #b5c2cc; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="figb8635819-text_12">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="334.590277" y="56.399482" transform="rotate(-0 334.590277 56.399482)">16.859 s</text>
+   </g>
+   <g id="figb8635819-text_13">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="311.930994" y="157.691018" transform="rotate(-0 311.930994 157.691018)">15.444 s</text>
+   </g>
+   <g id="figb8635819-text_14">
+    <text style="font-weight: 700; font-size: 13.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="60.613125" y="17.229938" transform="rotate(-0 60.613125 17.229938)">Client TTFT P90</text>
+   </g>
+  </g>
+  <g id="figb8635819-axes_2">
+   <g id="figb8635819-patch_7">
+    <path d="M 471.154204 184.789937 
+L 775.413125 184.789937 
+L 775.413125 23.229938 
+L 471.154204 23.229938 
+L 471.154204 184.789937 
+z
+" style="fill: none"/>
+   </g>
+   <g id="figb8635819-matplotlib.axis_3">
+    <g id="figb8635819-xtick_9">
+     <g id="figb8635819-line2d_19">
+      <path d="M 471.154204 184.789937 
+L 471.154204 23.229938 
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_20">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="471.154204" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_15">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="471.154204" y="200.148219" transform="rotate(-0 471.154204 200.148219)">0.0</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_10">
+     <g id="figb8635819-line2d_21">
+      <path d="M 511.188273 184.789937 
+L 511.188273 23.229938 
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_22">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="511.188273" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_16">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="511.188273" y="200.148219" transform="rotate(-0 511.188273 200.148219)">2.5</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_11">
+     <g id="figb8635819-line2d_23">
+      <path d="M 551.222341 184.789937 
+L 551.222341 23.229938 
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_24">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="551.222341" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_17">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="551.222341" y="200.148219" transform="rotate(-0 551.222341 200.148219)">5.0</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_12">
+     <g id="figb8635819-line2d_25">
+      <path d="M 591.25641 184.789937 
+L 591.25641 23.229938 
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_26">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="591.25641" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_18">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="591.25641" y="200.148219" transform="rotate(-0 591.25641 200.148219)">7.5</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_13">
+     <g id="figb8635819-line2d_27">
+      <path d="M 631.290478 184.789937 
+L 631.290478 23.229938 
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_28">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="631.290478" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_19">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="631.290478" y="200.148219" transform="rotate(-0 631.290478 200.148219)">10.0</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_14">
+     <g id="figb8635819-line2d_29">
+      <path d="M 671.324547 184.789937 
+L 671.324547 23.229938 
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_30">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="671.324547" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_20">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="671.324547" y="200.148219" transform="rotate(-0 671.324547 200.148219)">12.5</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_15">
+     <g id="figb8635819-line2d_31">
+      <path d="M 711.358615 184.789937 
+L 711.358615 23.229938 
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_32">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="711.358615" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_21">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="711.358615" y="200.148219" transform="rotate(-0 711.358615 200.148219)">15.0</text>
+     </g>
+    </g>
+    <g id="figb8635819-xtick_16">
+     <g id="figb8635819-line2d_33">
+      <path d="M 751.392684 184.789937 
+L 751.392684 23.229938 
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.16; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="figb8635819-line2d_34">
+      <g>
+       <use xlink:href="#figb8635819-m7a76a304eb" x="751.392684" y="184.789937" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_22">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="751.392684" y="200.148219" transform="rotate(-0 751.392684 200.148219)">17.5</text>
+     </g>
+    </g>
+    <g id="figb8635819-text_23">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203444" x="623.283664" y="214.794156" transform="rotate(-0 623.283664 214.794156)">Seconds</text>
+    </g>
+   </g>
+   <g id="figb8635819-matplotlib.axis_4">
+    <g id="figb8635819-ytick_3">
+     <g id="figb8635819-line2d_35">
+      <g>
+       <use xlink:href="#figb8635819-me0d2767505" x="471.154204" y="53.364169" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_24">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="464.154204" y="57.54331" transform="rotate(-0 464.154204 57.54331)">N: heap</text>
+     </g>
+    </g>
+    <g id="figb8635819-ytick_4">
+     <g id="figb8635819-line2d_36">
+      <g>
+       <use xlink:href="#figb8635819-me0d2767505" x="471.154204" y="154.655706" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="figb8635819-text_25">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="464.154204" y="158.834846" transform="rotate(-0 464.154204 158.834846)">F: FGJSQ</text>
+     </g>
+    </g>
+   </g>
+   <g id="figb8635819-patch_8">
+    <path d="M 471.154204 76.154765 
+L 611.209389 76.154765 
+L 611.209389 30.573574 
+L 471.154204 30.573574 
+z
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: #2367a2"/>
+   </g>
+   <g id="figb8635819-patch_9">
+    <path d="M 471.154204 177.446301 
+L 596.236648 177.446301 
+L 596.236648 131.86511 
+L 471.154204 131.86511 
+z
+" clip-path="url(#figb8635819-p9ccc1f5914)" style="fill: #147565"/>
+   </g>
+   <g id="figb8635819-patch_10">
+    <path d="M 471.154204 184.789937 
+L 471.154204 23.229937 
+" style="fill: none; stroke: #b5c2cc; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="figb8635819-patch_11">
+    <path d="M 471.154204 184.789937 
+L 775.413125 184.789937 
+" style="fill: none; stroke: #b5c2cc; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="figb8635819-text_26">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="615.212796" y="56.399482" transform="rotate(-0 615.212796 56.399482)">8.746 s</text>
+   </g>
+   <g id="figb8635819-text_27">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="600.240055" y="157.691018" transform="rotate(-0 600.240055 157.691018)">7.811 s</text>
+   </g>
+   <g id="figb8635819-text_28">
+    <text style="font-weight: 700; font-size: 13.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="471.154204" y="17.229938" transform="rotate(-0 471.154204 17.229938)">P first-queue P90</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="figb8635819-p31b6085cdf">
+   <rect x="60.613125" y="23.229938" width="304.258921" height="161.56"/>
+  </clipPath>
+  <clipPath id="figb8635819-p9ccc1f5914">
+   <rect x="471.154204" y="23.229938" width="304.258921" height="161.56"/>
+  </clipPath>
+ </defs>
+</svg>
+<figcaption>EXP_10.9 / g2：同源 trace 原速开环；数值采用最终等待报告精确口径。</figcaption></figure><div class="tablewrap"><table><thead><tr><th>指标</th><th>N_heap</th><th>F_fgjsq</th><th>读取方式</th></tr></thead><tbody><tr><td>TTFT P90</td><td>16.859 s</td><td>15.444 s</td><td>−8.39%</td></tr><tr><td>P 首次 queue P90</td><td>8.746 s</td><td>7.811 s</td><td>−10.69%</td></tr><tr><td>完成 OPS</td><td>0.7678</td><td>0.7677</td><td>在相同 offered load 下基本一致</td></tr><tr><td>D 池引擎 TPOT P90</td><td>24 ms</td><td>24 ms</td><td>直方图口径；不是客户端逐请求 P90</td></tr><tr><td>失败 / 发出</td><td>1 / 5,549</td><td>0 / 5,549</td><td>传输级失败单列，不从分母隐藏</td></tr></tbody></table></div>
+    <p class="small">原早期汇总 TTFT P90 为 16.857 / 15.443 s；此处采用后续最终等待报告 16.859 / 15.444 s。完成 OPS / TPOT 来自早期汇总，口径分别标注；没有完整原生 chenyao 栈的开环对照。</p><details class="notes"><summary>讲者备注</summary><p>8.4% 是这个历史同栈对照的证据。F/N 均为 g2 体系，不能宣布 g5 或新 admission 已获得同样收益。相同 offered load 的完成速率接近，也不回答容量问题。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-waiting">[waiting]</a> · <a href="#ref-historical">[historical]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="waiting" aria-labelledby="title-waiting">
+    <div class="kicker"><span>生产数据</span><span>08 / 35</span></div>
+    <h2 id="title-waiting">首次入场等待存在，但并非所有尾部都在入场前</h2><p class="lead">等待证据支持 GF 入场优化，同时限定它能影响的范围。</p>
+    <div class="tablewrap"><table><thead><tr><th>场景</th><th>已有观察</th><th>对设计的约束</th></tr></thead><tbody><tr><td>生产重放 g2 / F</td><td>P 首次 queue P90=7.811s；126/240 个池化快照有等待</td><td>52.5% 是快照比例，不是请求等待比例</td></tr><tr><td>126K / B16 闭环</td><td>首次 queue P50 约 20–30s；三 P 稳态 10s 窗 waiting 均值 6.94</td><td>存在显著首次入场等待，适合检验入场顺序</td></tr><tr><td>66K / B16 闭环</td><td>首次 queue P50≈0.5s，P90≈0.8s；TTFT P50≈11.17s</td><td>仅改首次入场可能覆盖较少；不能用分位相减定位剩余阶段</td></tr></tbody></table></div>
+    <div class="callout">running-first 下，长 prefill 在首次入场后可连续占用多轮 token 预算。GF LIFO 只能控制尚未送入 P 的请求，已经 running 的长请求不会被它暂停。</div>
+    <p class="small">EXP_10.14_TRACE 是 EXP_10.9 / 10.12 的二次分析，不能当成第三组独立性能实验。历史 126K B16 waiting 均值 5.87 已由 6.94 替代。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-waiting">[waiting]</a> · <a href="#ref-omni">[omni]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="fg-score" aria-labelledby="title-fg-score">
+    <div class="kicker"><span>FGJSQ</span><span>09 / 35</span></div>
+    <h2 id="title-fg-score">用事件修正剩余工作量，再选择最低压力 P</h2><p class="lead">FGJSQ = Fine-grained token Join Shortest Queue；批级时间预测用于负载衰减，不直接预测请求 TTFT。</p>
+    <div class="formula">score<sub>p</sub> = W<sub>p</sub> · (⌈N<sub>p</sub> / M<sub>p</sub>⌉ + 1) / 2</div>
+    <div class="formula compact">w<sub>r</sub>(t) = O<sub>r</sub> · remaining<sub>r</sub>/L<sub>r</sub> + O<sub>r</sub> · scheduled<sub>r</sub>/L<sub>r</sub> · [1 − min(Δt / T̂<sub>batch</sub>, 0.95)]</div>
+    <div class="two"><div><h3>W 随批事件和时间变化</h3><p>W 是请求 committed load 的和；N 是未释放的 FG 请求数；M 是实例序列上限。未开始部分保留全额，本批 scheduled 部分随预测时间衰减。首个匹配事件把初始 O 校正为真实 prompt 长度 L。</p></div><div><h3>派发是一次事务</h3><p>rank 前重算 W；按 score 从小到大选可用 P；同锁完成候选检查与 native SHM CAS，成功后写 FG 预留。不能先按旧快照选中 P 再无条件占额。</p></div></div>
+    <p class="small">实现对负载取整；预测无效时本批不衰减。5% retention 是 scheduled 负载估计的保留量，不是最低服务进展保障；score 不是秒，也不是精确剩余 token。g5 初估沿用请求 body bytes / 4。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-fg-code">[fg-code]</a> · <a href="#ref-adapter">[adapter]</a> · <a href="#ref-alignment">[alignment]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="fg-example" aria-labelledby="title-fg-example">
+    <div class="kicker"><span>FGJSQ</span><span>10 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-fg-example">一个数值例子：路由看到的是预计剩余工作</h2><p class="lead">示例只解释公式，不是实验曲线或现场预测误差。</p>
+    <div class="tablewrap"><table><thead><tr><th>同一请求快照</th><th>值</th></tr></thead><tbody><tr><td>L = O</td><td>64,000 token</td></tr><tr><td>remaining / scheduled</td><td>24,000 / 8,000 token</td></tr><tr><td>本批预测时间</td><td>400 ms</td></tr><tr><td>事件后经过</td><td>200 ms</td></tr><tr><td>估计负载</td><td>24,000 + 8,000 × (1−0.5) = 28,000</td></tr></tbody></table></div>
+    <div class="two"><div><h3>比静态 token 账本细</h3><p>静态账本直到释放前可能一直记 64K；事件驱动账本能感知已经推进的工作与在途 batch 的进度。</p></div><div><h3>仍是成本代理</h3><p>同样 28K 新 token 在不同上下文、KV 层级和批形状下耗时可不同；波次系数也没有把 score 变成时延预测。候选过时、主机延迟和首事件前粗估会影响排序。</p></div></div>
+    <p>当 N≤M 时波次系数通常为 1；在当前集群 B16、每 P max_num_seqs=24 的常见状态下，主要区别来自 W。不能把多波次项当成该实验收益的必然来源。</p><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-fg-code">[fg-code]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="fg-sequence" aria-labelledby="title-fg-sequence">
+    <div class="kicker"><span>FGJSQ</span><span>11 / 35</span></div>
+    <h2 id="title-fg-sequence">g5 请求生命周期与批事件反馈</h2><p class="lead">保留 P→D HANDOFF、双账与事件身份；已调度不是已完成。</p>
+    <figure><svg class="sequence" viewBox="0 0 1040 522" role="img" aria-label="fg"><defs><marker id="arrow-fg" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 Z" fill="#2367a2"/></marker></defs><rect x="13.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="85.0" y="34" text-anchor="middle" font-size="17" font-weight="600">Client / Worker</text><line x1="85.0" x2="85.0" y1="50" y2="510" stroke="#c1ccd4" stroke-dasharray="4 5"/><rect x="303.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="375.0" y="34" text-anchor="middle" font-size="17" font-weight="600">GF Mgmt / FG</text><line x1="375.0" x2="375.0" y1="50" y2="510" stroke="#c1ccd4" stroke-dasharray="4 5"/><rect x="593.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="665.0" y="34" text-anchor="middle" font-size="17" font-weight="600">P Scheduler</text><line x1="665.0" x2="665.0" y1="50" y2="510" stroke="#c1ccd4" stroke-dasharray="4 5"/><rect x="883.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="955.0" y="34" text-anchor="middle" font-size="17" font-weight="600">D Engine</text><line x1="955.0" x2="955.0" y1="50" y2="510" stroke="#c1ccd4" stroke-dasharray="4 5"/><line x1="85.0" x2="375.0" y1="87" y2="87" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-fg)"/><text x="230.0" y="59" text-anchor="middle" font-size="16">P allocate：recompute → rank → CAS +</text><text x="230.0" y="78" text-anchor="middle" font-size="16"> FG reserve</text><line x1="85.0" x2="665.0" y1="135" y2="135" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-fg)"/><text x="375.0" y="126" text-anchor="middle" font-size="16">提交 P 请求，进入原生 waiting / running</text><rect x="537.0" y="162" width="256" height="32" rx="5" fill="#f7efe4"/><text x="665.0" y="183" text-anchor="middle" font-size="16">组批：predict + 冻结事件快照</text><line x1="665.0" x2="375.0" y1="231" y2="231" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-fg)"/><text x="520.0" y="203" text-anchor="middle" font-size="16">batch event：epoch / seq / request /</text><text x="520.0" y="222" text-anchor="middle" font-size="16"> attempt</text><rect x="247.0" y="258" width="256" height="32" rx="5" fill="#f7efe4"/><text x="375.0" y="279" text-anchor="middle" font-size="16">更新进度，影响后续请求排序</text><line x1="665.0" x2="85.0" y1="327" y2="327" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-fg)"/><text x="375.0" y="318" text-anchor="middle" font-size="16">P 返回 KV 交接信息；P leg 清 native 账</text><line x1="85.0" x2="955.0" y1="375" y2="375" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-fg)"/><text x="520.0" y="366" text-anchor="middle" font-size="16">随后选择 D 并提交请求 / 获取 KV</text><line x1="955.0" x2="85.0" y1="423" y2="423" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-fg)"/><text x="520.0" y="414" text-anchor="middle" font-size="16">首非空 HTTP body：触发 FG P 账释放</text><line x1="955.0" x2="85.0" y1="471" y2="471" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-fg)"/><text x="520.0" y="462" text-anchor="middle" font-size="16">流结束：完成 D / E2E；异常走幂等清理</text></svg></figure>
+    <p class="small">图按逻辑依赖展示，省略异步重叠与具体 KV 协议。首非空 body 不等于首个语义 content；该释放钩子也不替代 AISBench 客户端计时。P 的 native / FG 两账为零不单独证明 D 已结束。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-adapter">[adapter]</a> · <a href="#ref-alignment">[alignment]</a> · <a href="#ref-body">[body]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="predictor" aria-labelledby="title-predictor">
+    <div class="kicker"><span>FGJSQ</span><span>12 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-predictor">预测器的训练标签必须按源码解释</h2><p class="lead">现有 LightGBM 支撑 g5 事件反馈；新的 chunk 成本模型应单独版本化。</p>
+    <div class="flow"><div>调度快照<small>legacy 8 特征</small></div><b>→</b><div>Scaler + LightGBM<small>predicted_exec_ms</small></div><b>→</b><div>批事件<small>FG 负载衰减</small></div></div>
+    <div class="flow"><div>patch_core 计时<small>主机观察标签</small></div><b>→</b><div>后台分桶滑窗<small>有效样本过滤</small></div><b>→</b><div>周期重训 / 快照替换<small>不在本轮改写 v1</small></div></div>
+    <div class="two"><div><h3>标签不是纯设备时间</h3><p>异步队列空时，标签是提交到主机观察完成的区间；非空时可能是相邻主机观察结果的间隔。它既不是请求剩余 TTFT，也不等于孤立 kernel 耗时。</p></div><div><h3>特征名字不等于物理含义</h3><p>legacy cache_hit_rate 来自 prompt / computed 关系；computed 可在提交后提前推进。不能把它读成真实 APC 命中率，也不能从旧八维直接恢复新模型的 Σu² 与 Σuh。</p></div></div>
+    <p class="small">300 棵树、depth=5、learning rate=0.05；达到最小样本后周期训练。predict 有计数/日志副作用。现场 warm model 未外传，当前材料不构成预测数值复现或留出集精度证明。</p><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-alignment">[alignment]</a> · <a href="#ref-cost-audit">[cost-audit]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="fg-benchmark" aria-labelledby="title-fg-benchmark">
+    <div class="kicker"><span>FGJSQ</span><span>13 / 35</span></div>
+    <h2 id="title-fg-benchmark">压测中 TTFT 有改善，TPOT 与吞吐尚未全面对齐</h2><p class="lead">历史 g4 与 9.10 同事基线：高并发 B16 摘要；属于跨轮栈比较，不能归因成 FG 单变量收益。</p>
+    <div class="tablewrap"><table><thead><tr><th>B16 / 指标</th><th>66K 同事 9.10</th><th>66K g4</th><th>128K 同事 9.10</th><th>128K g4</th></tr></thead><tbody><tr><td>TTFT P90（s）</td><td>13.555</td><td>13.152</td><td>47.860</td><td>47.208</td></tr><tr><td>TPOT mean（ms）</td><td>11.60</td><td>12.63</td><td>11.20</td><td>12.20</td></tr><tr><td>TPOT P90（ms）</td><td>12.40</td><td>13.29</td><td>—</td><td>—</td></tr><tr><td>QPS</td><td>0.6693</td><td>0.6499</td><td>0.2991</td><td>0.2823</td></tr></tbody></table></div>
+    <div class="two"><div><h3>相同栈的配对证据</h3><p>EXP_10.13 的 66K H/F 紧邻配对，两臂 TPOT 差较小，用于定位 TPOT 回归；g5 后续 Phase 2 开/关四轮各项差异 &lt;1%，该组条件下未显示明显路由收益。不能推广为 FG 普遍无效。</p></div><div><h3>跨栈对照的局限</h3><p>9.10 / 10.12 使用 AISBench 原生全窗；10.13 / 10.14 有墙钟补丁和主集截窗。输入实长也不完全一致。表中差异用于回归定位，不构成严格同条件因果实验。</p></div></div>
+    <p class="small">历史 g4 已将 D 侧恢复为原生引擎与 heap 路由。10.13 四 run 均值，10.14 两 run 均值；缺少的 P90 不用 mean 替代。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-historical">[historical]</a> · <a href="#ref-frozen">[frozen]</a> · <a href="#ref-alignment">[alignment]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="g5-results" aria-labelledby="title-g5-results">
+    <div class="kicker"><span>FGJSQ</span><span>14 / 35</span></div>
+    <h2 id="title-g5-results">g5 恢复了工程基线，128K 业务 TTFT 仍未达标</h2><p class="lead">冻结报告 E2：128K、集群 B16、PT900、prefix 目标 50%、输出 1024。</p>
+    <div class="tablewrap"><table><thead><tr><th>指标</th><th>g5 E2 r01</th><th>g5 E2 r02</th><th>结论</th></tr></thead><tbody><tr><td>成功 / 总请求</td><td>284 / 284</td><td>283 / 283</td><td>两轮零失败</td></tr><tr><td>TTFT mean / P90（s）</td><td>38.18 / 43.84</td><td>38.49 / 43.76</td><td>P90 仍高于 30s 业务线</td></tr><tr><td>TPOT mean / P90（ms）</td><td>13.2 / 14.2</td><td>13.1 / 14.2</td><td>业务 40ms 内；相对 g4 仍有残差</td></tr><tr><td>QPS</td><td>0.2980</td><td>0.2973</td><td>与 g4 历史约 0.2812 / 0.2834 比较有提高</td></tr></tbody></table></div>
+    <div class="callout">±10% 工程恢复阈值通过，不能等同业务 SLO 达标或“完全无回归”。g5 相对 g4 的 TPOT 约 +7.5% 尚未做单变量分解。</div>
+    <p>两轮复用同一服务生命周期，predictor 与缓存状态可延续，不能称为独立重启随机重复。冻结报告截止时十档验收未完成，B1 的两项 TPOT 工程阈值未过；本地未见后续完整验收结果。</p>
+    <p class="small">g5 较早的大幅退化同时涉及 HCCL 环境和引擎栈版本，修复收益不能记为 FGJSQ 算法增益。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-frozen">[frozen]</a> · <a href="#ref-alignment">[alignment]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="fg-fit" aria-labelledby="title-fg-fit">
+    <div class="kicker"><span>FGJSQ</span><span>15 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-fg-fit">FGJSQ 的价值取决于跨 P 工作差异是否可被利用</h2><p class="lead">适用性是可验证的场景假设；不要求入口一定泊松。</p>
+    <div class="tablewrap"><table><thead><tr><th>场景</th><th>预期与理由</th><th>需要观察</th></tr></thead><tbody><tr><td>长短输入 / 命中混合，P 之间进度差明显</td><td>事件衰减可减少静态账本滞后</td><td>跨 P score 差、实际路由变化、等待尾部</td></tr><tr><td>稀疏请求，多个 P 同时空闲</td><td>路由选择空间有，但性能差可能很小</td><td>额外调度/上报开销与低负载延迟</td></tr><tr><td>同质长输入、闭环同步、各 P 近似一致</td><td>负载差异小，路由策略未必有明显增益</td><td>不据此宣称容量耗尽</td></tr><tr><td>大量未入场请求 / 批事件陈旧</td><td>长期全额预留可能使账本偏保守</td><td>事件新鲜度、初估误差、清账时序</td></tr><tr><td>KV 分层与加载代价显著</td><td>仅 token 账本不足以完整描述成本</td><td>区分 NPU 驻留与 CPU/Disk 命中</td></tr></tbody></table></div>
+    <p>生产重放的 −8.4% TTFT P90 是支持证据；同质压测的弱收益也是证据。后续应保留两类负载，而不是只选择更容易展示收益的一类。</p><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-historical">[historical]</a> · <a href="#ref-alignment">[alignment]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="tpot" aria-labelledby="title-tpot">
+    <div class="kicker"><span>FGJSQ</span><span>16 / 35</span></div>
+    <h2 id="title-tpot">下一步：分别关闭两层 TPOT 回归</h2><p class="lead">本轮同时跟踪：g4→同事基线、g5→g4 两层回归，分别设计对照。</p>
+    <div class="tablewrap"><table><thead><tr><th>回归层</th><th>已有证据</th><th>尚未解决</th></tr></thead><tbody><tr><td>g4 相对 9.10</td><td>66K 各 B mean TPOT 约 +0.73～1.18ms；128K 约 +0.93～1.22ms</td><td>口径、跨日环境与执行栈残差未完全闭合</td></tr><tr><td>g5 相对 g4</td><td>E2 mean TPOT 约 +7.5%；工程容忍通过</td><td>没有单变量归因，不能以旧 rc1→final diff 解释</td></tr><tr><td>已做的历史修复</td><td>g2 D 侧 predictor / 日志 / wrapper 被移除，66K mean TPOT 降约 0.41～0.50ms</td><td>这是已回收部分，不能把残差宣布归零</td></tr></tbody></table></div>
+    <ol><li><strong>双锚点配对：</strong>对齐各自比较栈的采样、MTP、graph/eager、KV、通信、客户端汇总和时间窗；一组针对 g4/同事基线，一组针对 g5/g4。</li>
+    <li><strong>按证据分层定位：</strong>D step 的采样 / 主机调度 / 日志路径，P→D 交接与编排，以及测量口径；一次只改变一个因素，保持 D 算法基线。</li>
+    <li><strong>低并发定位 + 目标负载复核：</strong>B1/B2 看固定开销，B16 检查排队与闭环反馈；确认延迟、吞吐和失败联合回归，而非只修 mean TPOT。</li></ol>
+    <div class="callout">上述是下一轮建议，不是已执行实验。sampler / I/O / 编排仅为候选原因；g5 和 g4 已同为正式版底座，旧 435 文件差异不能直接解释当前 +7.5%。</div><details class="notes"><summary>讲者备注</summary><p>先定位原有路径的性能差异，并保持策略归因分离。闭环中 TPOT 变慢会拉长 E2E，降低补发强度，因此吞吐退化可能随之出现。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-historical">[historical]</a> · <a href="#ref-alignment">[alignment]</a> · <a href="#ref-frozen">[frozen]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="omni" aria-labelledby="title-omni">
+    <div class="kicker"><span>super_p90</span><span>17 / 35</span></div>
+    <h2 id="title-omni">借鉴 super-p95 的“有限让行”，拆开各项机制</h2><p class="lead">vllm-omni 固定源码 dd9c0895：普通 FIFO、让行 LIFO，并能在 diffusion step 边界暂停让行请求。</p>
+    <div class="tablewrap"><table><thead><tr><th>原型机制</th><th>作用</th><th>LLM GF 方案</th></tr></thead><tbody><tr><td>成本分类 + 每 20 次到达补 1 credit</td><td>有限选择较长请求承担等待</td><td>保留可解释分类，并加入统一高压触发</td></tr><tr><td>normal FIFO 优先，tail LIFO</td><td>让较新 tail 先完成，将额外等待集中于少数较老请求</td><td>在尚未 P 预留的 GF pending 中实现</td></tr><tr><td>step 边界暂停 active tail</td><td>普通请求到来时收回下一步执行机会</td><td>GF 不具备；已派发 P 请求不可暂停</td></tr><tr><td>路由折扣 N + 0.1S</td><td>让 tail 对原型路由负载贡献较低</td><td>不照搬；g5 FG 账本与公式保持</td></tr><tr><td>可选小图 batch2</td><td>另一项吞吐优化</td><td>不并入 LLM 双队列收益归因</td></tr></tbody></table></div>
+    <div class="two"><div><h3>历史 Qwen 图像实验</h3><p>P95 407.83→321.00s（−21.3%）；QPS 0.4525→0.4139（−8.5%）。来自历史重写笔记，不能宣称纯 LIFO 已独立证明吞吐不降。</p></div><div><h3>历史 Wan 实验</h3><p>P95 2750.93→2191.56s；QPS 0.0135→0.0157，同时从 1×USP8 改为 2×USP4，存在拓扑混杂。</p></div></div>
+    <p class="small">原型衡量图片/视频完成延迟 P95，不能直接转换成 LLM P90 TTFT。让行 credit 的 5% 频率也不能机械改为 10% 来“匹配 P90”。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-omni">[omni]</a> · <a href="#ref-omni-code">[omni-code]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="admission-idea" aria-labelledby="title-admission-idea">
+    <div class="kicker"><span>super_p90</span><span>18 / 35</span></div>
+    <h2 id="title-admission-idea">把一部分等待留在 GF，保留对派发顺序的控制</h2><p class="lead">目标是在吞吐不下降的条件下改善多数请求的 TTFT；收益尚需现场验证。</p>
+    <div class="queue-diagram"><div class="queue"><b>normal pending / FIFO</b><div><span>N1</span><span>N2</span><span>N3</span><em>先到先出 →</em></div><small>优先派发；沿用 g5 FGJSQ</small></div><div class="queue tail"><b>sacrificial pending / LIFO</b><div><span>T-old</span><span>T-new</span><em>← 新请求先出</em></div><small>normal 空 + 实际候选 P 压力低才放行</small></div><div class="queue-result"><b>FG rank → CAS → P</b><p>排在 GF 时不占 P 的 native / FG 预留</p><p>放行后 P 保持 FCFS / running-first</p></div></div>
+    <div class="two"><div><h3>为什么放在预留前</h3><p>若全部请求已进入 P waiting，GF LIFO 无法改变真实入场顺序。未预留 tail 不进入 FG 工作账本；放行时重新选择真实候选，逐条 reserve 后重算压力。</p></div><div><h3>低负载行为</h3><p>普通请求通常直接派发；低压时 tail 可及时放行。希望低负载下机制近似休眠，但长成本分类仍可能触发，必须测量实际驻留与额外开销。</p></div></div>
+    <p class="small">normal 为空不代表 P 中普通工作已排空。GF 不能取消已经提交的设备计算，也不改 running/KV 抢占。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-revision">[revision]</a> · <a href="#ref-design">[design]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="admission-rules" aria-labelledby="title-admission-rules">
+    <div class="kicker"><span>super_p90</span><span>19 / 35</span></div>
+    <h2 id="title-admission-rules">rc2：长成本或统一高压力触发，共用有限预算</h2><p class="lead">同成本 AISBench 也可在高压时让行，不引入 benchmark 专用分类开关。</p>
+    <pre><code>tail_eligible = known_positive_cost AND fresh_pressure
+  AND (long_cost OR min(score[p] for p in eligible_P) &gt;= H)
+  AND credit_available AND S_available AND V_available
+  AND NOT protected AND NOT draining
+
+normal FIFO 优先
+当 normal 为空：尝试 tail LIFO
+  实际候选 P 必须满足 score[p] &lt;= L；0 &lt; L &lt; H
+  每次 CAS、每次 fallback 候选均重新检查
+  reserve 成功后更新账本，再判断下一条</code></pre>
+    <div class="two"><div><h3>分类与压力不是同一量</h3><p>长成本条件沿用原型：cost ≥0.8×历史 max，且 ≥1.5×历史 min。压力用请求可用候选 P 的最低 FG score，不是全池最大压力。</p></div><div><h3>成本与 KV 层级</h3><p>成本代理包括 uncached + β<sub>CPU</sub>·CPU 命中 + β<sub>Disk</sub>·Disk 命中，按可用候选取值。Conductor 的连续前缀层级覆盖互斥；unknown 不当作零命中。</p></div></div>
+    <p class="small">score=0 不是物理空闲证明。H/L、β 与各预算是待标定超参数；此处不填伪造生产最优值。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-revision">[revision]</a> · <a href="#ref-rc2">[rc2]</a> · <a href="#ref-admission-code">[admission-code]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="admission-budgets" aria-labelledby="title-admission-budgets">
+    <div class="kicker"><span>super_p90</span><span>20 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-admission-budgets">四种预算分别约束不同风险</h2><p class="lead">队列深度可以动态变化，但其上限与保护规则仍需明确。</p>
+    <div class="tablewrap"><table><thead><tr><th>约束</th><th>rc2 候选起点</th><th>含义</th></tr></thead><tbody><tr><td>分类 credit</td><td>每 20 到达补 1；cap=2</td><td>累计分类额度；不是滑窗比例或队列长度</td></tr><tr><td>存量数量 S</td><td>tail ≤2</td><td>限制当前延后请求数</td></tr><tr><td>存量成本 V</td><td>2,097,152 成本代理单位</td><td>限制当前延后工作量，非实测时延</td></tr><tr><td>年龄保护</td><td>5s</td><td>晋升为 protected normal；不保证 5s 内完成</td></tr><tr><td>压力与状态保护</td><td>stale / drain 晋升</td><td>事件陈旧不继续制造 tail；关闭时可排空</td></tr></tbody></table></div>
+    <p>分类按 logical 请求计一次，业务重试不重复赚取/消耗 credit。取消或晋升释放 S/V 存量，不退分类 credit。遇到压力拒绝时停止 tail 放行；资源不可用时仅做有界候选扫描。</p>
+    <div class="callout">应把“降低实际入场并发”与“真实 LIFO 越序”分开归因。tail 入过队不等于 LIFO 已发挥作用；age / stale / drain 晋升可能使它最终走普通路径。</div><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-rc2">[rc2]</a> · <a href="#ref-runtime">[runtime]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="admission-sequence" aria-labelledby="title-admission-sequence">
+    <div class="kicker"><span>super_p90</span><span>21 / 35</span></div>
+    <h2 id="title-admission-sequence">异步排队必须同时解决预留、claim 与取消</h2><p class="lead">Mgmt 维护队列，worker 保留 HTTP；短 enqueue + 有界 long-poll 避免挂住原 Motor 5s dispatch RPC。</p>
+    <figure><svg class="sequence" viewBox="0 0 1040 522" role="img" aria-label="admission"><defs><marker id="arrow-admission" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 Z" fill="#2367a2"/></marker></defs><rect x="13.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="85.0" y="34" text-anchor="middle" font-size="17" font-weight="600">HTTP Worker</text><line x1="85.0" x2="85.0" y1="50" y2="510" stroke="#c1ccd4" stroke-dasharray="4 5"/><rect x="303.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="375.0" y="34" text-anchor="middle" font-size="17" font-weight="600">Admission Broker</text><line x1="375.0" x2="375.0" y1="50" y2="510" stroke="#c1ccd4" stroke-dasharray="4 5"/><rect x="593.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="665.0" y="34" text-anchor="middle" font-size="17" font-weight="600">FG / Native CAS</text><line x1="665.0" x2="665.0" y1="50" y2="510" stroke="#c1ccd4" stroke-dasharray="4 5"/><rect x="883.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="955.0" y="34" text-anchor="middle" font-size="17" font-weight="600">P → D</text><line x1="955.0" x2="955.0" y1="50" y2="510" stroke="#c1ccd4" stroke-dasharray="4 5"/><line x1="85.0" x2="375.0" y1="87" y2="87" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-admission)"/><text x="230.0" y="78" text-anchor="middle" font-size="16">enqueue：logical key / round</text><rect x="247.0" y="114" width="256" height="32" rx="5" fill="#f7efe4"/><text x="375.0" y="135" text-anchor="middle" font-size="16">QUEUED：尚无 P 资源</text><line x1="85.0" x2="375.0" y1="183" y2="183" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-admission)"/><text x="230.0" y="174" text-anchor="middle" font-size="16">long-poll / query（WaitHub）</text><line x1="375.0" x2="665.0" y1="231" y2="231" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-admission)"/><text x="520.0" y="222" text-anchor="middle" font-size="16">normal 优先；tail 候选检查 score ≤ L</text><line x1="665.0" x2="375.0" y1="279" y2="279" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-admission)"/><text x="520.0" y="270" text-anchor="middle" font-size="16">CAS + FG reserve 成功</text><rect x="247.0" y="306" width="256" height="32" rx="5" fill="#f7efe4"/><text x="375.0" y="327" text-anchor="middle" font-size="16">READY_RESERVED：短交付租约</text><line x1="85.0" x2="375.0" y1="375" y2="375" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-admission)"/><text x="230.0" y="366" text-anchor="middle" font-size="16">claim：确认同一预留，进入 CLAIMED</text><line x1="85.0" x2="955.0" y1="423" y2="423" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-admission)"/><text x="520.0" y="414" text-anchor="middle" font-size="16">随后按 g5 提交 P，再 HANDOFF 到 D</text><line x1="85.0" x2="375.0" y1="471" y2="471" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-admission)"/><text x="230.0" y="462" text-anchor="middle" font-size="16">finish / cancel：按原 owner 幂等清理</text></svg></figure>
+    <p>normal fast path 可在一次 RPC 内直接 reserve / CLAIMED。结果未知时查同 key，不盲目 fallback 重复预留；worker 租约过期不自动释放执行中的 CLAIMED。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-design">[design]</a> · <a href="#ref-rc2">[rc2]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="admission-status" aria-labelledby="title-admission-status">
+    <div class="kicker"><span>super_p90</span><span>22 / 35</span></div>
+    <h2 id="title-admission-status">本地交付已通过，下一步是现场机制与收益验证</h2><p class="lead">rc2 实现 75c5e519；交付记录 8171c2d；尚未合入 main，未见现场 NPU 性能结果。</p>
+    <div class="three"><div><b>正确性</b><span>R1–R4 已关闭<br>独立解包 75 项 + 评审 2 项通过</span></div><div><b>集成边界</b><span>真实 ZMQ / 子进程<br>native SHM 与计算仍用替身</span></div><div><b>性能结论</b><span>尚未获得<br>本地测试不等于 NPU / SLO 通过</span></div></div>
+    <ol><li><strong>off / shadow：</strong>真实镜像与 P/D 兼容、取消、清账、关闭回退。</li><li><strong>H/L 标定：</strong>优先复用已有结果，必要时短探测每 P 的 FG score / committed_tokens / 未释放数 / 有效事件时间；选静态阈值并冻结。</li><li><strong>enforce 短验证与通知演练：</strong>真实 SHM、故障与恢复；保留版本、错误与重启记录。</li><li><strong>正式六格：</strong>实际约 66K / 128K × 集群 B16 / B18 / B20；cache 目标 50%；off/enforce 配对，B16 重复。</li></ol>
+    <p class="small">长度标签、真实 token、配置、cache 实测与失败均留档；same-length 的 H/L 冻结后跨 B 使用。正常监控不调用模型，故障通知需验证实际可达。以上是已批准的执行计划，不是已完成实验。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-rc2">[rc2]</a> · <a href="#ref-experiment">[experiment]</a> · <a href="#ref-delivery">[delivery]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="chunk-control" aria-labelledby="title-chunk-control">
+    <div class="kicker"><span>Chunk size</span><span>23 / 35</span></div>
+    <h2 id="title-chunk-control">先区分四种“token 上限”</h2><p class="lead">当前寻优对象是 P 每批共享预算 C；它不等于单请求 chunk，也不等于 API 输出上限。</p>
+    <div class="tablewrap"><table><thead><tr><th>量</th><th>作用域</th><th>当前研究中的角色</th></tr></thead><tbody><tr><td>C = max_num_batched_tokens</td><td>每次 P 组批共享</td><td>现有 8K；扫描 8/16/32/64K</td></tr><tr><td>U = long_prefill_token_threshold</td><td>单请求本轮分配上限（启用时）</td><td>可作为第二步静态对照；当前 g5 未启用</td></tr><tr><td>max_num_seqs</td><td>实例并行序列名额</td><td>g5 为 24；不随集群 B 自动变化</td></tr><tr><td>输入 / 输出长度限制</td><td>请求 API 与模型上下文</td><td>不把 C=8192 解释成输出最多 8192</td></tr></tbody></table></div>
+    <div class="callout">P 按 running-first、waiting FCFS 依序消费 C。没有单请求 U 时，一个长 partial prefill 可以吃完本轮预算；“有 chunk 边界”不自动意味着短请求获得机会。</div>
+    <p>当前优先级：按规格 / 负载建立静态 C 基线 → 评估静态 C+U → 必要时少量状态分档 → 最后评估在线预测寻优的净收益。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-chunk">[chunk]</a> · <a href="#ref-model">[model]</a> · <a href="#ref-ascend-code">[ascend-code]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="chunk-data" aria-labelledby="title-chunk-data">
+    <div class="kicker"><span>Chunk size</span><span>24 / 35</span></div>
+    <h2 id="title-chunk-data">已有扫描：128K 温和改善，66K 的 64K 预算明显变差</h2><p class="lead">仅调整 P 侧 max_num_batched_tokens；集群 B=1、输出 1024、cache 目标 50%。</p>
+    <figure><svg class="plot" role="img" aria-label="g5 / B=1：各长度分别以 8K 预算归一化；每点单次运行，连线仅帮助阅读。" xmlns:xlink="http://www.w3.org/1999/xlink"  viewBox="0 0 782.602188 256.1215" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="fig87f90187-figure_1">
+  <g id="fig87f90187-patch_1">
+   <path d="M 0 256.1215 
+L 782.602188 256.1215 
+L 782.602188 0 
+L 0 0 
+L 0 256.1215 
+z
+" style="fill: none"/>
+  </g>
+  <g id="fig87f90187-axes_1">
+   <g id="fig87f90187-patch_2">
+    <path d="M 49.842188 216.323687 
+L 372.357188 216.323687 
+L 372.357188 23.229937 
+L 49.842188 23.229937 
+L 49.842188 216.323687 
+z
+" style="fill: none"/>
+   </g>
+   <g id="fig87f90187-matplotlib.axis_1">
+    <g id="fig87f90187-xtick_1">
+     <g id="fig87f90187-line2d_1">
+      <path d="M 64.50196 216.323687 
+L 64.50196 23.229937 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_2">
+      <defs>
+       <path id="fig87f90187-m2f6a643782" d="M 0 0 
+L 0 3.5 
+" style="stroke: #526776; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#fig87f90187-m2f6a643782" x="64.50196" y="216.323687" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_1">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="64.50196" y="231.681969" transform="rotate(-0 64.50196 231.681969)">8K</text>
+     </g>
+    </g>
+    <g id="fig87f90187-xtick_2">
+     <g id="fig87f90187-line2d_3">
+      <path d="M 162.233778 216.323687 
+L 162.233778 23.229937 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_4">
+      <g>
+       <use xlink:href="#fig87f90187-m2f6a643782" x="162.233778" y="216.323687" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_2">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="162.233778" y="231.681969" transform="rotate(-0 162.233778 231.681969)">16K</text>
+     </g>
+    </g>
+    <g id="fig87f90187-xtick_3">
+     <g id="fig87f90187-line2d_5">
+      <path d="M 259.965597 216.323687 
+L 259.965597 23.229937 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_6">
+      <g>
+       <use xlink:href="#fig87f90187-m2f6a643782" x="259.965597" y="216.323687" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_3">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="259.965597" y="231.681969" transform="rotate(-0 259.965597 231.681969)">32K</text>
+     </g>
+    </g>
+    <g id="fig87f90187-xtick_4">
+     <g id="fig87f90187-line2d_7">
+      <path d="M 357.697415 216.323687 
+L 357.697415 23.229937 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_8">
+      <g>
+       <use xlink:href="#fig87f90187-m2f6a643782" x="357.697415" y="216.323687" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_4">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="357.697415" y="231.681969" transform="rotate(-0 357.697415 231.681969)">64K</text>
+     </g>
+    </g>
+    <g id="fig87f90187-text_5">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203444" x="211.099688" y="246.327906" transform="rotate(-0 211.099688 246.327906)">P max_num_batched_tokens</text>
+    </g>
+   </g>
+   <g id="fig87f90187-matplotlib.axis_2">
+    <g id="fig87f90187-ytick_1">
+     <g id="fig87f90187-line2d_9">
+      <path d="M 49.842188 193.041949 
+L 372.357188 193.041949 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_10">
+      <defs>
+       <path id="fig87f90187-m0356635d3e" d="M 0 0 
+L -3.5 0 
+" style="stroke: #526776; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="49.842188" y="193.041949" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_6">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="42.842188" y="197.22109" transform="rotate(-0 42.842188 197.22109)">100</text>
+     </g>
+    </g>
+    <g id="fig87f90187-ytick_2">
+     <g id="fig87f90187-line2d_11">
+      <path d="M 49.842188 162.334621 
+L 372.357188 162.334621 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_12">
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="49.842188" y="162.334621" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_7">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="42.842188" y="166.513762" transform="rotate(-0 42.842188 166.513762)">110</text>
+     </g>
+    </g>
+    <g id="fig87f90187-ytick_3">
+     <g id="fig87f90187-line2d_13">
+      <path d="M 49.842188 131.627294 
+L 372.357188 131.627294 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_14">
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="49.842188" y="131.627294" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_8">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="42.842188" y="135.806434" transform="rotate(-0 42.842188 135.806434)">120</text>
+     </g>
+    </g>
+    <g id="fig87f90187-ytick_4">
+     <g id="fig87f90187-line2d_15">
+      <path d="M 49.842188 100.919966 
+L 372.357188 100.919966 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_16">
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="49.842188" y="100.919966" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_9">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="42.842188" y="105.099107" transform="rotate(-0 42.842188 105.099107)">130</text>
+     </g>
+    </g>
+    <g id="fig87f90187-ytick_5">
+     <g id="fig87f90187-line2d_17">
+      <path d="M 49.842188 70.212638 
+L 372.357188 70.212638 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_18">
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="49.842188" y="70.212638" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_10">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="42.842188" y="74.391779" transform="rotate(-0 42.842188 74.391779)">140</text>
+     </g>
+    </g>
+    <g id="fig87f90187-ytick_6">
+     <g id="fig87f90187-line2d_19">
+      <path d="M 49.842188 39.50531 
+L 372.357188 39.50531 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_20">
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="49.842188" y="39.50531" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_11">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="42.842188" y="43.684451" transform="rotate(-0 42.842188 43.684451)">150</text>
+     </g>
+    </g>
+    <g id="fig87f90187-text_12">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203444" x="15.558281" y="119.776812" transform="rotate(-90 15.558281 119.776812)">Index</text>
+    </g>
+   </g>
+   <g id="fig87f90187-line2d_21">
+    <path d="M 64.50196 193.041949 
+L 162.233778 197.410635 
+L 259.965597 195.262101 
+L 357.697415 32.006926 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #2367a2; stroke-width: 2; stroke-linecap: square"/>
+    <defs>
+     <path id="fig87f90187-m2b58cfdd6c" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #2367a2"/>
+    </defs>
+    <g clip-path="url(#fig87f90187-p50e1ab463f)">
+     <use xlink:href="#fig87f90187-m2b58cfdd6c" x="64.50196" y="193.041949" style="fill: #2367a2; stroke: #2367a2"/>
+     <use xlink:href="#fig87f90187-m2b58cfdd6c" x="162.233778" y="197.410635" style="fill: #2367a2; stroke: #2367a2"/>
+     <use xlink:href="#fig87f90187-m2b58cfdd6c" x="259.965597" y="195.262101" style="fill: #2367a2; stroke: #2367a2"/>
+     <use xlink:href="#fig87f90187-m2b58cfdd6c" x="357.697415" y="32.006926" style="fill: #2367a2; stroke: #2367a2"/>
+    </g>
+   </g>
+   <g id="fig87f90187-line2d_22">
+    <path d="M 64.50196 193.041949 
+L 162.233778 196.777775 
+L 259.965597 207.546699 
+L 357.697415 206.312252 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke: #c17728; stroke-width: 2; stroke-linecap: square"/>
+    <defs>
+     <path id="fig87f90187-m99173de5ad" d="M -3 3 
+L 3 3 
+L 3 -3 
+L -3 -3 
+z
+" style="stroke: #c17728; stroke-linejoin: miter"/>
+    </defs>
+    <g clip-path="url(#fig87f90187-p50e1ab463f)">
+     <use xlink:href="#fig87f90187-m99173de5ad" x="64.50196" y="193.041949" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+     <use xlink:href="#fig87f90187-m99173de5ad" x="162.233778" y="196.777775" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+     <use xlink:href="#fig87f90187-m99173de5ad" x="259.965597" y="207.546699" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+     <use xlink:href="#fig87f90187-m99173de5ad" x="357.697415" y="206.312252" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+    </g>
+   </g>
+   <g id="fig87f90187-line2d_23">
+    <path d="M 49.842188 193.041949 
+L 372.357188 193.041949 
+" clip-path="url(#fig87f90187-p50e1ab463f)" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #92a4b1"/>
+   </g>
+   <g id="fig87f90187-patch_3">
+    <path d="M 49.842188 216.323687 
+L 49.842188 23.229937 
+" style="fill: none; stroke: #b5c2cc; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="fig87f90187-patch_4">
+    <path d="M 49.842188 216.323687 
+L 372.357188 216.323687 
+" style="fill: none; stroke: #b5c2cc; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="fig87f90187-text_13">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #2367a2" x="350.697415" y="22.006926" transform="rotate(-0 350.697415 22.006926)">152.4</text>
+   </g>
+   <g id="fig87f90187-text_14">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #c17728" x="350.697415" y="196.312252" transform="rotate(-0 350.697415 196.312252)">95.7</text>
+   </g>
+   <g id="fig87f90187-text_15">
+    <text style="font-weight: 700; font-size: 13.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="49.842188" y="17.229937" transform="rotate(-0 49.842188 17.229937)">TTFT P90  /  8K baseline = 100</text>
+   </g>
+   <g id="fig87f90187-legend_1">
+    <g id="fig87f90187-line2d_24">
+     <path d="M 59.742188 37.638219 
+L 70.742188 37.638219 
+L 81.742188 37.638219 
+" style="fill: none; stroke: #2367a2; stroke-width: 2; stroke-linecap: square"/>
+     <g>
+      <use xlink:href="#fig87f90187-m2b58cfdd6c" x="70.742188" y="37.638219" style="fill: #2367a2; stroke: #2367a2"/>
+     </g>
+    </g>
+    <g id="fig87f90187-text_16">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="90.542187" y="41.488219" transform="rotate(-0 90.542187 41.488219)">66k</text>
+    </g>
+    <g id="fig87f90187-line2d_25">
+     <path d="M 59.742188 53.784156 
+L 70.742188 53.784156 
+L 81.742188 53.784156 
+" style="fill: none; stroke: #c17728; stroke-width: 2; stroke-linecap: square"/>
+     <g>
+      <use xlink:href="#fig87f90187-m99173de5ad" x="70.742188" y="53.784156" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+     </g>
+    </g>
+    <g id="fig87f90187-text_17">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="90.542187" y="57.634156" transform="rotate(-0 90.542187 57.634156)">128k</text>
+    </g>
+   </g>
+  </g>
+  <g id="fig87f90187-axes_2">
+   <g id="fig87f90187-patch_5">
+    <path d="M 452.887188 216.323687 
+L 775.402188 216.323687 
+L 775.402188 23.229937 
+L 452.887188 23.229937 
+L 452.887188 216.323687 
+z
+" style="fill: none"/>
+   </g>
+   <g id="fig87f90187-matplotlib.axis_3">
+    <g id="fig87f90187-xtick_5">
+     <g id="fig87f90187-line2d_26">
+      <path d="M 467.54696 216.323687 
+L 467.54696 23.229937 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_27">
+      <g>
+       <use xlink:href="#fig87f90187-m2f6a643782" x="467.54696" y="216.323687" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_18">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="467.54696" y="231.681969" transform="rotate(-0 467.54696 231.681969)">8K</text>
+     </g>
+    </g>
+    <g id="fig87f90187-xtick_6">
+     <g id="fig87f90187-line2d_28">
+      <path d="M 565.278778 216.323687 
+L 565.278778 23.229937 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_29">
+      <g>
+       <use xlink:href="#fig87f90187-m2f6a643782" x="565.278778" y="216.323687" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_19">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="565.278778" y="231.681969" transform="rotate(-0 565.278778 231.681969)">16K</text>
+     </g>
+    </g>
+    <g id="fig87f90187-xtick_7">
+     <g id="fig87f90187-line2d_30">
+      <path d="M 663.010597 216.323687 
+L 663.010597 23.229937 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_31">
+      <g>
+       <use xlink:href="#fig87f90187-m2f6a643782" x="663.010597" y="216.323687" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_20">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="663.010597" y="231.681969" transform="rotate(-0 663.010597 231.681969)">32K</text>
+     </g>
+    </g>
+    <g id="fig87f90187-xtick_8">
+     <g id="fig87f90187-line2d_32">
+      <path d="M 760.742415 216.323687 
+L 760.742415 23.229937 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_33">
+      <g>
+       <use xlink:href="#fig87f90187-m2f6a643782" x="760.742415" y="216.323687" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_21">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #526776" x="760.742415" y="231.681969" transform="rotate(-0 760.742415 231.681969)">64K</text>
+     </g>
+    </g>
+    <g id="fig87f90187-text_22">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203444" x="614.144688" y="246.327906" transform="rotate(-0 614.144688 246.327906)">P max_num_batched_tokens</text>
+    </g>
+   </g>
+   <g id="fig87f90187-matplotlib.axis_4">
+    <g id="fig87f90187-ytick_7">
+     <g id="fig87f90187-line2d_34">
+      <path d="M 452.887188 197.348621 
+L 775.402188 197.348621 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_35">
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="452.887188" y="197.348621" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_23">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="445.887188" y="201.527762" transform="rotate(-0 445.887188 201.527762)">85</text>
+     </g>
+    </g>
+    <g id="fig87f90187-ytick_8">
+     <g id="fig87f90187-line2d_36">
+      <path d="M 452.887188 150.193409 
+L 775.402188 150.193409 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_37">
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="452.887188" y="150.193409" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_24">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="445.887188" y="154.372549" transform="rotate(-0 445.887188 154.372549)">90</text>
+     </g>
+    </g>
+    <g id="fig87f90187-ytick_9">
+     <g id="fig87f90187-line2d_38">
+      <path d="M 452.887188 103.038196 
+L 775.402188 103.038196 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_39">
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="452.887188" y="103.038196" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_25">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="445.887188" y="107.217337" transform="rotate(-0 445.887188 107.217337)">95</text>
+     </g>
+    </g>
+    <g id="fig87f90187-ytick_10">
+     <g id="fig87f90187-line2d_40">
+      <path d="M 452.887188 55.882983 
+L 775.402188 55.882983 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="fig87f90187-line2d_41">
+      <g>
+       <use xlink:href="#fig87f90187-m0356635d3e" x="452.887188" y="55.882983" style="fill: #526776; stroke: #526776; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="fig87f90187-text_26">
+      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #526776" x="445.887188" y="60.062124" transform="rotate(-0 445.887188 60.062124)">100</text>
+     </g>
+    </g>
+    <g id="fig87f90187-text_27">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #203444" x="418.603281" y="119.776812" transform="rotate(-90 418.603281 119.776812)">Index</text>
+    </g>
+   </g>
+   <g id="fig87f90187-line2d_42">
+    <path d="M 467.54696 55.882983 
+L 565.278778 57.626244 
+L 663.010597 54.139722 
+L 760.742415 207.546699 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #2367a2; stroke-width: 2; stroke-linecap: square"/>
+    <g clip-path="url(#fig87f90187-p0cd020bd68)">
+     <use xlink:href="#fig87f90187-m2b58cfdd6c" x="467.54696" y="55.882983" style="fill: #2367a2; stroke: #2367a2"/>
+     <use xlink:href="#fig87f90187-m2b58cfdd6c" x="565.278778" y="57.626244" style="fill: #2367a2; stroke: #2367a2"/>
+     <use xlink:href="#fig87f90187-m2b58cfdd6c" x="663.010597" y="54.139722" style="fill: #2367a2; stroke: #2367a2"/>
+     <use xlink:href="#fig87f90187-m2b58cfdd6c" x="760.742415" y="207.546699" style="fill: #2367a2; stroke: #2367a2"/>
+    </g>
+   </g>
+   <g id="fig87f90187-line2d_43">
+    <path d="M 467.54696 55.882983 
+L 565.278778 41.557349 
+L 663.010597 36.782138 
+L 760.742415 32.006926 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke: #c17728; stroke-width: 2; stroke-linecap: square"/>
+    <g clip-path="url(#fig87f90187-p0cd020bd68)">
+     <use xlink:href="#fig87f90187-m99173de5ad" x="467.54696" y="55.882983" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+     <use xlink:href="#fig87f90187-m99173de5ad" x="565.278778" y="41.557349" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+     <use xlink:href="#fig87f90187-m99173de5ad" x="663.010597" y="36.782138" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+     <use xlink:href="#fig87f90187-m99173de5ad" x="760.742415" y="32.006926" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+    </g>
+   </g>
+   <g id="fig87f90187-line2d_44">
+    <path d="M 452.887188 55.882983 
+L 775.402188 55.882983 
+" clip-path="url(#fig87f90187-p0cd020bd68)" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #92a4b1"/>
+   </g>
+   <g id="fig87f90187-patch_6">
+    <path d="M 452.887188 216.323688 
+L 452.887188 23.229938 
+" style="fill: none; stroke: #b5c2cc; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="fig87f90187-patch_7">
+    <path d="M 452.887188 216.323687 
+L 775.402188 216.323687 
+" style="fill: none; stroke: #b5c2cc; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="fig87f90187-text_28">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #2367a2" x="753.742415" y="197.546699" transform="rotate(-0 753.742415 197.546699)">83.9</text>
+   </g>
+   <g id="fig87f90187-text_29">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: end; fill: #c17728" x="753.742415" y="49.006926" transform="rotate(-0 753.742415 49.006926)">102.5</text>
+   </g>
+   <g id="fig87f90187-text_30">
+    <text style="font-weight: 700; font-size: 13.2px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="452.887188" y="17.229937" transform="rotate(-0 452.887188 17.229937)">QPS  /  8K baseline = 100</text>
+   </g>
+   <g id="fig87f90187-legend_2">
+    <g id="fig87f90187-line2d_45">
+     <path d="M 462.787188 184.140094 
+L 473.787188 184.140094 
+L 484.787188 184.140094 
+" style="fill: none; stroke: #2367a2; stroke-width: 2; stroke-linecap: square"/>
+     <g>
+      <use xlink:href="#fig87f90187-m2b58cfdd6c" x="473.787188" y="184.140094" style="fill: #2367a2; stroke: #2367a2"/>
+     </g>
+    </g>
+    <g id="fig87f90187-text_31">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="493.587188" y="187.990094" transform="rotate(-0 493.587188 187.990094)">66k</text>
+    </g>
+    <g id="fig87f90187-line2d_46">
+     <path d="M 462.787188 200.286031 
+L 473.787188 200.286031 
+L 484.787188 200.286031 
+" style="fill: none; stroke: #c17728; stroke-width: 2; stroke-linecap: square"/>
+     <g>
+      <use xlink:href="#fig87f90187-m99173de5ad" x="473.787188" y="200.286031" style="fill: #c17728; stroke: #c17728; stroke-linejoin: miter"/>
+     </g>
+    </g>
+    <g id="fig87f90187-text_32">
+     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #203444" x="493.587188" y="204.136031" transform="rotate(-0 493.587188 204.136031)">128k</text>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="fig87f90187-p50e1ab463f">
+   <rect x="49.842188" y="23.229937" width="322.515" height="193.09375"/>
+  </clipPath>
+  <clipPath id="fig87f90187-p0cd020bd68">
+   <rect x="452.887188" y="23.229937" width="322.515" height="193.09375"/>
+  </clipPath>
+ </defs>
+</svg>
+<figcaption>g5 / B=1：各长度分别以 8K 预算归一化；每点单次运行，连线仅帮助阅读。</figcaption></figure>
+    <div class="two"><div><h3>128K</h3><p>32K 相对 8K：TTFT P90 <strong>−4.72%</strong>，QPS <strong>+2.03%</strong>。64K：TTFT P90 −4.32%，QPS +2.53%。32K 的 P90 更低，64K 的 mean / QPS 略好。</p></div><div><h3>66K</h3><p>16K / 32K 与 8K 的差异较小；64K：TTFT P90 <strong>+52.44%</strong>，QPS <strong>−16.08%</strong>。不能把更大的预算作为所有规格的默认值。</p></div></div>
+    <p class="small">8 个单次 run，共 285 个有效样本，每格 30–43 条。仅有单次扫描，无误差棒或显著性结论。比例变化不依赖延迟单位；原 CSV 延迟单位暂按推定 ms、span 推定 s。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-chunk">[chunk]</a> · <a href="#ref-chunk-csv">[chunk-csv]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="chunk-table" aria-labelledby="title-chunk-table">
+    <div class="kicker"><span>Chunk size</span><span>25 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-chunk-table">八格原始读数与解释边界</h2><p class="lead">TTFT / TPOT 列保持 CSV 原数值，单位推定为 ms；QPS 为 req/s。</p>
+    <div class="tablewrap"><table><thead><tr><th>输入标签</th><th>P 预算</th><th>n</th><th>TTFT mean</th><th>TTFT P90</th><th>TPOT P90</th><th>QPS</th></tr></thead><tbody><tr><td>66k</td><td>8K</td><td>42</td><td>6383.2</td><td>6431.5</td><td>12.292</td><td>0.0541</td></tr><tr><td>66k</td><td>16K</td><td>42</td><td>6294.7</td><td>6340</td><td>12.495</td><td>0.054</td></tr><tr><td>66k</td><td>32K</td><td>43</td><td>6320.8</td><td>6385</td><td>12.452</td><td>0.0542</td></tr><tr><td>66k</td><td>64K</td><td>35</td><td>9716.6</td><td>9804.3</td><td>12.629</td><td>0.0454</td></tr><tr><td>128k</td><td>8K</td><td>30</td><td>13151.5</td><td>13233.7</td><td>12.966</td><td>0.0395</td></tr><tr><td>128k</td><td>16K</td><td>31</td><td>12959.2</td><td>13072.7</td><td>12.53</td><td>0.0401</td></tr><tr><td>128k</td><td>32K</td><td>31</td><td>12491.9</td><td>12608.6</td><td>13.6</td><td>0.0403</td></tr><tr><td>128k</td><td>64K</td><td>31</td><td>12456.3</td><td>12661.8</td><td>12.56</td><td>0.0405</td></tr></tbody></table></div>
+    <p>实际输入均值约 67,892 / 129,241 token。所有行 status=valid，但本摘要没有单独失败计数；不据此补写“零失败”。实际 cache hit、预热/重启和种子细节也未在这份 CSV 中闭合。</p>
+    <p>B1 只能评价低负载串行服务表现：P 之后还有约 12s decode，故 TTFT 的百分比改善被 E2E 稀释。不能据此推断三个 P 的容量、高并发尾部或 kernel 效率。</p>
+    <p class="small">数值核验：qps × [ttft_mean + 1023×tpot_mean]/1000 ≈ 1，支持 ms 解释但不替代导出 schema。in_tps 包含命中输入 token，不能当作新增计算吞吐。</p><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-chunk">[chunk]</a> · <a href="#ref-chunk-csv">[chunk-csv]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="chunk-research" aria-labelledby="title-chunk-research">
+    <div class="kicker"><span>Chunk size</span><span>26 / 35</span></div>
+    <h2 id="title-chunk-research">业界的共同做法：按负载选择预算，先建立强静态基线</h2><p class="lead">可迁移的是控制量、成本结构和实验方法；硬件数值与混部策略不能直接照搬。</p>
+    <div class="tablewrap"><table><thead><tr><th>来源</th><th>可借鉴机制</th><th>对本项目的适用边界</th></tr></thead><tbody><tr><td>NVIDIA TensorRT-LLM</td><td>联合扫描 max batch size / max num tokens，比较时延、吞吐和内存</td><td>NVIDIA 的默认值与最优点不是 910B2 的结论</td></tr><tr><td>Hugging Face TGI</td><td>分开请求长度、batch prefill 与 batch total token 约束</td><td>不能把这些不同预算统一理解为 chunk size</td></tr><tr><td>Sarathi-Serve / vLLM</td><td>chunked prefill 权衡执行效率、迭代耗时与 decode 干扰</td><td>主要讨论混部；当前 P-only 没有同批 D token</td></tr><tr><td>QoServe</td><td>用批成本预测与 deadline / slack 约束选择 chunk</td><td>借鉴显式时间预算；不能直接把 D TPOT SLO 当 P 批时限</td></tr><tr><td>Ascend Dynamic Batch / CPP</td><td>profile 表或历史上下文预测服务成本</td><td>P-only、async、PP 条件须核对；不能直接打开替换 g5 scheduler</td></tr></tbody></table></div>
+    <p class="small">文献支持研究方向，不证明本实现有效；本项目未复现这些系统的硬件收益。此处摘要以官方文档、论文和固定源码为依据。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-nvidia">[nvidia]</a> · <a href="#ref-tgi">[tgi]</a> · <a href="#ref-sarathi">[sarathi]</a> · <a href="#ref-qoserve">[qoserve]</a> · <a href="#ref-survey">[survey]</a> · <a href="#ref-vllm-doc">[vllm-doc]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="model" aria-labelledby="title-model">
+    <div class="kicker"><span>Chunk size</span><span>27 / 35</span></div>
+    <h2 id="title-model">把“新增 token”与“读取的历史”分开建模</h2><p class="lead">在同一冻结状态上模拟原生组批，比较完整候选 batch，而非只按 prompt 总长预测。</p>
+    <div class="formula compact">Q = Σu<sub>i</sub> ≤ C　　S₂ = Σu<sub>i</sub>²　　H = Σu<sub>i</sub>h<sub>i</sub>　　A = H + (S₂ + Q)/2</div>
+    <div class="two"><div><h3>结构约束模型 S</h3><div class="formula compact">T̂<sub>S</sub> = α₀ + α<sub>B</sub>n + α<sub>U</sub>Q + α<sub>A</sub>A</div><p>固定批开销 + 每请求开销 + 新 token 线性成本 + 因果注意力配对成本代理。</p></div><div><h3>自由拟合模型 F</h3><div class="formula compact">T̂<sub>F</sub> = β₀ + β₁n + β₂Q + β₃S₂ + β₄H</div><p>解除 S₂ 与 H 的系数耦合，用同样本、同标签、同候选集做独立对照；多参数不天然更优。</p></div></div>
+    <p>u<sub>i</sub> 是本批实际计划新算 token，h<sub>i</sub> 是执行前可用历史，n 是实际 batch 请求数。前缀命中减少新增计算量，但命中的上下文仍被注意力读取。对目标混合注意力模型，A 是经验成本代理，不是全部层精确 FLOPs。</p>
+    <p class="small">结构模型是自由模型的子空间：β₃=α<sub>A</sub>/2，β₄=α<sub>A</sub>，β₂=α<sub>U</sub>+α<sub>A</sub>/2。参数尚无现场标定；不把公式当作性能结果。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-model">[model]</a> · <a href="#ref-cost-audit">[cost-audit]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="model-decision" aria-labelledby="title-model-decision">
+    <div class="kicker"><span>Chunk size</span><span>28 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-model-decision">单批效率优化有解析直觉，也有全局盲点</h2><p class="lead">候选目标至少应区分“最高 Q/T”与“满足时间预算下推进最多 Q”。</p>
+    <div class="two"><div><h3>吞吐代理</h3><div class="formula compact">C* ∈ argmax Q(C) / T̂(C)</div><p>满预算 Q=C、固定成员与相对分配形状时，若 T(C)=a+bC+dC²，a,d&gt;0，则内点效率最优 C*=√(a/d)。上下文影响线性项时，不直接改变该理想式的最优点，却影响时限可行域。</p></div><div><h3>时限约束</h3><div class="formula compact">max Q(C)　s.t. T̂(C) ≤ τ</div><p>τ 必须定义为 P 的批服务预算；不是直接取 30ms TPOT 或 30s TTFT。有限候选枚举还要满足 KV、序列、运行时硬预算与异步依赖。</p></div></div>
+    <div class="callout">逐批 Q/T 最优不等于整请求完成时间最优，更不保证总体 P90。把长 prefill 切开不会消除因果注意力总配对量；还可能增加固定批开销与历史 KV 重读。</div>
+    <p>正常因果计算下，完整长度 L、初始历史 h₀ 的总配对量为 h₀L+L(L+1)/2，与切块方式无关。真正影响性能的是硬件效率、重复成本、请求间执行机会与资源限制的组合。</p><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-model">[model]</a> · <a href="#ref-survey">[survey]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="chunk-sequence" aria-labelledby="title-chunk-sequence">
+    <div class="kicker"><span>Chunk size</span><span>29 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-chunk-sequence">拟议的在线路径：纯候选计划 → 成本评分 → 一次真实提交</h2><p class="lead">这是设计方案，尚未实现为动态 controller；现有静态扫描不依赖此流程。</p>
+    <figure><svg class="sequence" viewBox="0 0 1040 426" role="img" aria-label="chunk"><defs><marker id="arrow-chunk" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 Z" fill="#2367a2"/></marker></defs><rect x="13.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="85.0" y="34" text-anchor="middle" font-size="17" font-weight="600">P Scheduler</text><line x1="85.0" x2="85.0" y1="50" y2="414" stroke="#c1ccd4" stroke-dasharray="4 5"/><rect x="303.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="375.0" y="34" text-anchor="middle" font-size="17" font-weight="600">纯候选模拟</text><line x1="375.0" x2="375.0" y1="50" y2="414" stroke="#c1ccd4" stroke-dasharray="4 5"/><rect x="593.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="665.0" y="34" text-anchor="middle" font-size="17" font-weight="600">成本模型</text><line x1="665.0" x2="665.0" y1="50" y2="414" stroke="#c1ccd4" stroke-dasharray="4 5"/><rect x="883.0" y="8" width="144" height="40" rx="7" fill="#eaf0f5"/><text x="955.0" y="34" text-anchor="middle" font-size="17" font-weight="600">执行 / 反馈</text><line x1="955.0" x2="955.0" y1="50" y2="414" stroke="#c1ccd4" stroke-dasharray="4 5"/><line x1="85.0" x2="375.0" y1="87" y2="87" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-chunk)"/><text x="230.0" y="59" text-anchor="middle" font-size="16">冻结状态：running / waiting / KV / i</text><text x="230.0" y="78" text-anchor="middle" font-size="16">nflight</text><rect x="247.0" y="114" width="256" height="32" rx="5" fill="#f7efe4"/><text x="375.0" y="135" text-anchor="middle" font-size="16">枚举 C，保持原生顺序与约束</text><line x1="375.0" x2="665.0" y1="183" y2="183" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-chunk)"/><text x="520.0" y="174" text-anchor="middle" font-size="16">候选聚合：n、Q、Σu²、Σuh</text><line x1="665.0" x2="85.0" y1="231" y2="231" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-chunk)"/><text x="375.0" y="222" text-anchor="middle" font-size="16">预测成本 + 可行性；选择预算</text><rect x="-43.0" y="258" width="256" height="32" rx="5" fill="#f7efe4"/><text x="85.0" y="279" text-anchor="middle" font-size="16">异常 / 不可表达状态：回原生预算</text><line x1="85.0" x2="955.0" y1="327" y2="327" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-chunk)"/><text x="520.0" y="318" text-anchor="middle" font-size="16">只对选中预算进行一次真实 schedule / submit</text><line x1="955.0" x2="665.0" y1="375" y2="375" stroke="#2367a2" stroke-width="1.7" marker-end="url(#arrow-chunk)"/><text x="810.0" y="347" text-anchor="middle" font-size="16">带 batch 身份与 label_kind 的离线验</text><text x="810.0" y="366" text-anchor="middle" font-size="16">证样本</text></svg></figure>
+    <p>候选模拟不能调用会推进 computed、占 KV 或修改队列的真实 schedule。已提交 batch 的依赖必须保留；在线控制也不能热扩张超过实际初始化的运行时上限。</p><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-model">[model]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="chunk-next" aria-labelledby="title-chunk-next">
+    <div class="kicker"><span>Chunk size</span><span>30 / 35</span></div>
+    <h2 id="title-chunk-next">下一步先回答：动态策略能否胜过按规格固定 C？</h2><p class="lead">先用便宜、稳定、可解释的配置建立基线，再判断预测和控制复杂度是否值得。</p>
+    <ol><li><strong>复核静态候选：</strong>66K 重点 8K / 16K / 32K；128K 重点 8K / 32K / 64K。核对实际配置与缓存流程，重复配对，不把单次小差异当最优。</li>
+    <li><strong>进入目标负载：</strong>从 B1 扩展到目标 B，保持输入 / 输出和测量窗口可比；观察全体 TTFT、TPOT、完成 QPS 与失败。</li>
+    <li><strong>独立评估 C+U：</strong>静态总预算配合单请求上限，测量吞吐和执行机会的取舍；不同时混入 GF 分类变更。</li>
+    <li><strong>必要时再自适应：</strong>先少量状态档位和明确切换条件；只有在负载变化下稳定超过强静态基线，才开发完整成本模型控制器。</li></ol>
+    <div class="callout">模型线的验证项：同标签留出误差、候选排序、模型调用/模拟开销，以及最终业务指标。旧 g5 LightGBM 和新 S/F 模型各自版本化；离线拟合优度不替代现场收益。</div><details class="notes"><summary>讲者备注</summary><p>分规格和随时间变化是两个尺度。先看静态规格是否已经覆盖大部分收益，再评估同一集群随时间切换的必要性。此页是计划与建议，未启动新压测。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-chunk">[chunk]</a> · <a href="#ref-model">[model]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="joint" aria-labelledby="title-joint">
+    <div class="kicker"><span>联合验证</span><span>31 / 35</span></div>
+    <h2 id="title-joint">先分开归因，再寻找吞吐—P90 的 Pareto 方案</h2><p class="lead">GF 决定入场，P 决定每批推进量；二者会改变彼此看到的负载分布。</p>
+    <div class="tablewrap"><table><thead><tr><th>比较阶段</th><th>固定什么</th><th>要回答的问题</th></tr></thead><tbody><tr><td>FG / TPOT 基线</td><td>P/D 配置与测量窗口</td><td>两层 TPOT 回归是否已关闭？</td></tr><tr><td>GF admission off ↔ enforce</td><td>固定 P 预算、冻结 H/L / S / V</td><td>尾部变化来自并发门控还是 LIFO 顺序？</td></tr><tr><td>P 预算 / C+U 对照</td><td>固定 GF 策略与流量</td><td>吞吐净收益是否伴随 TTFT / TPOT 回归？</td></tr><tr><td>组合对照（后续建议）</td><td>同一可复现部署与请求集</td><td>两者是否互补，还是门控抵消批效率？</td></tr></tbody></table></div>
+    <p>联合验收至少呈现：全体 P50/P90/P95/P99 TTFT、P90 TPOT、QPS / 输出 token/s、错误与取消、分组尾部，以及 tail 分类/派发/晋升/越序次数。固定硬件下画可行配置的 Pareto 前沿，不预设唯一权重。</p>
+    <div class="callout">短期最有价值的三件事：关闭双层 TPOT 残差；让 rc2 在真实 P/D 上完成配对验证；用目标负载复核静态 C。动态 chunk 与 GF 联合控制是后续增量。</div><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-entry">[entry]</a> · <a href="#ref-experiment">[experiment]</a> · <a href="#ref-chunk">[chunk]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide " id="discussion" aria-labelledby="title-discussion">
+    <div class="kicker"><span>联合验证</span><span>32 / 35</span></div>
+    <h2 id="title-discussion">讨论：下一轮先验证哪些假设？</h2><p class="lead">把分歧变成可复现的对照，避免继续叠加无法归因的复杂度。</p>
+    <div class="three"><div><b>路由与 TPOT</b><span>两层回归分别缺哪一个<br>同条件对照？</span></div><div><b>入场策略</b><span>收益来自减少实际入场并发，<br>还是 tail 的真实越序？</span></div><div><b>批预算</b><span>静态 C+U 是否足够？<br>什么证据才值得上动态模型？</span></div></div>
+    <p class="closing">当前已有“异质负载 + 首次等待”的证据，也有 g5 与 rc2 的工程落地。下一阶段应把这些机制变成可复现的 SLO 收益，并保留吞吐、公平性和 TPOT 的完整代价。</p>
+    <p>建议团队共同确认：对照栈身份、失败/取消口径、重复规则、可接受的吞吐差异，以及由谁完成现场验证和结果回传。</p><details class="notes"><summary>讲者备注</summary><p>先讲本页结论，再用表格或图示解释机制；证据边界与来源在本页保留。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-entry">[entry]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="appendix-math" aria-labelledby="title-appendix-math">
+    <div class="kicker"><span>附录</span><span>33 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-appendix-math">原始效用与 KV 宏观模型：保留推导，也保留假设</h2><p class="lead">研究方向尚未联合求解或现场验证；不能用它替代当前 P-only 的成本模型。</p>
+    <div class="formula compact">F(C) = [C + P<sub>b</sub> + W<sub>q</sub> + λT<sub>k</sub>ℓ] / [NT<sub>k</sub> + λT₂² / 2]</div>
+    <p>T<sub>k</sub>=T<sub>mix</sub>(d₁,…,d<sub>k</sub>; C,p₁,…)，T₂=T<sub>mix</sub>(d₁,…,d₂; C,p₁,…)；两组 decode 参数是用户有意保留的差异，不合并成同一个 T。</p>
+    <p>分子包括等待工作量与未来到达工作，本轮没有全部完成，所以 F 是研究效用，不能直接命名为已完成 token/s。λT₂²/2 需要相应等待核；若所有到达都等到 T<sub>k</sub>，不能无解释地使用 T₂。</p>
+    <p>KV 宏观演化还需明确写入、命中、活跃引用与淘汰闭合；共享前缀、异步在途和闭环反馈使常 λ / TTL 近似有适用条件。普通 LightGBM 常值叶不可直接求连续导数。</p>
+    <div class="callout">d<sub>k</sub> 与 d₂、批成本预测、KV 演化、总体 P90 是四个需要分别定义的对象。当前交付是数学审查和设计，不是已验证最优控制器。</div><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-kv-model">[kv-model]</a> · <a href="#ref-model">[model]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="appendix-compat" aria-labelledby="title-appendix-compat">
+    <div class="kicker"><span>附录</span><span>34 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-appendix-compat">Ascend 动态机制与 g5 的兼容性不是一个开关</h2><p class="lead">固定源码 5cb98caa 的能力边界，优先于泛化宣传描述。</p>
+    <div class="tablewrap"><table><thead><tr><th>机制</th><th>固定源码语义</th><th>为何不能即插即用</th></tr></thead><tbody><tr><td>Dynamic Batch</td><td>按 decode 负载查预算表，无 decode 时回基准预算；调度路径还有顺序处理</td><td>当前为 P-only，且要保留 g5 async predictor 链</td></tr><tr><td>Dynamic CPP</td><td>基于历史长度 profile 反求 chunk / 时间预算；要求 PP>1</td><td>当前 TP4 不代表 PP4；替换 scheduler 会涉及新兼容性工作</td></tr><tr><td>差分曲线 g(h+u)−g(h)</td><td>g(l)=al²+bl+d 时，差分消去 d</td><td>不自然保留每个 batch 再付出的固定开销</td></tr><tr><td>设备同步 profile 标签</td><td>固定校准执行区间</td><td>与 g5 主机提交/取结果间隔不同，不能混合拟合</td></tr></tbody></table></div>
+    <p>可迁移：上下文特征、低维成本回归、明确时间标签与预算。暂不迁移：PP 专用流水线控制、decode 优先重排、动态抢占与未经验证的 profile 数值。</p><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span>依据：<a href="#ref-survey">[survey]</a> · <a href="#ref-model">[model]</a> · <a href="#ref-ascend-code">[ascend-code]</a></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><section class="slide deep" id="sources" aria-labelledby="title-sources">
+    <div class="kicker"><span>来源</span><span>35 / 35 · 详解 / 附录</span></div>
+    <h2 id="title-sources">可追溯来源与版本说明</h2><p class="lead">原始结果、源码核查、批准设计与研究模型分开引用。</p>
+    <p>正文、图表、样本读数与机制说明均已内嵌，可单文件离线分享。下列“项目文件”链接需要保留项目目录；外部链接用于原论文和固定源码核验。</p><div class="tablewrap"><table><thead><tr><th>版本简称</th><th>本文身份</th></tr></thead><tbody><tr><td>g2</td><td>早期 proxy FGJSQ 与 P/D 插件栈，承载 EXP_10.9–10.13 历史结果</td></tr><tr><td>g4</td><td>P 保留 predictor / FG；D 恢复原生引擎 + heap 路由</td></tr><tr><td>g5</td><td>基于正式版 g4 底座接入 Motor；冻结版本见交接与核查稿</td></tr><tr><td>rc2</td><td>g5 上增量 gf_admission 0.1.0rc2；本地评审通过，性能待现场验证</td></tr></tbody></table></div><div class="sources"><article id="ref-entry"><b>[entry] 项目总工程师入口</b><p>统一边界、协作与证据地图；B=16 为集群总并发。</p><a href="../../docs/architecture/CHIEF_ENGINEER_SESSION_ENTRY.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/architecture/CHIEF_ENGINEER_SESSION_ENTRY.md</code></article><article id="ref-flow"><b>[flow] 生产画像原件</b><p>5,549 条，单 UUID，2026-09-24。</p><a href="../../docs/traffic/CLUSTER_FLOW_PROFILE_REPORT_20260924.original.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/traffic/CLUSTER_FLOW_PROFILE_REPORT_20260924.original.md</code></article><article id="ref-flow-review"><b>[flow-review] 生产画像核对</b><p>修正 ≥32K 零命中 1,268 条；保留延迟单位与 completion 语义限制。</p><a href="../../docs/traffic/CLUSTER_FLOW_PROFILE_ANALYSIS_20260924.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/traffic/CLUSTER_FLOW_PROFILE_ANALYSIS_20260924.md</code></article><article id="ref-waiting"><b>[waiting] 最终等待证据核对</b><p>g2 开/闭环等待、精确 TTFT 与首次 queue 数值。</p><a href="../../docs/traffic/FINAL_WAITING_AND_ADMISSION_REVIEW_20261021.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/traffic/FINAL_WAITING_AND_ADMISSION_REVIEW_20261021.md</code></article><article id="ref-historical"><b>[historical] 10.9–10.14 原始全景报告</b><p>历史 replay / AISBench 原表；历史推断以新核对稿纠正。</p><a href="../../evidence/huawei/2026-10-19-import/SUMMARY_REPORT.txt" target="_blank" rel="noopener">项目文件 ↗</a><code>evidence/huawei/2026-10-19-import/SUMMARY_REPORT.txt</code></article><article id="ref-frozen"><b>[frozen] g5 冻结交接原件</b><p>§8 实验与计时；截止 2026-10-21 13:09 UTC。原件有勘误。</p><a href="../../docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/engineering/G5_FROZEN_BASELINE_HANDOVER.md</code></article><article id="ref-alignment"><b>[alignment] g5 源码核查与勘误</b><p>computed / 标签 / predict / 双账 / 正式版底座以核查为准。</p><a href="../../docs/engineering/G5_LOCAL_BASELINE_ALIGNMENT_REVIEW.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/engineering/G5_LOCAL_BASELINE_ALIGNMENT_REVIEW.md</code></article><article id="ref-fg-code"><b>[fg-code] FGJSQ 公式实现</b><p>actual、score、rank、reserve、event、release。</p><a href="../../src/fgjsq/policy.py" target="_blank" rel="noopener">项目文件 ↗</a><code>src/fgjsq/policy.py</code></article><article id="ref-adapter"><b>[adapter] Motor 适配服务</b><p>FG 与 native 预留、事件身份及原子候选检查。</p><a href="../../src/motor_adapter/service.py" target="_blank" rel="noopener">项目文件 ↗</a><code>src/motor_adapter/service.py</code></article><article id="ref-body"><b>[body] D 流体观察与 FG 释放</b><p>首非空 body 释放钩子；不是客户端 content TTFT 定义。</p><a href="../../src/motor_adapter/body_observer.py" target="_blank" rel="noopener">项目文件 ↗</a><code>src/motor_adapter/body_observer.py</code></article><article id="ref-cost-audit"><b>[cost-audit] 旧成本特征源码审查</b><p>旧八维特征实际含义，以及复用限制。</p><a href="../../docs/modeling/COST_FUNCTION_SOURCE_AUDIT.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/modeling/COST_FUNCTION_SOURCE_AUDIT.md</code></article><article id="ref-omni"><b>[omni] super-p95 源码研究与 LLM 对比</b><p>原型机制与历史结果；后续 GF 设计已更新旧待讨论项。</p><a href="../../docs/references/SUPER_P95_RESEARCH_AND_LLM_COMPARISON.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/references/SUPER_P95_RESEARCH_AND_LLM_COMPARISON.md</code></article><article id="ref-omni-code"><b>[omni-code] vllm-omni 固定 step scheduler</b><p>FIFO/LIFO、active 与 step 暂停；固定 commit。</p><a href="https://github.com/Lijunzhang0829/vllm-omni/blob/dd9c0895d98a73c760e9ca930d87e03198713ff7/vllm_omni/diffusion/sched/super_p95_step_scheduler.py" target="_blank" rel="noopener">外部来源 ↗</a><code>https://github.com/Lijunzhang0829/vllm-omni/blob/dd9c0895d98a73c760e9ca930d87e03198713ff7/vllm_omni/diffusion/sched/super_p95_step_scheduler.py</code></article><article id="ref-revision"><b>[revision] 统一高压让行修订</b><p>rc2 已批准 OR 分类、H/L 与共同预算。</p><a href="../../docs/admission/GF_PRESSURE_ADMISSION_REVISION_20261022.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/admission/GF_PRESSURE_ADMISSION_REVISION_20261022.md</code></article><article id="ref-design"><b>[design] GF 双队列工程设计</b><p>Mgmt / worker、状态机、窄 hook 与回退。</p><a href="../../docs/admission/G5_GF_DUAL_QUEUE_IMPLEMENTATION_DESIGN.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/admission/G5_GF_DUAL_QUEUE_IMPLEMENTATION_DESIGN.md</code></article><article id="ref-admission-code"><b>[admission-code] rc2 broker 实现</b><p>统一分类、FIFO/LIFO、预留/claim/取消和保护。</p><a href="../../src/gf_admission/broker.py" target="_blank" rel="noopener">项目文件 ↗</a><code>src/gf_admission/broker.py</code></article><article id="ref-rc2"><b>[rc2] rc2 复评与现场放行</b><p>本地通过、R1–R4 关闭、现场流程与验证边界。</p><a href="../../docs/engineering/GF_ADMISSION_0.1.0rc2_REVIEW_20261022.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/engineering/GF_ADMISSION_0.1.0rc2_REVIEW_20261022.md</code></article><article id="ref-runtime"><b>[runtime] gf_admission 运行指南</b><p>off/shadow/enforce 与安装、诊断、关闭回退。</p><a href="../../docs/engineering/GF_ADMISSION_RUNTIME_GUIDE.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/engineering/GF_ADMISSION_RUNTIME_GUIDE.md</code></article><article id="ref-experiment"><b>[experiment] rc2 六格实验计划</b><p>66K/128K × B16/18/20 配对矩阵，冻结条件。</p><a href="../../experiments/plans/GF_ADMISSION_RC2_AISBENCH_20261022.json" target="_blank" rel="noopener">项目文件 ↗</a><code>experiments/plans/GF_ADMISSION_RC2_AISBENCH_20261022.json</code></article><article id="ref-delivery"><b>[delivery] rc2 交付凭据</b><p>实现与归档 SHA；旧待复评状态已被复评通过覆盖。</p><a href="../../docs/engineering/GF_ADMISSION_0.1.0rc2_DELIVERY_20261022.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/engineering/GF_ADMISSION_0.1.0rc2_DELIVERY_20261022.md</code></article><article id="ref-chunk"><b>[chunk] MaaS token 预算实践与 g5 B1 扫描</b><p>2026-10-28 最新优先级：静态 C / C+U 后再自适应。</p><a href="../../docs/modeling/MAAS_TOKEN_LIMIT_PRACTICES_AND_G5_EXPERIMENT.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/modeling/MAAS_TOKEN_LIMIT_PRACTICES_AND_G5_EXPERIMENT.md</code></article><article id="ref-chunk-csv"><b>[chunk-csv] P 侧 token 预算原始 CSV</b><p>SHA256 73dffb52f08de0d544866a29c29f55a51ff9147354e75adfc39da942ff619be6；用户本轮保留单位推定。</p><a href="../../evidence/huawei/2026-10-28-g5-p-token-budget/perf_summary.original.csv" target="_blank" rel="noopener">项目文件 ↗</a><code>evidence/huawei/2026-10-28-g5-p-token-budget/perf_summary.original.csv</code></article><article id="ref-model"><b>[model] 动态批 token 预算设计 v0.1</b><p>S/F 模型、标签、候选模拟、可行域和验证；未实现动态控制器。</p><a href="../../docs/modeling/DYNAMIC_BATCH_TOKEN_BUDGET_DESIGN_V0_1.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/modeling/DYNAMIC_BATCH_TOKEN_BUDGET_DESIGN_V0_1.md</code></article><article id="ref-kv-model"><b>[kv-model] Chunk / KV 数学建模</b><p>保留 d_k 与 d_2 区别；KV 宏观演化为研究方向。</p><a href="../../docs/modeling/CHUNK_SIZE_KV_CACHE_MATHEMATICAL_MODEL.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/modeling/CHUNK_SIZE_KV_CACHE_MATHEMATICAL_MODEL.md</code></article><article id="ref-survey"><b>[survey] Chunk 行业研究</b><p>固定源码与论文的适用性比较。</p><a href="../../docs/modeling/CHUNK_SIZE_INDUSTRY_RESEARCH_SURVEY.md" target="_blank" rel="noopener">项目文件 ↗</a><code>docs/modeling/CHUNK_SIZE_INDUSTRY_RESEARCH_SURVEY.md</code></article><article id="ref-ascend-code"><b>[ascend-code] Ascend 固定 RecomputeScheduler</b><p>running-first、共享预算与单请求 threshold。</p><a href="https://github.com/vllm-project/vllm-ascend/blob/5cb98caaadeff42b5b62b996e34bb2aaa29d20fd/vllm_ascend/core/recompute_scheduler.py" target="_blank" rel="noopener">外部来源 ↗</a><code>https://github.com/vllm-project/vllm-ascend/blob/5cb98caaadeff42b5b62b996e34bb2aaa29d20fd/vllm_ascend/core/recompute_scheduler.py</code></article><article id="ref-nvidia"><b>[nvidia] NVIDIA max batch / max token 调优</b><p>官方文档：按 workload 扫描并考虑内存；本轮在线核验。</p><a href="https://nvidia.github.io/TensorRT-LLM/1.3.0rc23.post1/legacy/performance/performance-tuning-guide/tuning-max-batch-size-and-max-num-tokens.html" target="_blank" rel="noopener">外部来源 ↗</a><code>https://nvidia.github.io/TensorRT-LLM/1.3.0rc23.post1/legacy/performance/performance-tuning-guide/tuning-max-batch-size-and-max-num-tokens.html</code></article><article id="ref-tgi"><b>[tgi] Hugging Face TGI launcher</b><p>官方预算参数定义；本轮在线核验。</p><a href="https://huggingface.co/docs/text-generation-inference/en/reference/launcher" target="_blank" rel="noopener">外部来源 ↗</a><code>https://huggingface.co/docs/text-generation-inference/en/reference/launcher</code></article><article id="ref-sarathi"><b>[sarathi] Sarathi-Serve · OSDI 2024</b><p>原论文：chunked prefill 与吞吐/时延权衡；本轮核验。</p><a href="https://www.usenix.org/conference/osdi24/presentation/agrawal" target="_blank" rel="noopener">外部来源 ↗</a><code>https://www.usenix.org/conference/osdi24/presentation/agrawal</code></article><article id="ref-qoserve"><b>[qoserve] QoServe · ASPLOS 2026</b><p>Microsoft Research 原论文；批成本、QoS 与动态 chunk。</p><a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2025/10/QoServe_CC_final_v2.pdf" target="_blank" rel="noopener">外部来源 ↗</a><code>https://www.microsoft.com/en-us/research/wp-content/uploads/2025/10/QoServe_CC_final_v2.pdf</code></article><article id="ref-vllm-doc"><b>[vllm-doc] vLLM v0.23.0 optimization</b><p>混部调优解释；不替代 P-only 固定源码。</p><a href="https://docs.vllm.ai/en/v0.23.0/configuration/optimization/" target="_blank" rel="noopener">外部来源 ↗</a><code>https://docs.vllm.ai/en/v0.23.0/configuration/optimization/</code></article></div><details class="notes"><summary>讲者备注</summary><p>详解页，可在 60 分钟报告或问答时展开。</p></details>
+    <div class="foot"><span></span><span>llm-slo-scheduler · 2026-10-28</span></div></section><noscript><p>JavaScript 已关闭：正文、数据与图表仍可阅读；演示模式需要启用 JavaScript。</p></noscript></main><script>
+const sections = [...document.querySelectorAll('.slide')];
+const links = [...document.querySelectorAll('#toc a')];
+let index = 0, presenting = false, duration = '45';
+const shortIds = new Set(['opening','goals','boundary','workload','replay','waiting','fg-score','fg-sequence','fg-benchmark','g5-results','tpot','omni','admission-idea','admission-rules','admission-sequence','admission-status','chunk-control','chunk-data','chunk-research','model','chunk-next','joint','discussion']);
+function activeSections(){
+  return sections.filter(s => !s.classList.contains('short-hidden') && (duration==='60' || !s.classList.contains('deep')));
+}
+function refresh(){
+  sections.forEach((s,i)=>s.classList.toggle('current-slide',i===index));
+  links.forEach(a=>a.classList.toggle('current',a.hash==='#'+sections[index].id));
+  const active=activeSections(), n=active.indexOf(sections[index]);
+  document.getElementById('progressLabel').textContent = (n>=0 ? (n+1)+' / '+active.length : '附录') + ' · '+duration+' min';
+  document.getElementById('progress').style.width=((index+1)/sections.length*100)+'%';
+  document.getElementById('prev').disabled=!active.some(s=>sections.indexOf(s)<index);
+  document.getElementById('next').disabled=!active.some(s=>sections.indexOf(s)>index);
+}
+function go(i, hash=true){
+  index=Math.max(0,Math.min(sections.length-1,i));
+  sections[index].classList.remove('short-hidden');
+  refresh();
+  if(hash)history.replaceState(null,'','#'+sections[index].id);
+  sections[index].scrollIntoView({behavior:'instant',block:'start'});
+  document.body.classList.remove('nav-open');
+}
+function advance(dir){
+  const active=activeSections(), current=sections[index];let pos=active.indexOf(current);
+  if(pos<0){const choices=sections.map((s,i)=>({s,i})).filter(x=>active.includes(x.s)&&(dir>0?x.i>index:x.i<index));const target=dir>0?choices[0]:choices.at(-1);if(target)go(target.i);return;}
+  const target=active[pos+dir];if(target)go(sections.indexOf(target));
+}
+document.getElementById('mode').addEventListener('click',()=>{
+  presenting=!presenting;document.body.classList.toggle('present',presenting);
+  const button=document.getElementById('mode');button.textContent=presenting?'返回阅读':'进入演示';button.classList.toggle('active',presenting);button.setAttribute('aria-pressed',String(presenting));go(index,false);
+});
+document.getElementById('duration').addEventListener('change',e=>{
+  duration=e.target.value;
+  sections.forEach(s=>s.classList.toggle('short-hidden',duration==='30'&&!shortIds.has(s.id)));
+  links.forEach(a=>a.classList.toggle('short-hidden',duration==='30'&&!shortIds.has(a.hash.slice(1))&&a.hash!=='#sources'));
+  if(sections[index].classList.contains('short-hidden'))index=0;
+  document.getElementById('routeNote').textContent=duration==='30'?'主线 23 页 · 重点结论':duration==='45'?'主线 + 按需详解 · 45 分钟':'全部页面 + 附录 · 60 分钟';
+  refresh();if(presenting)go(index,false);
+});
+document.getElementById('prev').addEventListener('click',()=>advance(-1));
+document.getElementById('next').addEventListener('click',()=>advance(1));
+document.getElementById('print').addEventListener('click',()=>window.print());
+document.getElementById('mobileMenu').addEventListener('click',()=>document.body.classList.toggle('nav-open'));
+document.addEventListener('click',e=>{
+  const a=e.target.closest('a[href^="#"]');if(!a)return;
+  const el=document.getElementById(a.hash.slice(1));if(!el)return;
+  const section=el.closest('.slide');if(!section)return;e.preventDefault();go(sections.indexOf(section));
+  if(el!==section)setTimeout(()=>el.scrollIntoView({block:'start'}),50);
+});
+document.addEventListener('keydown',e=>{
+  if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName))return;
+  if(e.key==='Escape'&&presenting){document.getElementById('mode').click();return;}
+  if(!presenting)return;
+  if(['ArrowRight','PageDown'].includes(e.key)){e.preventDefault();advance(1)}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();advance(-1)}
+});
+const observer=new IntersectionObserver(entries=>{
+  if(presenting)return;
+  const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);
+  if(visible.length){index=sections.indexOf(visible[0].target);refresh()}
+},{rootMargin:'-70px 0px -45% 0px',threshold:[0,.2,.5]});
+sections.forEach(s=>observer.observe(s));
+const initial=sections.findIndex(s=>'#'+s.id===location.hash);
+if(initial>=0)go(initial,false);else refresh();
+</script></body></html>

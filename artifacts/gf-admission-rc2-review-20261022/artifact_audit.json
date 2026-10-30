@@ -1,0 +1,29 @@
+{
+  "source_commit": "75c5e519195b55ce314fc00bf81b068f382e9cb1",
+  "head": "8171c2da61a6fcfb3007e2fb30be57ce21b37337",
+  "package": {
+    "path": "/mnt/c/Users/ALIENWARE/Desktop/gf-admission-0.1.0rc2-20261022.tar.gz",
+    "size": 1575686,
+    "sha256": "b23cee6b81d6f4f8b87b1e6cfd6fc28e7e8ed4bab3512c4ab6a4a7cecd1b0121"
+  },
+  "manifest_source_head": "75c5e519195b55ce314fc00bf81b068f382e9cb1",
+  "manifest_count": 685,
+  "manifest_mismatches": [],
+  "runtime_workspace_mismatches": [],
+  "wheel_src_mismatches": [],
+  "desktop_docs": {
+    "HUAWEI_AGENT_PROMPT_GF_RUNTIME_0.1.0rc2_20261022.md": {
+      "sha256": "fe6c3b72a988e859331a85e319930f957ba297183841c344fa13d851f806f06a",
+      "matches_bundle": true
+    },
+    "GF_ADMISSION_RUNTIME_GUIDE_0.1.0rc2_20261022.md": {
+      "sha256": "246134aeaa849b633fd4ee6edab0d6f343ecd9b0b137a55b62dab5e6ad3ec53f",
+      "matches_bundle": true
+    },
+    "GF_ADMISSION_RC2_REPAIR_REPORT_20261022.md": {
+      "sha256": "77f7700a1f593eb8875dff8c56326bdb3cb0c8e16e4b1f9d0bb94a11f013b221",
+      "matches_bundle": true
+    }
+  },
+  "extracted_root": "/home/zhangxiyue/llm-slo-scheduler/artifacts/gf-admission-rc2-review-20261022/independent/gf-admission-0.1.0rc2"
+}

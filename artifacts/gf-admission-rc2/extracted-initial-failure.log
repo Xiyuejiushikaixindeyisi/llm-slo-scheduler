@@ -1,0 +1,220 @@
+Checking test dependencies...
+Installing pytest-xdist...
+Requirement already satisfied: pytest-xdist in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (3.8.0)
+Requirement already satisfied: execnet>=2.1 in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (from pytest-xdist) (2.1.2)
+Requirement already satisfied: pytest>=7.0.0 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest-xdist) (8.4.2)
+Requirement already satisfied: iniconfig>=1 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.3.0)
+Requirement already satisfied: packaging>=20 in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (26.3)
+Requirement already satisfied: pluggy<2,>=1.5 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (1.5.0)
+Requirement already satisfied: pygments>=2.7.2 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.19.2)
+Checking project core dependencies...
+Checking HTTP client dependencies...
+Dependency check completed
+Checking and generating protobuf files...
+Generating code from ./motor/common/etcd/proto/rpc.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/rpc.proto
+  Fixed import paths in rpc_pb2_grpc.py
+  Fixed import paths in rpc_pb2.py
+Generating code from ./motor/common/etcd/proto/auth.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/auth.proto
+  Fixed import paths in auth_pb2_grpc.py
+  Fixed import paths in auth_pb2.py
+Generating code from ./motor/common/etcd/proto/kv.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/kv.proto
+  Fixed import paths in kv_pb2_grpc.py
+  Fixed import paths in kv_pb2.py
+All protobuf files generated successfully.
+Executing command: pytest  /home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2/tests/unit/test_admission_core.py /home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2/tests/unit/test_admission_broker.py /home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2/tests/unit/test_admission_install.py /home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2/tests/unit/test_gf_experiment_tools.py /home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2/tests/unit/test_fgjsq.py /home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2/tests/integration/test_motor_adapter.py /home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2/tests/integration/test_admission_runtime.py --color=no --junitxml=/home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2/artifacts/gf-admission/runtime.xml
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-8.4.2, pluggy-1.5.0
+rootdir: /home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2
+configfile: pyproject.toml
+plugins: xdist-3.8.0, asyncio-1.4.0, anyio-4.13.0, cov-7.1.0, jaxtyping-0.3.6
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 75 items
+
+../tests/unit/test_admission_core.py ..........................          [ 34%]
+../tests/unit/test_admission_broker.py ....................              [ 61%]
+../tests/unit/test_admission_install.py ....                             [ 66%]
+../tests/unit/test_gf_experiment_tools.py ...                            [ 70%]
+../tests/unit/test_fgjsq.py .....                                        [ 77%]
+../tests/integration/test_motor_adapter.py ...........                   [ 92%]
+../tests/integration/test_admission_runtime.py F.....                    [100%]
+
+=================================== FAILURES ===================================
+_______ test_real_zmq_two_workers_lost_ack_cancel_and_no_double_reserve ________
+
+enabled_config = None
+tmp_path = PosixPath('/tmp/pytest-of-zhangxiyue/pytest-34/test_real_zmq_two_workers_lost0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x73e03401aeb0>
+
+    @pytest.mark.asyncio
+    async def test_real_zmq_two_workers_lost_ack_cancel_and_no_double_reserve(
+        enabled_config, tmp_path, monkeypatch
+    ):
+        runtime_config = replace(
+            cfg(),
+            classifier=replace(cfg().classifier, quota_every=1),
+            high_pressure_threshold=10,
+            limits=replace(cfg().limits, max_tail_wait_ms=5000),
+        )
+        monkeypatch.setattr(bindings, "admission_mode", lambda: "enforce")
+        dispatcher, _legacy, native = make_stack()
+        broker = AdmissionBroker(dispatcher._fgjsq_service, runtime_config)
+        dispatcher._gf_admission = broker
+        dispatcher._fgjsq_service.on_events = broker.notify
+        serializer = ZMQMessageSerializer()
+        context = zmq.asyncio.Context()
+        socket = context.socket(zmq.ROUTER)
+        address = "ipc://" + str(tmp_path / "admission.sock")
+        socket.bind(address)
+        tasks = set()
+        errors = []
+        dropped = False
+        held = asyncio.Event()
+    
+        async def respond(identity, frames):
+            nonlocal dropped
+            incoming = serializer.deserialize_request(frames[1:])
+            if incoming.data.get("key") == "hold-query":
+                held.set()
+                await asyncio.Event().wait()
+            result = await dispatcher.dispatch(incoming)
+            if incoming.data["op"] == "admission_enqueue" and not dropped:
+                dropped = True
+                return
+            out = serializer.serialize_response(result)
+            await socket.send_multipart(
+                [identity, b""] + (out if isinstance(out, list) else [out])
+            )
+    
+        async def serve():
+            while True:
+                identity, *frames = await socket.recv_multipart()
+                task = asyncio.create_task(respond(identity, frames))
+                tasks.add(task)
+    
+                def done(task):
+                    tasks.discard(task)
+                    if not task.cancelled() and task.exception():
+                        errors.append(task.exception())
+    
+                task.add_done_callback(done)
+    
+        server = asyncio.create_task(serve())
+        clients = []
+        transports = []
+        try:
+            for _ in range(2):
+                transport = _SchedulerTransport(address, 0.6)
+                assert await transport.connect()
+                transports.append(transport)
+                client = SimpleNamespace(_transport=transport)
+                plugin = AdmissionClient(
+                    motor_sender(client, runtime_config), runtime_config
+                )
+                client._gf_admission = plugin
+                clients.append(client)
+            infos = [request("w" + str(i)) for i in range(2)]
+            results = await asyncio.gather(
+                *(
+                    bindings.allocate(client, PDRole.ROLE_P, info, 1)
+                    for client, info in zip(clients, infos)
+                )
+            )
+            assert all(results) and native.adds == 2 and broker.classifier.arrivals == 2
+            assert len(broker.workers) == 2
+            # A cancelled long poll remains cancellation through Motor's typed transport result.
+            wait = asyncio.create_task(
+                motor_sender(clients[0], runtime_config)(
+                    clients[0]._gf_admission.data("query", key="hold-query")
+                )
+            )
+            await asyncio.wait_for(held.wait(), 1)
+            wait.cancel()
+            with pytest.raises(asyncio.CancelledError):
+                await wait
+            await asyncio.gather(
+                *(
+                    bindings.finish_request(
+                        SimpleNamespace(req_info=info, _scheduler=client)
+                    )
+                    for client, info in zip(clients, infos)
+                )
+            )
+            child_config = tmp_path / "child-config.json"
+            child_config.write_text(json.dumps(asdict(runtime_config)))
+            code = """import asyncio,sys
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock
+    from test_admission_broker import config
+    from gf_admission.client import AdmissionClient,motor_sender
+    from gf_admission.runtime_config import load_config
+    from motor.coordinator.scheduler.runtime.scheduler_client import _SchedulerTransport
+    async def main():
+        config=load_config(sys.argv[1])
+        transport=_SchedulerTransport(sys.argv[2],.6)
+        assert await transport.connect()
+        client=AdmissionClient(motor_sender(SimpleNamespace(_transport=transport),config),config)
+        try:
+            reply=await client.allocate('cross-process',1,dict(req_id='child',estimated_tokens=10,native_tokens=5,cost=None))
+            assert reply['state']=='CLAIMED'
+            await client.finish('cross-process')
+        finally:
+            await client.close()
+            await transport.disconnect()
+        print('CHILD_OK')
+    asyncio.run(main())
+    """
+            child = await asyncio.create_subprocess_exec(
+                sys.executable,
+                "-c",
+                code,
+                str(child_config),
+                address,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            output, error = await asyncio.wait_for(child.communicate(), 10)
+>           assert child.returncode == 0, error.decode()
+E           AssertionError: Traceback (most recent call last):
+E               File "<string>", line 4, in <module>
+E                 from test_admission_broker import config
+E             ModuleNotFoundError: No module named 'test_admission_broker'
+E             
+E           assert 1 == 0
+E            +  where 1 = <Process 1551782>.returncode
+
+../tests/integration/test_admission_runtime.py:180: AssertionError
+----------------------------- Captured stdout call -----------------------------
+(MainProcess pid=1551743) INFO 10-22 20:05:04 [scheduler][scheduler_client.py:313] Scheduler transport connected to ipc:///tmp/pytest-of-zhangxiyue/pytest-34/test_real_zmq_two_workers_lost0/admission.sock
+(MainProcess pid=1551743) INFO 10-22 20:05:04 [scheduler][scheduler_client.py:313] Scheduler transport connected to ipc:///tmp/pytest-of-zhangxiyue/pytest-34/test_real_zmq_two_workers_lost0/admission.sock
+(MainProcess pid=1551743) WARNING 10-22 20:05:05 [scheduler][scheduler_client.py:358] Scheduler request timeout request_type=fgjsq_v1 req_id=b0f54751943f4db38034e86a0005b495 elapsed_ms=600.9
+(MainProcess pid=1551743) WARNING 10-22 20:05:05 [scheduler][scheduler_client.py:396] Scheduler request cancelled request_type=fgjsq_v1 req_id=a3b2621ebbd3440d95b880dc0cea548b
+(MainProcess pid=1551743) WARNING 10-22 20:05:05 [scheduler][scheduler_client.py:396] Scheduler request cancelled request_type=fgjsq_v1 req_id=4181977c5ab1473297641e7ebbec50a2
+(MainProcess pid=1551743) WARNING 10-22 20:05:05 [scheduler][scheduler_client.py:396] Scheduler request cancelled request_type=fgjsq_v1 req_id=f999387830ba4f48a1c1c69ffde0b209
+------------------------------ Captured log call -------------------------------
+INFO     scheduler:scheduler_client.py:313 Scheduler transport connected to ipc:///tmp/pytest-of-zhangxiyue/pytest-34/test_real_zmq_two_workers_lost0/admission.sock
+INFO     scheduler:scheduler_client.py:313 Scheduler transport connected to ipc:///tmp/pytest-of-zhangxiyue/pytest-34/test_real_zmq_two_workers_lost0/admission.sock
+WARNING  scheduler:scheduler_client.py:358 Scheduler request timeout request_type=fgjsq_v1 req_id=b0f54751943f4db38034e86a0005b495 elapsed_ms=600.9
+WARNING  scheduler:scheduler_client.py:396 Scheduler request cancelled request_type=fgjsq_v1 req_id=a3b2621ebbd3440d95b880dc0cea548b
+WARNING  scheduler:scheduler_client.py:396 Scheduler request cancelled request_type=fgjsq_v1 req_id=4181977c5ab1473297641e7ebbec50a2
+WARNING  scheduler:scheduler_client.py:396 Scheduler request cancelled request_type=fgjsq_v1 req_id=f999387830ba4f48a1c1c69ffde0b209
+- generated xml file: /home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r1/extracted/gf-admission-0.1.0rc2/artifacts/gf-admission/runtime.xml -
+=========================== short test summary info ============================
+FAILED ../tests/integration/test_admission_runtime.py::test_real_zmq_two_workers_lost_ack_cancel_and_no_double_reserve
+========================= 1 failed, 74 passed in 4.12s =========================
+
+==========================================
+Test Result Summary
+==========================================
+Test Status:
+  ✓ Passed: 74
+  ✗ Failed: 1
+
+Overall Status:
+  ✗ Tests failed
+
+Hint: Check the output above for detailed information about failed tests
+==========================================
+

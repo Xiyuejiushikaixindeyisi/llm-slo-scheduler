@@ -1,0 +1,62 @@
+Checking test dependencies...
+Installing pytest-xdist...
+Requirement already satisfied: pytest-xdist in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (3.8.0)
+Requirement already satisfied: execnet>=2.1 in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (from pytest-xdist) (2.1.2)
+Requirement already satisfied: pytest>=7.0.0 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest-xdist) (8.4.2)
+Requirement already satisfied: iniconfig>=1 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.3.0)
+Requirement already satisfied: packaging>=20 in /home/zhangxiyue/llm-slo-scheduler/.venv/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (26.3)
+Requirement already satisfied: pluggy<2,>=1.5 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (1.5.0)
+Requirement already satisfied: pygments>=2.7.2 in /home/zhangxiyue/miniconda3/lib/python3.13/site-packages (from pytest>=7.0.0->pytest-xdist) (2.19.2)
+Checking project core dependencies...
+Checking HTTP client dependencies...
+Dependency check completed
+Checking and generating protobuf files...
+Generating code from ./motor/common/etcd/proto/rpc.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/rpc.proto
+  Fixed import paths in rpc_pb2_grpc.py
+  Fixed import paths in rpc_pb2.py
+Generating code from ./motor/common/etcd/proto/auth.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/auth.proto
+  Fixed import paths in auth_pb2_grpc.py
+  Fixed import paths in auth_pb2.py
+Generating code from ./motor/common/etcd/proto/kv.proto...
+✓ Successfully generated code from ./motor/common/etcd/proto/kv.proto
+  Fixed import paths in kv_pb2_grpc.py
+  Fixed import paths in kv_pb2.py
+All protobuf files generated successfully.
+Executing command: pytest  /home/zhangxiyue/llm-slo-scheduler/artifacts/gf-admission-review-20261022/test_review_rc1.py -s --color=no --junitxml=/home/zhangxiyue/llm-slo-scheduler/artifacts/gf-admission-review-20261022/reproductions.xml
+============================= test session starts ==============================
+platform linux -- Python 3.13.11, pytest-8.4.2, pluggy-1.5.0
+rootdir: /home/zhangxiyue/llm-slo-scheduler
+configfile: pyproject.toml
+plugins: xdist-3.8.0, asyncio-1.4.0, anyio-4.13.0, cov-7.1.0, jaxtyping-0.3.6
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+(MainProcess pid=1496663) INFO 10-22 15:56:18 [config][coordinator.py:541] Using encryption algorithm: PBKDF2_SHA256
+(MainProcess pid=1496663) INFO 10-22 15:56:18 [config][config_utils.py:484] No configuration file specified, using default configuration
+(MainProcess pid=1496663) INFO 10-22 15:56:18 [config][config_utils.py:485] Configuration loading completed
+collected 5 items
+
+../../gf-admission-review-20261022/test_review_rc1.py REVIEW_R1 {"mode": "off", "second_attempt": "success", "session_sequence": 1, "native_adds": 1}
+.REVIEW_R1 {"mode": "enforce", "second_attempt": "UNAVAILABLE despite available P", "session_sequence": 0, "native_adds": 0, "broker_states": {"UNAVAILABLE": 1}}
+.REVIEW_R2 {"rejected_ops": ["query", "cancel", "finish"], "states": {"CLAIMED": 1}, "claimed_worker_lost": 1, "open_fg": 0, "open_native": 0}
+.REVIEW_R3 {"configured_ms": 20, "configured_inflight": 2, "elapsed_ms": 250.76, "metadata_rpc_peak": 8, "thread_futures": 0}
+.REVIEW_R4 {"changes_batch": 10, "states": {"CLOSED": 10, "CLAIMED": 1}, "residual_sample": []}
+.
+
+- generated xml file: /home/zhangxiyue/llm-slo-scheduler/artifacts/gf-admission-review-20261022/reproductions.xml -
+============================== 5 passed in 0.83s ===============================
+
+==========================================
+Test Result Summary
+==========================================
+Test Status:
+  ✓ Passed: 5
+
+Overall Status:
+  ✓ All tests passed
+==========================================
+
+
+✓ All tests passed
+
+STDERR

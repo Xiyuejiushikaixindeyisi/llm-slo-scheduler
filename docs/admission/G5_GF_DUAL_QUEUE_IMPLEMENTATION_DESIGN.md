@@ -1,8 +1,11 @@
 # g5 Motor＋FGJSQ 双等待队列工程设计
 
+> 2026-10-30 当前状态：本文是初版设计快照；rc2 已实现并通过[本地复评](../engineering/GF_ADMISSION_0.1.0rc2_REVIEW_20261022.md)。用户已批准作为[研发基线](../engineering/DEVELOPMENT_BASELINE_20261030.md)合入 main；正式性能仍待现场验证。下文“未实施”保留为当时状态。
+
+
 版本：0.1；设计日期：2026-10-21；状态更新：2026-10-22，**独立 `gf_admission` 包＋少量 g5 显式钩子已获用户批准，尚未实施。**
 
-实施顺序：Session 1 完成 g5 基线修复、与现场对齐、版本整理及 GitHub 推送后，基于本设计开始第一版编码。Session 2 负责入场与让行；是否另开编码 session 或 fork 留到下一轮讨论。详见[研究分工与现场回传约定](../architecture/RESEARCH_COLLABORATION_AND_HANDOFF.md)。本轮仅同步状态与基线身份；第 3 节源码行号/hash 属 10-21 设计快照，编码前在交接 commit 上核对接入点，不能当成当前部署 allowlist。
+实施状态（2026-10-22）：Session 1 已完成 g5 修复、对齐及 GitHub 推送，基线 commit 为 `3b63b00546e7a6ffb2526dafc341969cebe22359`。用户选择新增独立编码 session 实现本设计，Session 2 保持设计/评审职责；阅读顺序与执行约定见[编码启动 prompt](../engineering/GF_ADMISSION_CODING_SESSION_PROMPT.md)。详见[研究分工与现场回传约定](../architecture/RESEARCH_COLLABORATION_AND_HANDOFF.md)。本轮仅同步状态与基线身份；第 3 节源码行号/hash 属 10-21 设计快照，编码前在交接 commit 上核对接入点，不能当成当前部署 allowlist。
 
 已批准的架构：在 GF 的 P 分配入口接入独立 `gf_admission` 包；Mgmt 统一维护普通 FIFO、让行 LIFO、分类额度及压力判断；Inference worker 保留 HTTP 上下文，以异步方式等待。放行与 FGJSQ 的原子预留衔接，P 引擎与 D 路由沿用 g5。
 

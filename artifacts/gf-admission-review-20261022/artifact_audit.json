@@ -1,0 +1,29 @@
+{
+  "source_commit": "546bc7d349c1ed24fdb4acd868ad28e409eb0c11",
+  "head": "0bb3e40adbecb0ddbadfe1f7400f3b44c47ec54b",
+  "artifacts": {
+    "gf-admission-0.1.0rc1-20261022.tar.gz": {
+      "bytes": 1448273,
+      "sha256": "3e97e3ebdbd930f9ec0c5892870d07f04e415a1cf96865ff309c67588d3b14e3"
+    },
+    "HUAWEI_AGENT_PROMPT_GF_RUNTIME_0.1.0rc1_20261022.md": {
+      "bytes": 4502,
+      "sha256": "2d54d318962a1db3b5040c3af33b715fcd44486ba45ac307d2a12844f0bc8df7"
+    },
+    "GF_ADMISSION_RUNTIME_GUIDE_0.1.0rc1_20261022.md": {
+      "bytes": 12705,
+      "sha256": "59186a787da553120c354e746a2cd72156b23a60fe1140aad16f92f59e38067d"
+    }
+  },
+  "manifest": {
+    "source_head": "546bc7d349c1ed24fdb4acd868ad28e409eb0c11",
+    "checked_files": 642,
+    "mismatches": []
+  },
+  "workspace_packaged_runtime_mismatches": [],
+  "wheel_src_mismatches": [],
+  "desktop_docs_match_package": {
+    "HUAWEI_AGENT_PROMPT_GF_RUNTIME_0.1.0rc1_20261022.md": true,
+    "GF_ADMISSION_RUNTIME_GUIDE_0.1.0rc1_20261022.md": true
+  }
+}

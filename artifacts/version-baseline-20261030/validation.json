@@ -1,0 +1,305 @@
+{
+  "date": "2026-10-30",
+  "tag": "baseline-20261030",
+  "source_head_before_organization": "8171c2da61a6fcfb3007e2fb30be57ce21b37337",
+  "origin_main_before_merge": "3b63b00546e7a6ffb2526dafc341969cebe22359",
+  "runtime_version": "0.1.0rc2",
+  "runtime_source_unchanged_since": "75c5e519195b55ce314fc00bf81b068f382e9cb1",
+  "runtime_contract": [
+    {
+      "name": "src/motor_adapter/bindings.py",
+      "sha256": "3f8741d9978118d4002e1362442e113b61d972843a516f1e2a35ebdc7d71b0e6",
+      "expected": "3f8741d9978118d4002e1362442e113b61d972843a516f1e2a35ebdc7d71b0e6",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/motor_adapter/service.py",
+      "sha256": "9f4e7604fb6d23919849877e46569d49bdd9921ffc021990e0f04c376637f390",
+      "expected": "9f4e7604fb6d23919849877e46569d49bdd9921ffc021990e0f04c376637f390",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "motor/coordinator/scheduler/runtime/scheduler_client.py",
+      "sha256": "25f9c29e4b32e962c463259152dceedc35d257573d913559d9c17839a71e308b",
+      "expected": "25f9c29e4b32e962c463259152dceedc35d257573d913559d9c17839a71e308b",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "motor/coordinator/scheduler/runtime/scheduler_server.py",
+      "sha256": "41a5324e9989a38d0161e50d20f90b441607a8ca581872789f40cb79243dd8f7",
+      "expected": "41a5324e9989a38d0161e50d20f90b441607a8ca581872789f40cb79243dd8f7",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/fgjsq/__init__.py",
+      "sha256": "4db447395f66ea2cbabc85c0b925c70c7feefa0b75f706386480baf4921f197a",
+      "expected": "4db447395f66ea2cbabc85c0b925c70c7feefa0b75f706386480baf4921f197a",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/fgjsq/policy.py",
+      "sha256": "68c2695dec1136b593a9b827bc05c5f43e333b8e79154eb424044f29bbfa4f07",
+      "expected": "68c2695dec1136b593a9b827bc05c5f43e333b8e79154eb424044f29bbfa4f07",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/fgjsq/snapshot.py",
+      "sha256": "459b020bdf59c7e850a0338f44b6b23faadcc0413a24c7492e8bde8b7f00233a",
+      "expected": "459b020bdf59c7e850a0338f44b6b23faadcc0413a24c7492e8bde8b7f00233a",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/motor_adapter/__init__.py",
+      "sha256": "c155c64486f27a3c4e3bf547b8ce10850edf8427bfcf6ee6894fe8ff9f5b4745",
+      "expected": "c155c64486f27a3c4e3bf547b8ce10850edf8427bfcf6ee6894fe8ff9f5b4745",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/motor_adapter/body_observer.py",
+      "sha256": "586ff1fb72492190a74d55fea332f9447bc2e278ae316a99739c54c8b806f386",
+      "expected": "586ff1fb72492190a74d55fea332f9447bc2e278ae316a99739c54c8b806f386",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/motor_adapter/config.py",
+      "sha256": "6f715fb64ec0f05ec8d289d4671e1922afd1e40bf1c6698df0e807aa74d4e17c",
+      "expected": "6f715fb64ec0f05ec8d289d4671e1922afd1e40bf1c6698df0e807aa74d4e17c",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/motor_adapter/motor_backend.py",
+      "sha256": "78fab06f2e9466b9857823f0855b10a5003b78607b62e2768f3f5947588b49a6",
+      "expected": "78fab06f2e9466b9857823f0855b10a5003b78607b62e2768f3f5947588b49a6",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/__init__.py",
+      "sha256": "9acc027352b776aa0bd06090a5d75e4275972edff38f1c4ab343e4b36cc3c3ef",
+      "expected": "9acc027352b776aa0bd06090a5d75e4275972edff38f1c4ab343e4b36cc3c3ef",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/activate.py",
+      "sha256": "bdf2cd6453d0c1ed5f15246a764518f590244ea23d246cc5aa12a0cbb8b908b5",
+      "expected": "bdf2cd6453d0c1ed5f15246a764518f590244ea23d246cc5aa12a0cbb8b908b5",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/compatibility.py",
+      "sha256": "3de3fdc8f3cbd837dbd68deea7830439b35f43882ac3cd52e5d3ec2b45c329dc",
+      "expected": "3de3fdc8f3cbd837dbd68deea7830439b35f43882ac3cd52e5d3ec2b45c329dc",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/engine_files.json",
+      "sha256": "523b6c1e256fd77b0352f8f8f1219252ad246d2d98701d200a77a1584697af36",
+      "expected": "523b6c1e256fd77b0352f8f8f1219252ad246d2d98701d200a77a1584697af36",
+      "match": true,
+      "observe_only": true
+    },
+    {
+      "name": "src/slo_patch/patch_core.py",
+      "sha256": "ff2052d2fbaf2c4c011a759e3011355dc289d9573700a94fbc8a8f05c505fac3",
+      "expected": "ff2052d2fbaf2c4c011a759e3011355dc289d9573700a94fbc8a8f05c505fac3",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/patch_runtime.py",
+      "sha256": "f1148ba16b2b79c4ca338a9052743ff4a5bdf66998f22ff543ae63021c39af85",
+      "expected": "f1148ba16b2b79c4ca338a9052743ff4a5bdf66998f22ff543ae63021c39af85",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/slo/__init__.py",
+      "sha256": "d3e17837e17aaddf1227a2e104e3d3550470e333dde13b105111a14f5ca2721a",
+      "expected": "d3e17837e17aaddf1227a2e104e3d3550470e333dde13b105111a14f5ca2721a",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/slo/batch_event_reporter.py",
+      "sha256": "4b15a44d939cbe6397d31cddb0c96ebc954711d9ca8c3a84ad4d03576c442381",
+      "expected": "4b15a44d939cbe6397d31cddb0c96ebc954711d9ca8c3a84ad4d03576c442381",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/slo/batch_reporter.py",
+      "sha256": "7ec2a7efd5c10e0b1b65bac6dcae0fbb5bdfd736d8bf0e792224d9d63da70181",
+      "expected": "7ec2a7efd5c10e0b1b65bac6dcae0fbb5bdfd736d8bf0e792224d9d63da70181",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/slo/predictor.py",
+      "sha256": "f08e3e40782deb3f544aee3f6b4279761d00d5657e75825676c112c6e53695de",
+      "expected": "f08e3e40782deb3f544aee3f6b4279761d00d5657e75825676c112c6e53695de",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/slo/predictor_impl.py",
+      "sha256": "ca4f9d20077243cec679cd487db57e4db4dae89dfd8d1dbd71a34e6baa788aca",
+      "expected": "ca4f9d20077243cec679cd487db57e4db4dae89dfd8d1dbd71a34e6baa788aca",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "src/slo_patch/slo/scheduler_with_predictor.py",
+      "sha256": "36c97c22e941d20fe7750a5c4d5acd717f9219c9ee784cf58d9323e781f4803a",
+      "expected": "36c97c22e941d20fe7750a5c4d5acd717f9219c9ee784cf58d9323e781f4803a",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "motor/coordinator/models/request.py",
+      "sha256": "041ffef5b364419dfb442a0dccab77f0cb1dc7e58605c440fa96f957a9514d38",
+      "expected": "041ffef5b364419dfb442a0dccab77f0cb1dc7e58605c440fa96f957a9514d38",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "motor/coordinator/domain/scheduling.py",
+      "sha256": "d18e07bfb27fd5a023aec6747eb038d3bcbf0792d5f4b1be4b543f8c1d05a77c",
+      "expected": "d18e07bfb27fd5a023aec6747eb038d3bcbf0792d5f4b1be4b543f8c1d05a77c",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "motor/coordinator/api_server/management_server.py",
+      "sha256": "3e8ea8fea66482fa1a77625f904f5ecbca818fb4786767707f1f8e601f1c79b4",
+      "expected": "3e8ea8fea66482fa1a77625f904f5ecbca818fb4786767707f1f8e601f1c79b4",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "motor/coordinator/router/strategies/unified_pd.py",
+      "sha256": "7e5860e55f2f11896269426ccdd7f06190f75072503c41d2992f33aa81dd232b",
+      "expected": "7e5860e55f2f11896269426ccdd7f06190f75072503c41d2992f33aa81dd232b",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "motor/coordinator/router/strategies/base.py",
+      "sha256": "5efc332eadf8ea69e0ff33e7457a0cc785325ee447637c87c0ce1bf2edd75c8e",
+      "expected": "5efc332eadf8ea69e0ff33e7457a0cc785325ee447637c87c0ce1bf2edd75c8e",
+      "match": true,
+      "observe_only": false
+    },
+    {
+      "name": "motor/config/node_manager.py",
+      "sha256": "46800951b22e5011045f33494cc21e4435940bedd09ac91854a76b96f56a648d",
+      "expected": "46800951b22e5011045f33494cc21e4435940bedd09ac91854a76b96f56a648d",
+      "match": true,
+      "observe_only": true
+    }
+  ],
+  "cpu_tests": {
+    "project": {
+      "tests": 96,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 96,
+      "skip_reasons": []
+    },
+    "motor": {
+      "tests": 317,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 8,
+      "passed": 309,
+      "skip_reasons": [
+        "Endpoint status resolution in model_validate needs investigation",
+        "native workload-shm library not built: Could not load libmindie_workload_shm.so (build it via build.sh / `cargo build --release` in motor/coordinator/workload_shm_rs, or set WORKLOAD_SHM_LIB). Tried: /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-rc2-validation/motor/coordinator/workload_shm_rs/lib/libmindie_workload_shm.so: not found; /home/zhangxiyue/llm-slo-scheduler/artifacts/build/motor-rc2-validation/motor/coordinator/workload_shm_rs/target/release/libmindie_workload_shm.so: not found"
+      ]
+    }
+  },
+  "python": "3.13.11",
+  "html_validation": {
+    "sections": 35,
+    "embedded_svg": 5,
+    "links": 146,
+    "unique_ids": 339,
+    "external_runtime_assets": 0,
+    "sample_count": 285,
+    "html_bytes": 147404,
+    "html_sha256": "98c5b45edb73700810d2913606a2a2fb925eadcd167cd63ffb76cae382fd7770",
+    "checks": [
+      "unique ids",
+      "internal anchors",
+      "all local source links exist",
+      "no external runtime dependencies",
+      "UTF-8",
+      "CSV count and SHA checked by builder"
+    ],
+    "notes": [
+      "Browser interaction/visual checks recorded separately.",
+      "No runtime source, deployment or benchmark changes."
+    ]
+  },
+  "syntax": {
+    "python_ast_files": 5,
+    "json_files": 8,
+    "bash_n": "passed",
+    "html_inline_javascript": "node --check passed"
+  },
+  "credential_pattern_scan": {
+    "files_considered": 61,
+    "high_confidence_findings": [],
+    "scope": "Changed/untracked text only; heuristic, not an exhaustive secret audit."
+  },
+  "source_lock_check": "Pinned Motor/vLLM/Ascend checked clean by prepare_sources.py",
+  "log_sha256": {
+    "motor.log": "cad663f0829ba70094d5453f92e5cc11e5aaf82de31bc95da026da193454b059",
+    "motor.xml": "53c730091a7e5b8bc528ab0909f231db96d881f750fb03cfb50b657dfb03d750",
+    "project.log": "8c762fea8c7b5e82bbc846381dccf994f9c8dabc33122a4290ea4609e4907c17",
+    "project.xml": "d3befedcd4262e35b050d0fc71d1e6fb6f85c4aa7bc9478ab3b655a2b06e09f9"
+  },
+  "preparation_note": "The first draft reused motor-g5 and was correctly rejected by the g5-only installer before any changes. The final entry uses a new motor-rc2-validation copy and validates the rc2 contract.",
+  "limits": [
+    "No NPU/SHM/onsite service/benchmark executed.",
+    "No dynamic chunk implementation or new performance claims.",
+    "Historical 75+2 review tests retained, not added to this run count."
+  ],
+  "whitespace": {
+    "maintained_files": "passed",
+    "normalized_line_endings_or_trailing_spaces": [
+      "artifacts/technical-brief-20261028/build_report.py",
+      "artifacts/technical-brief-20261028/validate_report.py",
+      "docs/modeling/CHUNK_RESEARCH_WORKSTREAMS_20261029.md",
+      "docs/modeling/CHUNK_SIZE_INDUSTRY_RESEARCH_PR_STATUS.json",
+      "docs/modeling/CHUNK_SIZE_INDUSTRY_RESEARCH_SURVEY.md",
+      "docs/modeling/DYNAMIC_BATCH_TOKEN_BUDGET_DESIGN_V0_1.md",
+      "docs/modeling/DYNAMIC_BATCH_TOKEN_BUDGET_DESIGN_V0_1_CHECKS.json",
+      "docs/modeling/DYNAMIC_BATCH_TOKEN_BUDGET_MODEL.md",
+      "docs/modeling/G5_P_TOKEN_BUDGET_B1_ANALYSIS.json",
+      "docs/modeling/MAAS_TOKEN_LIMIT_PRACTICES_AND_G5_EXPERIMENT.md",
+      "docs/modeling/RUNTIME_CHUNK_TIME_CONSTRAINT_CORRECTION.md"
+    ],
+    "preserved_evidence_and_generated_svg": {
+      "artifacts/gf-admission-rc2/extracted-initial-failure.log": 7,
+      "artifacts/gf-admission-rc2/motor-tests.log": 160,
+      "artifacts/gf-admission-rc2/owned-context-index.patch": 4,
+      "artifacts/version-baseline-20261030/motor.log": 160,
+      "docs/reports/LLM_SLO_SCHEDULER_TECHNICAL_BRIEF_20261028.html": 183
+    },
+    "reason": "Preserve original log/patch/approved HTML bytes; no blanket formatting."
+  }
+}

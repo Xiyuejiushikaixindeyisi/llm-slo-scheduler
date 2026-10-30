@@ -1,0 +1,11 @@
+Processing ./artifacts/releases/gf-runtime-0.1.0rc2-20261022-r2/wheel-source
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: gf-admission
+  Building wheel for gf-admission (pyproject.toml): started
+  Building wheel for gf-admission (pyproject.toml): finished with status 'done'
+  Created wheel for gf-admission: filename=gf_admission-0.1.0rc2-py3-none-any.whl size=25585 sha256=637f1f45a4d4cd200fb691a547998fb3dea010c36d707c942360f74bbfcc258f
+  Stored in directory: /home/zhangxiyue/.cache/pip/wheels/1c/69/c7/f6c3b04adc68134ea8345d6b00ae950f4d6583a6a28d74e0a0
+Successfully built gf-admission
+{"verified_files": 685, "version": "0.1.0rc2", "activated": false}
+{"archive": "/home/zhangxiyue/llm-slo-scheduler/artifacts/releases/gf-runtime-0.1.0rc2-20261022-r2/gf-admission-0.1.0rc2-20261022.tar.gz", "sha256": "b23cee6b81d6f4f8b87b1e6cfd6fc28e7e8ed4bab3512c4ab6a4a7cecd1b0121", "files": 685}

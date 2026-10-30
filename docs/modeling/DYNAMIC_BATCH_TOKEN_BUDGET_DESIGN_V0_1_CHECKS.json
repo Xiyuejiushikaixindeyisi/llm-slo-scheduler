@@ -1,0 +1,42 @@
+{
+  "schema": "mathematical_design_checks_v1",
+  "date": "2026-10-28",
+  "scope": "synthetic algebra only",
+  "parameter_cases": 80,
+  "max_pair_partition_abs_error": 0,
+  "max_structured_free_equivalence_abs_error_ms": 1.1368683772161603e-13,
+  "max_target_time_root_abs_error_ms": 3.552713678800501e-15,
+  "stationary": {
+    "c": 1414.213562373095,
+    "left_lower": true,
+    "right_lower": true
+  },
+  "finite_candidate_example": [
+    {
+      "c": 1024,
+      "T": 6.120576,
+      "F": 167.30451513060208
+    },
+    {
+      "c": 2048,
+      "T": 12.338304,
+      "F": 165.98715674374694
+    },
+    {
+      "c": 512,
+      "T": 3.798144,
+      "F": 134.8026825733832
+    },
+    {
+      "c": 4096,
+      "T": 31.065216,
+      "F": 131.8516504118304
+    },
+    {
+      "c": 8192,
+      "T": 93.684864,
+      "F": 87.4420866960964
+    }
+  ],
+  "baseline_included_noninferior": true
+}
